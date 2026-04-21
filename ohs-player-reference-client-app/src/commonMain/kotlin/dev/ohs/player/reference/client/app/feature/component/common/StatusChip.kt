@@ -1,4 +1,4 @@
-package dev.ohs.player.reference.client.app.feature.component
+package dev.ohs.player.reference.client.app.feature.component.common
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape

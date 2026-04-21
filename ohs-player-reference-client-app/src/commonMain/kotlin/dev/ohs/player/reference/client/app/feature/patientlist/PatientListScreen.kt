@@ -19,18 +19,23 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.reference.client.app.data.model.PatientView
-import dev.ohs.player.reference.client.app.feature.component.PatientCard
+import dev.ohs.player.reference.client.library.registry.ViewRegistry
+import dev.ohs.player.reference.client.library.registry.ViewType
+
+val PatientCardViewType = ViewType("PatientCard")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientListScreen(
     onPatientClick: (String) -> Unit,
+    registry: ViewRegistry,
+    listItemType: ViewType = PatientCardViewType,
     viewModel: PatientListViewModel = viewModel { PatientListViewModel() },
-    cardContent: @Composable (patient: PatientView, onClick: () -> Unit) -> Unit = { patient, onClick ->
-        PatientCard(patient = patient, onClick = onClick)
-    },
 ) {
     val patients by viewModel.patients.collectAsStateWithLifecycle()
+    val factory = requireNotNull(registry.getListItem<PatientView>(listItemType)) {
+        "No ListItemViewFactory registered for $listItemType"
+    }
 
     Scaffold(
         topBar = {
@@ -49,7 +54,7 @@ fun PatientListScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(patients, key = { it.id }) { patient ->
-                cardContent(patient) { onPatientClick(patient.id) }
+                factory.Content(patient) { onPatientClick(patient.id) }
             }
         }
     }

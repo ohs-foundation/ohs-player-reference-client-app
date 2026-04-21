@@ -33,3 +33,4 @@ plugins {
 }
 
 include(":ohs-player-reference-client-app")
+include(":ohs-player-reference-client-library")

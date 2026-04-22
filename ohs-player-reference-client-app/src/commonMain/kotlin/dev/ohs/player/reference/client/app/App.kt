@@ -8,8 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.ohs.player.reference.client.app.data.model.PatientView
 import dev.ohs.player.reference.client.app.feature.component.patient.ui.PatientCard
+import dev.ohs.player.reference.client.app.feature.component.common.VerticalListLayout
 import dev.ohs.player.reference.client.app.feature.patientlist.PatientCardViewType
 import dev.ohs.player.reference.client.app.feature.patientlist.PatientListScreen
+import dev.ohs.player.reference.client.app.feature.patientlist.VerticalListViewType
 import dev.ohs.player.reference.client.library.registry.ViewRegistry
 
 @Composable
@@ -19,6 +21,7 @@ fun App() {
             registerListItem<PatientView>(PatientCardViewType) { patient, onClick ->
                 PatientCard(patient = patient, onClick = onClick)
             }
+            registerLayout<PatientView>(VerticalListViewType, VerticalListLayout())
         }
     }
 

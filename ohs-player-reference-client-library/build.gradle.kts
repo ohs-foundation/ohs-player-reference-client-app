@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
@@ -7,9 +9,29 @@ plugins {
 kotlin {
     jvm()
 
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "OhsLibrary"
+            isStatic = true
+        }
+    }
+
+    js {
+        browser()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

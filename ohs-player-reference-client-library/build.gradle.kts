@@ -32,6 +32,8 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
+            implementation(libs.fhir.model)
+            implementation(libs.fhir.path)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

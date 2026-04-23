@@ -33,3 +33,4 @@ plugins {
 }
 
 include(":client-app")
+include(":data-transformer")

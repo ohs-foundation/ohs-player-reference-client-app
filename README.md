@@ -4,13 +4,13 @@ The OHS Player Reference Client is a [Kotlin Multiplatform(KMP)](https://kotlinl
 
 This Kotlin Multiplatform project targets Android, iOS, Web, Desktop (JVM).
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
+* [/client-app](./client-app/src) is for code that will be shared across your Compose Multiplatform applications.
   It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
+  - [commonMain](./client-app/src/commonMain/kotlin) is for code that’s common for all targets.
   - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
     For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
+    the [iosMain](./client-app/src/iosMain/kotlin) folder would be the right place for such calls.
+    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./client-app/src/jvmMain/kotlin)
     folder is the appropriate location.
 
 * [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
@@ -22,11 +22,11 @@ To build and run the development version of the Android app, use the run configu
 in your IDE’s toolbar or build it directly from the terminal:
 - on macOS/Linux
   ```shell
-  ./gradlew :composeApp:assembleDebug
+  ./gradlew :client-app:assembleDebug
   ```
 - on Windows
   ```shell
-  .\gradlew.bat :composeApp:assembleDebug
+  .\gradlew.bat :client-app:assembleDebug
   ```
 
 ### Build and Run Desktop (JVM) Application
@@ -35,11 +35,11 @@ To build and run the development version of the desktop app, use the run configu
 in your IDE’s toolbar or run it directly from the terminal:
 - on macOS/Linux
   ```shell
-  ./gradlew :composeApp:run
+  ./gradlew :client-app:run
   ```
 - on Windows
   ```shell
-  .\gradlew.bat :composeApp:run
+  .\gradlew.bat :client-app:run
   ```
 
 ### Build and Run Web Application
@@ -49,20 +49,20 @@ in your IDE's toolbar or run it directly from the terminal:
 - for the Wasm target (faster, modern browsers):
   - on macOS/Linux
     ```shell
-    ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+    ./gradlew :client-app:wasmJsBrowserDevelopmentRun
     ```
   - on Windows
     ```shell
-    .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
+    .\gradlew.bat :client-app:wasmJsBrowserDevelopmentRun
     ```
 - for the JS target (slower, supports older browsers):
   - on macOS/Linux
     ```shell
-    ./gradlew :composeApp:jsBrowserDevelopmentRun
+    ./gradlew :client-app:jsBrowserDevelopmentRun
     ```
   - on Windows
     ```shell
-    .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
+    .\gradlew.bat :client-app:jsBrowserDevelopmentRun
     ```
 
 ### Build and Run iOS Application

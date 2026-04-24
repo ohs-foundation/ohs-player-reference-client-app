@@ -43,7 +43,10 @@ node_modules/
 .aiignore
 .aiexclude
 
+# Docs tooling
+.venv/
+docs/.venv/
+site/
 # General / Emerging Standards
 .noai
 .aiexclude
-

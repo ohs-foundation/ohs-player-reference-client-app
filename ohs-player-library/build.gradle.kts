@@ -35,7 +35,7 @@ kotlin {
 }
 
 android {
-    namespace = "dev.ohs.player.datatransformer"
+    namespace = "dev.ohs.player.ohsplayerlibrary"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {

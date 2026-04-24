@@ -33,4 +33,4 @@ plugins {
 }
 
 include(":client-app")
-include(":data-transformer")
+include(":ohs-player-library")

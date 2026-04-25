@@ -35,7 +35,7 @@ kotlin {
 }
 
 android {
-    namespace = "dev.ohs.player.ohsplayerlibrary"
+    namespace = "dev.ohs.player.library"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {

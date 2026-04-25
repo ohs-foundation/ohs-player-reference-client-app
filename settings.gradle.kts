@@ -1,4 +1,4 @@
-rootProject.name = "Ohsplayerreferenceclientapp"
+rootProject.name = "OhsPlayerReferenceClientApp"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

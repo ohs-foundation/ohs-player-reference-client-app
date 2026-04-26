@@ -1,37 +1,39 @@
-package dev.ohs.player.reference.client.app.feature.component.patient.ui
+package dev.ohs.player.reference.client.app.feature.patientlist
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import dev.ohs.player.reference.client.app.data.model.PatientView
+import dev.ohs.player.reference.client.app.feature.component.common.CardView
 import dev.ohs.player.reference.client.app.feature.component.common.StatusChip
-import dev.ohs.player.reference.client.app.feature.component.patient.config.PatientCardConfig
+
+data class PatientCardConfig(
+    val showStatusChip: Boolean = true,
+    val showGender: Boolean = true,
+    val showBirthDate: Boolean = true,
+    val showLastVisit: Boolean = true,
+    val elevationDp: Float = 2f,
+    val contentPaddingDp: Float = 16f,
+)
 
 @Composable
 fun PatientCard(
     patient: PatientView,
-    onClick: () -> Unit,
     config: PatientCardConfig = PatientCardConfig(),
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = config.elevationDp.dp),
+    CardView(
+        elevationDp = config.elevationDp,
+        contentPaddingDp = config.contentPaddingDp,
+        onClick = onClick,
     ) {
-        Column(
-            Modifier.padding(config.contentPaddingDp.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
+        header {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -42,6 +44,8 @@ fun PatientCard(
                     StatusChip(isActive = patient.isActive)
                 }
             }
+        }
+        body {
             val details = buildList {
                 if (config.showGender) add(patient.gender)
                 if (config.showBirthDate) add("Born: ${patient.birthDate}")

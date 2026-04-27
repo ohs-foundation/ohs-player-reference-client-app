@@ -11,6 +11,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+class CardDslScope {
+    internal var headerContent: (@Composable () -> Unit)? = null
+    internal var bodyContent: (@Composable () -> Unit)? = null
+    internal var footerContent: (@Composable () -> Unit)? = null
+
+    fun header(content: @Composable () -> Unit) {
+        headerContent = content
+    }
+
+    fun body(content: @Composable () -> Unit) {
+        bodyContent = content
+    }
+
+    fun footer(content: @Composable () -> Unit) {
+        footerContent = content
+    }
+}
+
 @Composable
 fun CardView(
     elevationDp: Float = 2f,

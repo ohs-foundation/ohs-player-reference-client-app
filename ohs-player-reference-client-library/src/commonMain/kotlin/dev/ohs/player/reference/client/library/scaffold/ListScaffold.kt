@@ -8,14 +8,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import dev.ohs.player.reference.client.library.layout.VerticalListRenderer
+import dev.ohs.player.reference.client.library.registry.LocalViewRegistry
+import dev.ohs.player.reference.client.library.registry.ViewRegistry
+import dev.ohs.player.reference.client.library.registry.ViewType
+import dev.ohs.player.reference.client.library.registry.ViewTypeKey
 import dev.ohs.player.reference.client.library.renderer.LayoutRenderer
 import dev.ohs.player.reference.client.library.renderer.Renderer
+import kotlin.reflect.KClass
 
-class ListDslScope<T> {
-    internal var item: Renderer<T>? = null
-    internal var layout: LayoutRenderer<T>? = null
-    internal var topBar: (@Composable () -> Unit)? = null
-    internal var emptyState: (@Composable () -> Unit)? = null
+class ListDslScope<T : Any> @PublishedApi internal constructor(
+    @PublishedApi internal val registry: ViewRegistry,
+    @PublishedApi internal val dataType: KClass<T>,
+) {
+    @PublishedApi internal var item: Renderer<T>? = null
+    @PublishedApi internal var layout: LayoutRenderer<T>? = null
+    @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
+    @PublishedApi internal var emptyState: (@Composable () -> Unit)? = null
 
     /** Set the item renderer using a pre-built [Renderer]. Required. */
     fun item(renderer: Renderer<T>) {
@@ -32,9 +40,23 @@ class ListDslScope<T> {
         }
     }
 
+    /** Resolve the item renderer from the registry by [viewType]. */
+    fun item(viewType: ViewType) {
+        item = requireNotNull(registry.getItem(ViewTypeKey(viewType, dataType))) {
+            "No item renderer registered for (${dataType.simpleName}, ${viewType.value})."
+        }
+    }
+
     /** Override the default vertical layout. */
     fun layout(renderer: LayoutRenderer<T>) {
         layout = renderer
+    }
+
+    /** Resolve the layout renderer from the registry by [viewType]. */
+    fun layout(viewType: ViewType) {
+        layout = requireNotNull(registry.getLayout(ViewTypeKey(viewType, dataType))) {
+            "No layout renderer registered for (${dataType.simpleName}, ${viewType.value})."
+        }
     }
 
     fun topBar(content: @Composable () -> Unit) {
@@ -47,14 +69,15 @@ class ListDslScope<T> {
 }
 
 @Composable
-fun <T> ListScaffold(
+inline fun <reified T : Any> ListScaffold(
     items: List<T>,
-    onItemClick: (T) -> Unit,
-    key: (T) -> Any,
+    noinline onItemClick: (T) -> Unit,
+    noinline key: (T) -> Any,
     modifier: Modifier = Modifier,
     builder: ListDslScope<T>.() -> Unit,
 ) {
-    val scope = ListDslScope<T>().apply(builder)
+    val registry = LocalViewRegistry.current
+    val scope = ListDslScope(registry, T::class).apply(builder)
     val itemRenderer = requireNotNull(scope.item) {
         "ListScaffold requires item(...) to be called in the builder."
     }

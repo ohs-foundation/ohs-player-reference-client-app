@@ -10,8 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.ohs.player.reference.client.app.feature.patientlist.PatientCardConfig
-import dev.ohs.player.reference.client.app.feature.patientlist.PatientCardRenderer
+import dev.ohs.player.reference.client.app.data.model.PatientView
 import dev.ohs.player.reference.client.library.scaffold.DetailScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,7 +22,7 @@ fun PatientProfileScreen(
     val viewModel = remember(patientId) { PatientProfileViewModel(patientId) }
     val patient by viewModel.patient.collectAsStateWithLifecycle()
 
-    DetailScaffold(item = patient) {
+    DetailScaffold<PatientView>(item = patient) {
         topBar {
             TopAppBar(
                 title = { Text(patient?.fullName ?: "Patient") },
@@ -39,9 +38,9 @@ fun PatientProfileScreen(
             )
         }
         notFound { Text("Patient not found") }
-        section(PatientCardRenderer(PatientCardConfig(showLastVisit = false)))
-        section(PersonalSectionRenderer())
-        section(MedicalSectionRenderer())
-        section(ContactSectionRenderer())
+        section(PatientHeaderViewType)
+        section(PersonalSectionViewType)
+        section(MedicalSectionViewType)
+        section(ContactSectionViewType)
     }
 }

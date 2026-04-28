@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		85F4A8892E760E1B45D181CD /* Ohsplayerreferenceclientapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ohsplayerreferenceclientapp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		85F4A8892E760E1B45D181CD /* OhsPlayerReferenceClientApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OhsPlayerReferenceClientApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -59,7 +59,7 @@
 		06FB2EA4233F888AFBDBDD70 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				85F4A8892E760E1B45D181CD /* Ohsplayerreferenceclientapp.app */,
+				85F4A8892E760E1B45D181CD /* OhsPlayerReferenceClientApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,7 +87,7 @@
 			packageProductDependencies = (
 			);
 			productName = iosApp;
-			productReference = 85F4A8892E760E1B45D181CD /* Ohsplayerreferenceclientapp.app */;
+			productReference = 85F4A8892E760E1B45D181CD /* OhsPlayerReferenceClientApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

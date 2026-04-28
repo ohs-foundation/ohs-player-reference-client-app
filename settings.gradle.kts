@@ -13,6 +13,13 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "org.jetbrains.kotlin.plugin.serialization") {
+                useVersion("2.3.0")
+            }
+        }
+    }
 }
 
 dependencyResolutionManagement {
@@ -34,3 +41,4 @@ plugins {
 
 include(":ohs-player-reference-app")
 include(":ohs-player-library")
+include(":codegen")

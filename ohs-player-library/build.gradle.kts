@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -28,6 +29,12 @@ kotlin {
     }
 
     sourceSets {
+        commonMain.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0-rc01")
+            implementation(libs.kotlinx.serialization.json)
+            implementation("dev.ohs.fhir:fhir-model:1.0.0-beta03")
+            implementation("dev.ohs.fhir:fhir-path:1.0.0-beta02")
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }

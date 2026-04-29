@@ -133,7 +133,8 @@ val generateFromIg by tasks.registering(JavaExec::class) {
     mainClass.set("dev.ohs.player.reference.app.codegen.IgCodeGeneratorKt")
 
     // Pass the input IG directory and output directory as arguments
-    val igDir = file("../../../NawiTech/ohs-sample-ig")
+    //TODO Make this dynamic or read from URL for now copy the IG to the directory below, in root package
+    val igDir = file("ohs-sample-ig")
     val outDir = layout.buildDirectory.dir("generated/ig/commonMain/kotlin").get().asFile
 
     outputs.dir(outDir)

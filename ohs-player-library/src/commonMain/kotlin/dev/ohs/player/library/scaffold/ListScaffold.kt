@@ -21,8 +21,11 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val dataType: KClass<T>,
 ) {
     @PublishedApi internal var item: Renderer<T>? = null
+
     @PublishedApi internal var layout: LayoutRenderer<T>? = null
+
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
+
     @PublishedApi internal var emptyState: (@Composable () -> Unit)? = null
 
     /** Set the item renderer using a pre-built [Renderer]. Required. */

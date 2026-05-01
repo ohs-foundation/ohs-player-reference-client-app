@@ -2,7 +2,6 @@ package dev.ohs.player.library.scaffold
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.text.BasicText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -22,9 +21,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertTrue
+import androidx.compose.foundation.text.BasicText as Text
 
-private data object TextItemViewType : ViewType { override val value = "TextItem" }
-private data object PlainListViewType : ViewType { override val value = "PlainList" }
+private data object TextItemViewType : ViewType {
+    override val value = "TextItem"
+}
+private data object PlainListViewType : ViewType {
+    override val value = "PlainList"
+}
 
 private class TextRenderer : Renderer<String> {
     @Composable

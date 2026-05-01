@@ -5,9 +5,5 @@ import androidx.compose.ui.Modifier
 
 interface Renderer<T> {
     @Composable
-    fun Render(
-        item: T,
-        onClick: () -> Unit = {},
-        modifier: Modifier = Modifier,
-    )
+    fun Render(item: T, onClick: () -> Unit = {}, modifier: Modifier = Modifier)
 }

@@ -1,6 +1,5 @@
 package dev.ohs.player.library.scaffold
 
-import androidx.compose.foundation.text.BasicText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -16,10 +15,17 @@ import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.registerItem
 import dev.ohs.player.library.renderer.Renderer
 import kotlin.test.Test
+import androidx.compose.foundation.text.BasicText as Text
 
-private data object SectionA : ViewType { override val value = "SectionA" }
-private data object SectionB : ViewType { override val value = "SectionB" }
-private data object SectionC : ViewType { override val value = "SectionC" }
+private data object SectionA : ViewType {
+    override val value = "SectionA"
+}
+private data object SectionB : ViewType {
+    override val value = "SectionB"
+}
+private data object SectionC : ViewType {
+    override val value = "SectionC"
+}
 
 private class LabeledRenderer(private val label: String) : Renderer<String> {
     @Composable

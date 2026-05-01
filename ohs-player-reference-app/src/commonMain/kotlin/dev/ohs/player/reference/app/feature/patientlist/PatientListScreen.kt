@@ -9,10 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.ohs.player.library.scaffold.ListScaffold
 import dev.ohs.player.reference.app.data.model.PatientView
 import dev.ohs.player.reference.app.feature.component.common.viewtypes.CardViewType
 import dev.ohs.player.reference.app.feature.component.common.viewtypes.VerticalListViewType
-import dev.ohs.player.library.scaffold.ListScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

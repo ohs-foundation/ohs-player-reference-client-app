@@ -25,7 +25,9 @@ class DetailDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val dataType: KClass<T>,
 ) {
     @PublishedApi internal val sections = mutableListOf<Renderer<T>>()
+
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
+
     @PublishedApi internal var notFound: (@Composable () -> Unit)? = null
 
     /** Append a pre-built [Renderer]. Use this to reuse renderers across screens. */

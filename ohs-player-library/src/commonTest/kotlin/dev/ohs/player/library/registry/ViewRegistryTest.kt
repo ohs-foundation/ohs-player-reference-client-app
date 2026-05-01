@@ -8,7 +8,9 @@ import kotlin.test.Test
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
-private data object FooViewType : ViewType { override val value = "Foo" }
+private data object FooViewType : ViewType {
+    override val value = "Foo"
+}
 
 private class StringRenderer : Renderer<String> {
     @Composable override fun Render(item: String, onClick: () -> Unit, modifier: Modifier) {}

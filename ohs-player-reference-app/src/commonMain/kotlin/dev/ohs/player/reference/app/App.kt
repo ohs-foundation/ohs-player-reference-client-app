@@ -10,13 +10,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
+import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.feature.patientlist.PatientListScreen
 import dev.ohs.player.reference.app.feature.patientprofile.PatientProfileScreen
-import dev.ohs.player.library.registry.LocalViewRegistry
 
-private const val PatientListRoute = "patientList"
-private const val PatientProfileRoute = "patientProfile"
-private const val PatientIdArg = "patientId"
+private const val PATIENT_LIST_ROUTE = "patientList"
+private const val PATIENT_PROFILE_ROUTE = "patientProfile"
+private const val PATIENT_ID_ARG = "patientId"
 
 @Composable
 fun App() {
@@ -25,17 +25,17 @@ fun App() {
     CompositionLocalProvider(LocalViewRegistry provides registry) {
         MaterialTheme {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = PatientListRoute) {
-                composable(PatientListRoute) {
+            NavHost(navController = navController, startDestination = PATIENT_LIST_ROUTE) {
+                composable(PATIENT_LIST_ROUTE) {
                     PatientListScreen(
-                        onPatientClick = { id -> navController.navigate("$PatientProfileRoute/$id") },
+                        onPatientClick = { id -> navController.navigate("$PATIENT_PROFILE_ROUTE/$id") },
                     )
                 }
                 composable(
-                    route = "$PatientProfileRoute/{$PatientIdArg}",
-                    arguments = listOf(navArgument(PatientIdArg) { type = NavType.StringType }),
+                    route = "$PATIENT_PROFILE_ROUTE/{$PATIENT_ID_ARG}",
+                    arguments = listOf(navArgument(PATIENT_ID_ARG) { type = NavType.StringType }),
                 ) { backStackEntry ->
-                    val patientId = backStackEntry.arguments?.read { getString(PatientIdArg) }.orEmpty()
+                    val patientId = backStackEntry.arguments?.read { getString(PATIENT_ID_ARG) }.orEmpty()
                     PatientProfileScreen(
                         patientId = patientId,
                         onBack = { navController.popBackStack() },

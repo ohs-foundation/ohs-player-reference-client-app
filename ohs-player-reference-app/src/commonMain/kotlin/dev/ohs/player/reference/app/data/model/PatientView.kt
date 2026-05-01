@@ -25,24 +25,12 @@ data class PatientView(
 }
 
 @Serializable
-data class AddressView(
-    val street: String,
-    val city: String,
-    val country: String,
-) {
+data class AddressView(val street: String, val city: String, val country: String) {
     val formatted: String get() = "$street, $city, $country"
 }
 
 @Serializable
-data class MedicationView(
-    val name: String,
-    val dosage: String,
-    val frequency: String,
-)
+data class MedicationView(val name: String, val dosage: String, val frequency: String)
 
 @Serializable
-data class EmergencyContactView(
-    val name: String,
-    val relationship: String,
-    val phoneNumber: String,
-)
+data class EmergencyContactView(val name: String, val relationship: String, val phoneNumber: String)

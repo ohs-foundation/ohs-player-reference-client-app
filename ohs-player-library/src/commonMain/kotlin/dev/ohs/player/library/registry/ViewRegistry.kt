@@ -22,13 +22,11 @@ class ViewRegistry {
 
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getItem(key: ViewTypeKey<T>): Renderer<T>? =
-        items[key] as? Renderer<T>
+    internal fun <T : Any> getItem(key: ViewTypeKey<T>): Renderer<T>? = items[key] as? Renderer<T>
 
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getLayout(key: ViewTypeKey<T>): LayoutRenderer<T>? =
-        layouts[key] as? LayoutRenderer<T>
+    internal fun <T : Any> getLayout(key: ViewTypeKey<T>): LayoutRenderer<T>? = layouts[key] as? LayoutRenderer<T>
 }
 
 inline fun <reified T : Any> ViewRegistry.registerItem(viewType: ViewType, renderer: Renderer<T>) =

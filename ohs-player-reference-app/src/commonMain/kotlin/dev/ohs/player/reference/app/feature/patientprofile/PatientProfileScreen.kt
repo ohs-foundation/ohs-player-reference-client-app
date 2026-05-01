@@ -13,15 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.ohs.player.reference.app.data.model.PatientView
 import dev.ohs.player.library.scaffold.DetailScaffold
+import dev.ohs.player.reference.app.data.model.PatientView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientProfileScreen(
-    patientId: String,
-    onBack: () -> Unit,
-) {
+fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
     val viewModel = remember(patientId) { PatientProfileViewModel(patientId) }
     val patient by viewModel.patient.collectAsStateWithLifecycle()
 

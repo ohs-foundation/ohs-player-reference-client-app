@@ -58,7 +58,7 @@ fun MedicalSection(patient: PatientView) {
                 Column(Modifier.padding(vertical = 4.dp)) {
                     Text(med.name, style = MaterialTheme.typography.bodyMedium)
                     Text(
-                        "${med.dosage} — ${med.frequency}",
+                        "${med.dosage}, ${med.frequency}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

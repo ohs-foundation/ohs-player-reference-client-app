@@ -17,7 +17,7 @@ class DataTransformerTest {
     private val fhirJson = FhirR4Json {ignoreUnknownKeys = true}
     private val transformer = DataTransformer(FhirPathEngine.forR4())
 
-    // ViewDefinitions mathcing the IG
+    // ── ViewDefinitions matching the IG exactly ──────────────────────────────
 
     private val patientHeaderViewDef = ViewDefinition(
         name = "PatientHeaderState",
@@ -68,7 +68,7 @@ class DataTransformerTest {
         resource = "Observation",
         select = listOf(
             SelectBlock(column = listOf(
-                ViewColumn(name = "code", path = "code.coding.first.display"),
+                ViewColumn(name = "code",  path = "code.coding.first().display"),
                 ViewColumn(name = "value", path = "value.as(Quantity).value"),
                 ViewColumn(name = "unit", path = "value.as(Quantity).unit"),
             ))

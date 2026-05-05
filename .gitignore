@@ -47,4 +47,5 @@ node_modules/
 .noai
 .aiexclude
 ohs-sample-ig
+configuration-cache-report.html
 

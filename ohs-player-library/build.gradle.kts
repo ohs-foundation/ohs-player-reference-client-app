@@ -7,16 +7,17 @@ plugins {
 }
 
 kotlin {
+    // TODO(AGP-9.0): rename `androidLibrary { }` to `android { }` once AGP is upgraded.
     androidLibrary {
         namespace = "dev.ohs.player.library"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
-        compilations.configureEach {
-            compilerOptions.configure {
-                jvmTarget.set(JvmTarget.JVM_11)
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
+
+        withHostTest {}
     }
 
     iosArm64()

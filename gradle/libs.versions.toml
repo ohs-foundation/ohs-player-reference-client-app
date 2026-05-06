@@ -17,6 +17,8 @@ kotlinx-coroutines = "1.10.2"
 kotlinxSerializationJson = "1.11.0"
 material3 = "1.10.0-alpha05"
 
+ohs-player-config-ig = "0.1.0"   # was 0.1.0
+
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

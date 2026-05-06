@@ -11,28 +11,49 @@ import kotlinx.serialization.json.decodeFromJsonElement
 class ViewFactoryRegistry(private val json: Json = Json { ignoreUnknownKeys = true }) {
 
     // We store a lambda that handles decoding + rendering, now including an optional onClick handler
-    private val renderers = mutableMapOf<String, @Composable (ViewComponent, JsonElement, (() -> Unit)?) -> Unit>()
+//    private val renderers = mutableMapOf<String, @Composable (ViewComponent, JsonElement, (() -> Unit)?) -> Unit>()
+    private val renderers = mutableMapOf<String, @Composable (ViewComponent, Any, (() -> Unit)?) -> Unit>()
+
     /**
      * Register a factory for a specific ViewType.
      * [reified T] it allows us to decode the JSON element to the specific generated state class.
      */
     internal inline fun <reified T : Any> register(
-      type: ViewType,
-      crossinline factoryProvider: (ViewComponent, (() -> Unit)?) -> ViewComponentFactory<T>
+        type: ViewType,
+        crossinline factoryProvider: (ViewComponent, (() -> Unit)?) -> ViewComponentFactory<T>
     ) {
         renderers[type.value] = @Composable { component, data, onClick ->
-            val state = json.decodeFromJsonElement<T>(data)
-            factoryProvider(component, onClick).Render(state)
+            @Suppress("UNCHECKED_CAST")
+            factoryProvider(component, onClick).Render(data as T)
         }
     }
+//    internal inline fun <reified T : Any> register(
+//      type: ViewType,
+//      crossinline factoryProvider: (ViewComponent, (() -> Unit)?) -> ViewComponentFactory<T>
+//    ) {
+//        renderers[type.value] = @Composable { component, data, onClick ->
+//            val state = json.decodeFromJsonElement<T>(data)
+//            factoryProvider(component, onClick).Render(state)
+//        }
+//    }
+
+//    @Composable
+//    fun RenderComponent(component: ViewComponent, data: JsonElement, onClick: (() -> Unit)? = null) {
+//        val renderer = renderers[component.type.value]
+//        if (renderer != null) {
+//            renderer(component, data, onClick)
+//        } else {
+//            // Fallback for missing factories
+//            Text("No factory registered for ${component.type.value}")
+//        }
+//    }
 
     @Composable
-    fun RenderComponent(component: ViewComponent, data: JsonElement, onClick: (() -> Unit)? = null) {
+    fun RenderComponent(component: ViewComponent, data: Any, onClick: (() -> Unit)? = null) {
         val renderer = renderers[component.type.value]
         if (renderer != null) {
             renderer(component, data, onClick)
         } else {
-            // Fallback for missing factories
             Text("No factory registered for ${component.type.value}")
         }
     }

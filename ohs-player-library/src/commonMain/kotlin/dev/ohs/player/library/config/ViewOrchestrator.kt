@@ -20,11 +20,13 @@ class ViewOrchestrator(val transformer: DataTransformer) {
     inline fun <reified T> assemble(
         result: SearchResult<out Resource>,
         viewDefinitions: Map<String, ViewDefinition>
-    ): JsonObject {
+    ): T {
+        val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
+
         val descriptor = serializer<T>().descriptor
         val context = result.allResources()
 
-        return buildJsonObject {
+        val jsonObject = buildJsonObject {
             for (i in 0 until descriptor.elementsCount) {
                 val slotKey = descriptor.getElementName(i)
                 val elementDescriptor = descriptor.getElementDescriptor(i)
@@ -70,5 +72,6 @@ class ViewOrchestrator(val transformer: DataTransformer) {
                 }
             }
         }
+        return json.decodeFromJsonElement(jsonObject)
     }
 }

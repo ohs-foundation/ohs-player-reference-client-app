@@ -13,8 +13,11 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 
 data class HouseholdProfileUiState(
-    val householdProfile: JsonElement? = null,
-    val ipsDashboard: JsonElement? = null,
+//    val householdProfile: JsonElement? = null,
+//    val ipsDashboard: JsonElement? = null,
+//    val householdName: String? = null
+    val householdProfile: HouseholdDashboardState? = null,
+    val ipsDashboard: IpsDashboardState? = null,
     val householdName: String? = null
 )
 
@@ -29,16 +32,27 @@ class HouseholdProfileViewModel(
     fun loadHousehold(id: String) {
         val result = repository.getHouseholdById(id) ?: return
         val householdAssembled = orchestrator.assemble<HouseholdDashboardState>(result, viewDefinitions)
-        
-        val summaryJson = householdAssembled.jsonObject["summary"]
-        val summaryState = summaryJson?.let { json.decodeFromJsonElement<HouseholdSummaryState>(it) }
-        
         state = state.copy(
             householdProfile = householdAssembled,
-            householdName = summaryState?.householdName,
+            householdName = householdAssembled.summary?.householdName,
             ipsDashboard = orchestrator.assemble<IpsDashboardState>(result, viewDefinitions)
         )
     }
+
+//    fun loadHousehold(id: String) {
+//        val result = repository.getHouseholdById(id) ?: return
+//        val householdAssembled = orchestrator.assemble<HouseholdDashboardState>(result, viewDefinitions)
+//
+//
+//        val summaryJson = householdAssembled.jsonObject["summary"]
+//        val summaryState = summaryJson?.let { json.decodeFromJsonElement<HouseholdSummaryState>(it) }
+//
+//        state = state.copy(
+//            householdProfile = householdAssembled,
+//            householdName = summaryState?.householdName,
+//            ipsDashboard = orchestrator.assemble<IpsDashboardState>(result, viewDefinitions)
+//        )
+//    }
 
     fun clear() {
         state = HouseholdProfileUiState()

@@ -34,3 +34,4 @@ plugins {
 
 include(":ohs-player-reference-app")
 include(":ohs-player-library")
+include(":androidApp")

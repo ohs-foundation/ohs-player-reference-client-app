@@ -22,11 +22,11 @@ To build and run the development version of the Android app, use the run configu
 in your IDE’s toolbar or build it directly from the terminal:
 - on macOS/Linux
   ```shell
-  ./gradlew :ohs-player-reference-app:assembleDebug
+  ./gradlew :androidApp:assembleDebug
   ```
 - on Windows
   ```shell
-  .\gradlew.bat :ohs-player-reference-app:assembleDebug
+  .\gradlew.bat :androidApp:assembleDebug
   ```
 
 ### Build and Run Desktop (JVM) Application

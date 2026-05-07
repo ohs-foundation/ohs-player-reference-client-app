@@ -7,6 +7,8 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(17)
+
     // TODO(AGP-9.0): rename `androidLibrary { }` to `android { }` once AGP is upgraded.
     androidLibrary {
         namespace = "dev.ohs.player.library"

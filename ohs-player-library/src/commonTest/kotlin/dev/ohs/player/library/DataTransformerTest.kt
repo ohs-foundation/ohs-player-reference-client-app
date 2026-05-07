@@ -445,4 +445,24 @@ class DataTransformerTest {
         assertEquals("P-001", state.patientId)
         assertEquals("Smith", state.familyName)
     }
+
+    @Test
+    fun transformer_samePathTwoDifferentFieldNames_bothResolve() {
+        val patient = fhirJson.decodeFromString(
+            """{ "resourceType": "Patient", "id": "P-001" }"""
+        )
+
+        val result = transformer.extractToJson(
+            FhirExtractionRequest(
+                resource = patient,
+                paths = mapOf(
+                    "field1" to "id",
+                    "field2" to "id"
+                )
+            )
+        )
+
+        assertEquals("P-001", result["field1"]?.jsonPrimitive?.content)
+        assertEquals("P-001", result["field2"]?.jsonPrimitive?.content)
+    }
 }

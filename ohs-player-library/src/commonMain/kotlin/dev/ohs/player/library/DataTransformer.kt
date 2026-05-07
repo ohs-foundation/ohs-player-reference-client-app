@@ -14,7 +14,8 @@ import kotlinx.serialization.json.decodeFromJsonElement
  */
 class DataTransformer(
     private val fhirPathEngine: FhirPathEngine,
-    private val jsonConfiguration: Json = Json {
+    @PublishedApi
+    internal val jsonConfiguration: Json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
     }

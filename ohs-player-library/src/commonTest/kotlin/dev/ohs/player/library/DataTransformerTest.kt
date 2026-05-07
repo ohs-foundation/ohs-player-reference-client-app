@@ -465,4 +465,28 @@ class DataTransformerTest {
         assertEquals("P-001", result["field1"]?.jsonPrimitive?.content)
         assertEquals("P-001", result["field2"]?.jsonPrimitive?.content)
     }
+    @Test
+    fun transformer_pathReturnsMultipleValues_takesFirst() {
+        val patient = fhirJson.decodeFromString(
+            """                                                                                                                                                                                                         
+          {       
+            "resourceType": "Patient",
+            "id": "P-020",                                                                                                                                                                                            
+            "name": [
+              { "family": "Alpha" },                                                                                                                                                                                  
+              { "family": "Beta" }
+            ]
+          }
+          """
+        )
+
+        val result = transformer.extractToJson(
+            FhirExtractionRequest(
+                resource = patient,
+                paths = mapOf("family" to "name.family")
+            )
+        )
+
+        assertEquals("Alpha", result["family"]?.jsonPrimitive?.content)
+    }
 }

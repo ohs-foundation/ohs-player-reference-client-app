@@ -59,4 +59,8 @@ class DataTransformer(
 
     private fun String?.toJsonElement(): JsonElement =
         if (this == null) JsonNull else JsonPrimitive(this)
+
+    companion object {
+        fun forR4(): DataTransformer = DataTransformer(FhirPathEngine.forR4())
+    }
 }

@@ -3,14 +3,6 @@ package dev.ohs.player.reference.app
 import dev.ohs.player.library.registry.itemRenderer
 import dev.ohs.player.library.registry.layoutRenderer
 import dev.ohs.player.reference.app.data.model.PatientView
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.CardViewType
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.GridViewType
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.HorizontalListViewType
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.VerticalListViewType
-import dev.ohs.player.reference.app.feature.patientprofile.ContactSectionViewType
-import dev.ohs.player.reference.app.feature.patientprofile.MedicalSectionViewType
-import dev.ohs.player.reference.app.feature.patientprofile.PatientHeaderViewType
-import dev.ohs.player.reference.app.feature.patientprofile.PersonalSectionViewType
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -26,15 +18,15 @@ class AppViewRegistryTest {
         val registry = buildAppViewRegistry()
 
         // Patient list, item + every layout the screen may pick.
-        assertNotNull(registry.itemRenderer<PatientView>(CardViewType))
-        assertNotNull(registry.layoutRenderer<PatientView>(VerticalListViewType))
-        assertNotNull(registry.layoutRenderer<PatientView>(HorizontalListViewType))
-        assertNotNull(registry.layoutRenderer<PatientView>(GridViewType))
+        assertNotNull(registry.itemRenderer<PatientView>(AppViewTypes.Card))
+        assertNotNull(registry.layoutRenderer<PatientView>(AppViewTypes.VerticalList))
+        assertNotNull(registry.layoutRenderer<PatientView>(AppViewTypes.HorizontalList))
+        assertNotNull(registry.layoutRenderer<PatientView>(AppViewTypes.Grid))
 
         // Patient profile, header + each section the DetailScaffold composes.
-        assertNotNull(registry.itemRenderer<PatientView>(PatientHeaderViewType))
-        assertNotNull(registry.itemRenderer<PatientView>(PersonalSectionViewType))
-        assertNotNull(registry.itemRenderer<PatientView>(MedicalSectionViewType))
-        assertNotNull(registry.itemRenderer<PatientView>(ContactSectionViewType))
+        assertNotNull(registry.itemRenderer<PatientView>(AppViewTypes.PatientHeader))
+        assertNotNull(registry.itemRenderer<PatientView>(AppViewTypes.PersonalSection))
+        assertNotNull(registry.itemRenderer<PatientView>(AppViewTypes.MedicalSection))
+        assertNotNull(registry.itemRenderer<PatientView>(AppViewTypes.ContactSection))
     }
 }

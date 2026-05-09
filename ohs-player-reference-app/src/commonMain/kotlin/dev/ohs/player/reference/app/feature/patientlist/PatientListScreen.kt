@@ -10,9 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.library.scaffold.ListScaffold
+import dev.ohs.player.reference.app.AppViewTypes
 import dev.ohs.player.reference.app.data.model.PatientView
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.CardViewType
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.VerticalListViewType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,8 +24,8 @@ fun PatientListScreen(onPatientClick: (String) -> Unit) {
         onItemClick = { onPatientClick(it.id) },
         key = { it.id },
     ) {
-        item(CardViewType)
-        layout(VerticalListViewType)
+        item(AppViewTypes.Card)
+        layout(AppViewTypes.VerticalList)
         topBar {
             TopAppBar(
                 title = { Text("Patients") },

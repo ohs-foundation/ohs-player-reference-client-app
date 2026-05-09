@@ -23,12 +23,8 @@ import kotlin.test.assertFails
 import kotlin.test.assertTrue
 import androidx.compose.foundation.text.BasicText as Text
 
-private data object TextItemViewType : ViewType {
-    override val value = "TextItem"
-}
-private data object PlainListViewType : ViewType {
-    override val value = "PlainList"
-}
+private val TextItemViewType = ViewType("TextItem")
+private val PlainListViewType = ViewType("PlainList")
 
 private class TextRenderer : Renderer<String> {
     @Composable

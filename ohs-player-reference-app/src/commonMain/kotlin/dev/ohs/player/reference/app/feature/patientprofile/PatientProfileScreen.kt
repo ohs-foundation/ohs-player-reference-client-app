@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ohs.player.library.scaffold.DetailScaffold
+import dev.ohs.player.reference.app.AppViewTypes
 import dev.ohs.player.reference.app.data.model.PatientView
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,9 +43,9 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
             )
         }
         notFound { Text("Patient not found") }
-        section(PatientHeaderViewType)
-        section(PersonalSectionViewType)
-        section(MedicalSectionViewType)
-        section(ContactSectionViewType)
+        section(AppViewTypes.PatientHeader)
+        section(AppViewTypes.PersonalSection)
+        section(AppViewTypes.MedicalSection)
+        section(AppViewTypes.ContactSection)
     }
 }

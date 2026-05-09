@@ -8,22 +8,19 @@ import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.registerItem
 import dev.ohs.player.library.registry.registerLayout
+import dev.ohs.player.reference.app.AppViewTypes
 import dev.ohs.player.reference.app.data.model.PatientView
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.CardViewType
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.GridViewType
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.HorizontalListViewType
-import dev.ohs.player.reference.app.feature.component.common.viewtypes.VerticalListViewType
 
 fun ViewRegistry.registerPatientList() {
-    registerItem<PatientView>(CardViewType, PatientCardRenderer())
+    registerItem<PatientView>(AppViewTypes.Card, PatientCardRenderer())
 
     registerLayout<PatientView>(
-        VerticalListViewType,
+        AppViewTypes.VerticalList,
         VerticalListRenderer(contentPadding = PaddingValues(16.dp), itemSpacing = 12.dp),
     )
     registerLayout<PatientView>(
-        HorizontalListViewType,
+        AppViewTypes.HorizontalList,
         HorizontalListRenderer(contentPadding = PaddingValues(16.dp), itemSpacing = 12.dp),
     )
-    registerLayout<PatientView>(GridViewType, GridListRenderer(itemSpacing = 12.dp))
+    registerLayout<PatientView>(AppViewTypes.Grid, GridListRenderer(itemSpacing = 12.dp))
 }

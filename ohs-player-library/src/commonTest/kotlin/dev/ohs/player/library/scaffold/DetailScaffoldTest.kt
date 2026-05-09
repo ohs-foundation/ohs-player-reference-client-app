@@ -17,15 +17,9 @@ import dev.ohs.player.library.renderer.Renderer
 import kotlin.test.Test
 import androidx.compose.foundation.text.BasicText as Text
 
-private data object SectionA : ViewType {
-    override val value = "SectionA"
-}
-private data object SectionB : ViewType {
-    override val value = "SectionB"
-}
-private data object SectionC : ViewType {
-    override val value = "SectionC"
-}
+private val SectionA = ViewType("SectionA")
+private val SectionB = ViewType("SectionB")
+private val SectionC = ViewType("SectionC")
 
 private class LabeledRenderer(private val label: String) : Renderer<String> {
     @Composable

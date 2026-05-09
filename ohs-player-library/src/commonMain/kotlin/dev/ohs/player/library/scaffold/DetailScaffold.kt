@@ -17,27 +17,27 @@ import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.ViewTypeKey
-import dev.ohs.player.library.renderer.Renderer
+import dev.ohs.player.library.renderer.ComponentRenderer
 import kotlin.reflect.KClass
 
 class DetailDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
-    @PublishedApi internal val sections = mutableListOf<Renderer<T>>()
+    @PublishedApi internal val sections = mutableListOf<ComponentRenderer<T>>()
 
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
 
     @PublishedApi internal var notFound: (@Composable () -> Unit)? = null
 
-    /** Append a pre-built [Renderer]. Use this to reuse renderers across screens. */
-    fun section(renderer: Renderer<T>) {
+    /** Append a pre-built [ComponentRenderer]. Use this to reuse renderers across screens. */
+    fun section(renderer: ComponentRenderer<T>) {
         sections += renderer
     }
 
     /** Append an inline section. The lambda receives the detail item. */
     fun section(content: @Composable (T) -> Unit) {
-        sections += object : Renderer<T> {
+        sections += object : ComponentRenderer<T> {
             @Composable
             override fun Render(item: T, onClick: () -> Unit, modifier: Modifier) {
                 content(item)

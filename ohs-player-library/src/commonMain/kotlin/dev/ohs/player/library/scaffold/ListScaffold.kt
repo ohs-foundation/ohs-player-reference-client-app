@@ -12,15 +12,15 @@ import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.ViewTypeKey
+import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
-import dev.ohs.player.library.renderer.Renderer
 import kotlin.reflect.KClass
 
 class ListDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
-    @PublishedApi internal var component: Renderer<T>? = null
+    @PublishedApi internal var component: ComponentRenderer<T>? = null
 
     @PublishedApi internal var layout: LayoutRenderer<T>? = null
 
@@ -28,14 +28,14 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
 
     @PublishedApi internal var emptyState: (@Composable () -> Unit)? = null
 
-    /** Set the component renderer using a pre-built [Renderer]. Required. */
-    fun component(renderer: Renderer<T>) {
+    /** Set the component renderer using a pre-built [ComponentRenderer]. Required. */
+    fun component(renderer: ComponentRenderer<T>) {
         component = renderer
     }
 
     /** Set the component renderer using an inline composable. Required. */
     fun component(content: @Composable (T, onClick: () -> Unit) -> Unit) {
-        component = object : Renderer<T> {
+        component = object : ComponentRenderer<T> {
             @Composable
             override fun Render(item: T, onClick: () -> Unit, modifier: Modifier) {
                 content(item, onClick)

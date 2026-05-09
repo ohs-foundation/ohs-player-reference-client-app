@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
-import dev.ohs.player.library.renderer.Renderer
 
 class GridListRenderer<T>(
     private val cells: GridCells = GridCells.Fixed(2),
@@ -20,7 +20,7 @@ class GridListRenderer<T>(
     @Composable
     override fun Render(
         items: List<T>,
-        component: Renderer<T>,
+        component: ComponentRenderer<T>,
         key: (T) -> Any,
         onItemClick: (T) -> Unit,
         modifier: Modifier,

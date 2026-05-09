@@ -13,7 +13,7 @@ import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.registerComponent
-import dev.ohs.player.library.renderer.Renderer
+import dev.ohs.player.library.renderer.ComponentRenderer
 import kotlin.test.Test
 import androidx.compose.foundation.text.BasicText as Text
 
@@ -21,7 +21,7 @@ private val SectionA = ViewType("SectionA")
 private val SectionB = ViewType("SectionB")
 private val SectionC = ViewType("SectionC")
 
-private class LabeledRenderer(private val label: String) : Renderer<String> {
+private class LabeledRenderer(private val label: String) : ComponentRenderer<String> {
     @Composable
     override fun Render(item: String, onClick: () -> Unit, modifier: Modifier) {
         Text("[$label] $item")

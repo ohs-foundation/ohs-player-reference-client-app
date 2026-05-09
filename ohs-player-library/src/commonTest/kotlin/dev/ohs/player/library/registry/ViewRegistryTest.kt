@@ -2,22 +2,22 @@ package dev.ohs.player.library.registry
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
-import dev.ohs.player.library.renderer.Renderer
 import kotlin.test.Test
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
 private val FooViewType = ViewType("Foo")
 
-private class StringRenderer : Renderer<String> {
+private class StringRenderer : ComponentRenderer<String> {
     @Composable override fun Render(item: String, onClick: () -> Unit, modifier: Modifier) {}
 }
 
 private class StringLayoutRenderer : LayoutRenderer<String> {
     @Composable override fun Render(
         items: List<String>,
-        component: Renderer<String>,
+        component: ComponentRenderer<String>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,

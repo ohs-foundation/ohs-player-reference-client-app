@@ -15,8 +15,8 @@ import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.registerComponent
 import dev.ohs.player.library.registry.registerLayout
+import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
-import dev.ohs.player.library.renderer.Renderer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -26,7 +26,7 @@ import androidx.compose.foundation.text.BasicText as Text
 private val TextItemViewType = ViewType("TextItem")
 private val PlainListViewType = ViewType("PlainList")
 
-private class TextRenderer : Renderer<String> {
+private class TextRenderer : ComponentRenderer<String> {
     @Composable
     override fun Render(item: String, onClick: () -> Unit, modifier: Modifier) {
         Text(text = item, modifier = modifier.clickable { onClick() })
@@ -40,7 +40,7 @@ private class RecordingLayout : LayoutRenderer<String> {
     @Composable
     override fun Render(
         items: List<String>,
-        component: Renderer<String>,
+        component: ComponentRenderer<String>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,

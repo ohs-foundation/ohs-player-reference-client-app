@@ -24,7 +24,8 @@ class DetailDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
-    @PublishedApi internal val sections = mutableListOf<ComponentRenderer<T>>()
+    @PublishedApi internal var sections: List<ComponentRenderer<T>> = emptyList()
+        private set
 
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
 

@@ -12,7 +12,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
-import dev.ohs.player.library.registry.registerItem
+import dev.ohs.player.library.registry.registerComponent
 import dev.ohs.player.library.renderer.Renderer
 import kotlin.test.Test
 import androidx.compose.foundation.text.BasicText as Text
@@ -34,7 +34,7 @@ class DetailScaffoldTest {
     @Test
     fun nullItem_showsNotFound_andSkipsSections() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerItem<String>(SectionA, LabeledRenderer("A"))
+            registerComponent<String>(SectionA, LabeledRenderer("A"))
         }
         setContent {
             CompositionLocalProvider(LocalViewRegistry provides registry) {
@@ -52,9 +52,9 @@ class DetailScaffoldTest {
     @Test
     fun sections_renderInDeclaredOrder() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerItem<String>(SectionA, LabeledRenderer("A"))
-            registerItem<String>(SectionB, LabeledRenderer("B"))
-            registerItem<String>(SectionC, LabeledRenderer("C"))
+            registerComponent<String>(SectionA, LabeledRenderer("A"))
+            registerComponent<String>(SectionB, LabeledRenderer("B"))
+            registerComponent<String>(SectionC, LabeledRenderer("C"))
         }
         setContent {
             CompositionLocalProvider(LocalViewRegistry provides registry) {

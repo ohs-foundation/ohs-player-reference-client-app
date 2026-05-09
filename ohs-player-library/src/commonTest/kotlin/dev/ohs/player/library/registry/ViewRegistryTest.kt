@@ -17,7 +17,7 @@ private class StringRenderer : Renderer<String> {
 private class StringLayoutRenderer : LayoutRenderer<String> {
     @Composable override fun Render(
         items: List<String>,
-        itemRenderer: Renderer<String>,
+        component: Renderer<String>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,
@@ -29,23 +29,23 @@ class ViewRegistryTest {
     @Test
     fun registerAndLookup_works_forItemAndLayout() {
         val registry = ViewRegistry()
-        val item = StringRenderer()
+        val component = StringRenderer()
         val layout = StringLayoutRenderer()
 
-        registry.registerItem<String>(FooViewType, item)
+        registry.registerComponent<String>(FooViewType, component)
         registry.registerLayout<String>(FooViewType, layout)
 
-        assertSame(item, registry.itemRenderer<String>(FooViewType))
+        assertSame(component, registry.componentRenderer<String>(FooViewType))
         assertSame(layout, registry.layoutRenderer<String>(FooViewType))
     }
 
     @Test
     fun differentDataType_isDifferentKey() {
         val registry = ViewRegistry()
-        registry.registerItem<String>(FooViewType, StringRenderer())
+        registry.registerComponent<String>(FooViewType, StringRenderer())
 
         // Same view-type value, different T, must miss; protects against accidental key
         // collisions if T is ever dropped from the lookup key.
-        assertNull(registry.itemRenderer<Int>(FooViewType))
+        assertNull(registry.componentRenderer<Int>(FooViewType))
     }
 }

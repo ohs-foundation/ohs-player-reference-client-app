@@ -20,7 +20,7 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
-    @PublishedApi internal var item: Renderer<T>? = null
+    @PublishedApi internal var component: Renderer<T>? = null
 
     @PublishedApi internal var layout: LayoutRenderer<T>? = null
 
@@ -28,14 +28,14 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
 
     @PublishedApi internal var emptyState: (@Composable () -> Unit)? = null
 
-    /** Set the item renderer using a pre-built [Renderer]. Required. */
-    fun item(renderer: Renderer<T>) {
-        item = renderer
+    /** Set the component renderer using a pre-built [Renderer]. Required. */
+    fun component(renderer: Renderer<T>) {
+        component = renderer
     }
 
-    /** Set the item renderer using an inline composable. Required. */
-    fun item(content: @Composable (T, onClick: () -> Unit) -> Unit) {
-        item = object : Renderer<T> {
+    /** Set the component renderer using an inline composable. Required. */
+    fun component(content: @Composable (T, onClick: () -> Unit) -> Unit) {
+        component = object : Renderer<T> {
             @Composable
             override fun Render(item: T, onClick: () -> Unit, modifier: Modifier) {
                 content(item, onClick)
@@ -43,10 +43,10 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
         }
     }
 
-    /** Resolve the item renderer from the registry by [viewType]. */
-    fun item(viewType: ViewType) {
-        item = requireNotNull(registry.getItem(ViewTypeKey(viewType, dataType))) {
-            "No item renderer registered for (${dataType.simpleName}, ${viewType.value})."
+    /** Resolve the component renderer from the registry by [viewType]. */
+    fun component(viewType: ViewType) {
+        component = requireNotNull(registry.getComponent(ViewTypeKey(viewType, dataType))) {
+            "No component renderer registered for (${dataType.simpleName}, ${viewType.value})."
         }
     }
 
@@ -81,8 +81,8 @@ inline fun <reified T : Any> ListScaffold(
 ) {
     val registry = LocalViewRegistry.current
     val scope = ListDslScope(registry, T::class).apply(builder)
-    val itemRenderer = requireNotNull(scope.item) {
-        "ListScaffold requires item(...) to be called in the builder."
+    val component = requireNotNull(scope.component) {
+        "ListScaffold requires component(...) to be called in the builder."
     }
     val defaultLayout = remember { VerticalListRenderer<T>() }
     val layoutRenderer = scope.layout ?: defaultLayout
@@ -96,7 +96,7 @@ inline fun <reified T : Any> ListScaffold(
         } else {
             layoutRenderer.Render(
                 items = items,
-                itemRenderer = itemRenderer,
+                component = component,
                 key = key,
                 onItemClick = onItemClick,
                 modifier = Modifier.fillMaxSize(),

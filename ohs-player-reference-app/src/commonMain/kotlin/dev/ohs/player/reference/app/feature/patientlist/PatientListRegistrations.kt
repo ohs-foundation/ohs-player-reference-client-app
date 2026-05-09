@@ -6,13 +6,13 @@ import dev.ohs.player.library.layout.GridListRenderer
 import dev.ohs.player.library.layout.HorizontalListRenderer
 import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.registry.ViewRegistry
-import dev.ohs.player.library.registry.registerItem
+import dev.ohs.player.library.registry.registerComponent
 import dev.ohs.player.library.registry.registerLayout
 import dev.ohs.player.reference.app.AppViewTypes
 import dev.ohs.player.reference.app.data.model.PatientView
 
 fun ViewRegistry.registerPatientList() {
-    registerItem<PatientView>(AppViewTypes.Card, PatientCardRenderer())
+    registerComponent<PatientView>(AppViewTypes.Card, PatientCardRenderer())
 
     registerLayout<PatientView>(
         AppViewTypes.VerticalList,

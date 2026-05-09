@@ -13,7 +13,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
-import dev.ohs.player.library.registry.registerItem
+import dev.ohs.player.library.registry.registerComponent
 import dev.ohs.player.library.registry.registerLayout
 import dev.ohs.player.library.renderer.LayoutRenderer
 import dev.ohs.player.library.renderer.Renderer
@@ -40,7 +40,7 @@ private class RecordingLayout : LayoutRenderer<String> {
     @Composable
     override fun Render(
         items: List<String>,
-        itemRenderer: Renderer<String>,
+        component: Renderer<String>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,
@@ -48,7 +48,7 @@ private class RecordingLayout : LayoutRenderer<String> {
         renderInvocations++
         Column {
             items.forEach { item ->
-                itemRenderer.Render(item = item, onClick = { onItemClick(item) }, modifier = Modifier)
+                component.Render(item = item, onClick = { onItemClick(item) }, modifier = Modifier)
             }
         }
     }
@@ -60,7 +60,7 @@ class ListScaffoldTest {
     @Test
     fun emptyList_showsEmptyState_andDoesNotInvokeLayout() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerItem<String>(TextItemViewType, TextRenderer())
+            registerComponent<String>(TextItemViewType, TextRenderer())
         }
         val layout = RecordingLayout()
 
@@ -71,7 +71,7 @@ class ListScaffoldTest {
                     onItemClick = {},
                     key = { it },
                 ) {
-                    item(TextItemViewType)
+                    component(TextItemViewType)
                     layout(layout)
                     emptyState { Text("nothing here") }
                 }
@@ -86,7 +86,7 @@ class ListScaffoldTest {
     fun rendersItems_andForwardsClicksFromRegistry() = runComposeUiTest {
         var clicked: String? = null
         val registry = ViewRegistry().apply {
-            registerItem<String>(TextItemViewType, TextRenderer())
+            registerComponent<String>(TextItemViewType, TextRenderer())
             registerLayout<String>(PlainListViewType, RecordingLayout())
         }
 
@@ -97,7 +97,7 @@ class ListScaffoldTest {
                     onItemClick = { clicked = it },
                     key = { it },
                 ) {
-                    item(TextItemViewType)
+                    component(TextItemViewType)
                     layout(PlainListViewType)
                 }
             }
@@ -114,7 +114,7 @@ class ListScaffoldTest {
     @Test
     fun omittingLayout_fallsBackToVerticalListRenderer() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerItem<String>(TextItemViewType, TextRenderer())
+            registerComponent<String>(TextItemViewType, TextRenderer())
         }
 
         setContent {
@@ -124,7 +124,7 @@ class ListScaffoldTest {
                     onItemClick = {},
                     key = { it },
                 ) {
-                    item(TextItemViewType)
+                    component(TextItemViewType)
                 }
             }
         }
@@ -138,7 +138,7 @@ class ListScaffoldTest {
         val thrown = assertFails {
             setContent {
                 ListScaffold<String>(items = listOf("x"), onItemClick = {}, key = { it }) {
-                    item(TextItemViewType)
+                    component(TextItemViewType)
                 }
             }
         }

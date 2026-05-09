@@ -18,7 +18,7 @@ class VerticalListRenderer<T>(
     @Composable
     override fun Render(
         items: List<T>,
-        itemRenderer: Renderer<T>,
+        component: Renderer<T>,
         key: (T) -> Any,
         onItemClick: (T) -> Unit,
         modifier: Modifier,
@@ -29,7 +29,7 @@ class VerticalListRenderer<T>(
             verticalArrangement = Arrangement.spacedBy(itemSpacing),
         ) {
             items(items = items, key = key) { item ->
-                itemRenderer.Render(
+                component.Render(
                     item = item,
                     onClick = { onItemClick(item) },
                     modifier = Modifier,

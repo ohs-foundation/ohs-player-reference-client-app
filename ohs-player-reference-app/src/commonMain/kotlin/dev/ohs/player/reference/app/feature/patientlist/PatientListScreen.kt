@@ -24,7 +24,7 @@ fun PatientListScreen(onPatientClick: (String) -> Unit) {
         onItemClick = { onPatientClick(it.id) },
         key = { it.id },
     ) {
-        item(AppViewTypes.Card)
+        component(AppViewTypes.Card)
         layout(AppViewTypes.VerticalList)
         topBar {
             TopAppBar(

@@ -47,8 +47,8 @@ class DetailDslScope<T : Any> @PublishedApi internal constructor(
 
     /** Resolve the section renderer from the registry by [viewType]. */
     fun section(viewType: ViewType) {
-        val renderer = requireNotNull(registry.getItem(ViewTypeKey(viewType, dataType))) {
-            "No section renderer registered for (${dataType.simpleName}, ${viewType.value})."
+        val renderer = requireNotNull(registry.getComponent(ViewTypeKey(viewType, dataType))) {
+            "No component renderer registered for (${dataType.simpleName}, ${viewType.value})."
         }
         sections += renderer
     }

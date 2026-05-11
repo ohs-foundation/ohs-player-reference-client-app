@@ -1,8 +1,9 @@
 package dev.ohs.player.library.scaffold
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -87,10 +88,15 @@ inline fun <reified T : Any> ListScaffold(
     val defaultLayout = remember { VerticalListRenderer<T>() }
     val layoutRenderer = scope.layout ?: defaultLayout
 
-    Column(modifier = modifier.fillMaxSize()) {
-        scope.topBar?.invoke()
+    Scaffold(
+        modifier = modifier,
+        topBar = scope.topBar ?: {},
+    ) { padding ->
         if (items.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
                 scope.emptyState?.invoke()
             }
         } else {
@@ -99,7 +105,7 @@ inline fun <reified T : Any> ListScaffold(
                 component = component,
                 key = key,
                 onItemClick = onItemClick,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(padding),
             )
         }
     }

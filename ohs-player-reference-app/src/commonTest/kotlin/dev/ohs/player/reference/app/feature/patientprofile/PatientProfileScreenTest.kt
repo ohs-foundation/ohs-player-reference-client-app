@@ -3,8 +3,10 @@ package dev.ohs.player.reference.app.feature.patientprofile
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
@@ -16,8 +18,8 @@ class PatientProfileScreenTest {
 
     /**
      * End-to-end smoke for the detail flow: app registry → DetailScaffold → each registered
-     * section renderer. Sections may render off-screen in the test viewport, so this asserts
-     * existence in the semantic tree rather than visibility.
+     * section renderer. The scaffold uses a LazyColumn, so off-screen sections aren't composed
+     * until scrolled into view — scroll to each section before asserting it's in the tree.
      */
     @Test
     fun knownPatient_rendersNameAndAllSections() = runComposeUiTest {
@@ -30,9 +32,18 @@ class PatientProfileScreenTest {
             }
         }
 
-        assertTrue(onAllNodesWithText("Amina Diallo").fetchSemanticsNodes().isNotEmpty())
-        onAllNodesWithText("Personal Information").assertCountEquals(1)
-        onAllNodesWithText("Medical Information").assertCountEquals(1)
-        onAllNodesWithText("Contact & Insurance").assertCountEquals(1)
+        val scrollable = onNode(hasScrollAction())
+        listOf(
+            "Amina Diallo",
+            "Personal Information",
+            "Medical Information",
+            "Contact & Insurance",
+        ).forEach { text ->
+            scrollable.performScrollToNode(hasText(text))
+            assertTrue(
+                onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty(),
+                "Expected to find '$text' after scrolling the patient profile",
+            )
+        }
     }
 }

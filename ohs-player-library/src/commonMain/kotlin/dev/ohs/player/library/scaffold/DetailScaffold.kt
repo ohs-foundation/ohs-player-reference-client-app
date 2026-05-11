@@ -2,12 +2,12 @@ package dev.ohs.player.library.scaffold
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,21 +73,24 @@ inline fun <reified T : Any> DetailScaffold(
 ) {
     val registry = LocalViewRegistry.current
     val scope = DetailDslScope(registry, T::class).apply(builder)
-    Column(modifier = modifier.fillMaxSize()) {
-        scope.topBar?.invoke()
+    Scaffold(
+        modifier = modifier,
+        topBar = scope.topBar ?: {},
+    ) { padding ->
         if (item == null) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
                 scope.notFound?.invoke()
             }
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(contentPadding),
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(sectionSpacing),
             ) {
-                scope.sections.forEach { section ->
+                items(scope.sections) { section ->
                     section.Render(item = item, onClick = {}, modifier = Modifier)
                 }
             }

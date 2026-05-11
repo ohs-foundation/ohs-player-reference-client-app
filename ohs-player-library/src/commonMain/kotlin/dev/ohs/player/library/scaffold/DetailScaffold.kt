@@ -18,6 +18,7 @@ import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.ViewTypeKey
 import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.withConfig
 import kotlin.reflect.KClass
 
@@ -25,7 +26,7 @@ class DetailDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
-    @PublishedApi internal var sections: List<ComponentRenderer<T, Unit>> = emptyList()
+    @PublishedApi internal var sections: List<ConfiguredRenderer<T>> = emptyList()
         private set
 
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
@@ -39,12 +40,7 @@ class DetailDslScope<T : Any> @PublishedApi internal constructor(
 
     /** Append an inline section. The lambda receives the detail item. */
     fun section(content: @Composable (T) -> Unit) {
-        sections += object : ComponentRenderer<T, Unit> {
-            @Composable
-            override fun Render(item: T, config: Unit, onClick: () -> Unit, modifier: Modifier) {
-                content(item)
-            }
-        }
+        sections += ConfiguredRenderer { item, _, _ -> content(item) }
     }
 
     /** Resolve the section renderer from the registry by [viewType]. */
@@ -89,7 +85,7 @@ inline fun <reified T : Any> DetailScaffold(
                 verticalArrangement = Arrangement.spacedBy(sectionSpacing),
             ) {
                 items(scope.sections) { section ->
-                    section.Render(item = item, config = Unit, onClick = {}, modifier = Modifier)
+                    section.Render(item, {}, Modifier)
                 }
             }
         }

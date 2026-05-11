@@ -3,6 +3,7 @@ package dev.ohs.player.library.registry
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -19,7 +20,7 @@ private class StringRenderer : ComponentRenderer<String, TestConfig> {
 private class StringLayoutRenderer : LayoutRenderer<String> {
     @Composable override fun Render(
         items: List<String>,
-        component: ComponentRenderer<String, Unit>,
+        component: ConfiguredRenderer<String>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,

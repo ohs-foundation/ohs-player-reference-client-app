@@ -16,6 +16,7 @@ import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.registerComponent
 import dev.ohs.player.library.registry.registerLayout
 import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,7 +43,7 @@ private class RecordingLayout : LayoutRenderer<String> {
     @Composable
     override fun Render(
         items: List<String>,
-        component: ComponentRenderer<String, Unit>,
+        component: ConfiguredRenderer<String>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,
@@ -50,7 +51,7 @@ private class RecordingLayout : LayoutRenderer<String> {
         renderInvocations++
         Column {
             items.forEach { item ->
-                component.Render(item = item, config = Unit, onClick = { onItemClick(item) }, modifier = Modifier)
+                component.Render(item, { onItemClick(item) }, Modifier)
             }
         }
     }

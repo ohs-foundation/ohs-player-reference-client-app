@@ -1,18 +1,19 @@
 package dev.ohs.player.library.registry
 
 import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 import dev.ohs.player.library.renderer.withConfig
 
 class ViewRegistry {
     @PublishedApi
-    internal val components = mutableMapOf<ViewTypeKey<*>, ComponentRenderer<*, Unit>>()
+    internal val components = mutableMapOf<ViewTypeKey<*>, ConfiguredRenderer<*>>()
 
     @PublishedApi
     internal val layouts = mutableMapOf<ViewTypeKey<*>, LayoutRenderer<*>>()
 
     @PublishedApi
-    internal fun <T : Any> putComponent(key: ViewTypeKey<T>, renderer: ComponentRenderer<T, Unit>) {
+    internal fun <T : Any> putComponent(key: ViewTypeKey<T>, renderer: ConfiguredRenderer<T>) {
         components[key] = renderer
     }
 
@@ -23,13 +24,13 @@ class ViewRegistry {
 
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ComponentRenderer<T, Unit> {
+    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ConfiguredRenderer<T> {
         val renderer = components[key]
             ?: throw NoSuchElementException(
                 "No component renderer registered for " +
                     "(${key.dataType.simpleName}, ${key.viewType.value}).",
             )
-        return renderer as ComponentRenderer<T, Unit>
+        return renderer as ConfiguredRenderer<T>
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -53,7 +54,7 @@ inline fun <reified T : Any, C : Any> ViewRegistry.registerComponent(
 inline fun <reified T : Any> ViewRegistry.registerLayout(viewType: ViewType, renderer: LayoutRenderer<T>) =
     putLayout(ViewTypeKey(viewType, T::class), renderer)
 
-inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ComponentRenderer<T, Unit> =
+inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ConfiguredRenderer<T> =
     getComponent(ViewTypeKey(viewType, T::class))
 
 inline fun <reified T : Any> ViewRegistry.layoutRenderer(viewType: ViewType): LayoutRenderer<T> =

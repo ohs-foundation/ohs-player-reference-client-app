@@ -8,13 +8,19 @@ interface ComponentRenderer<T, C> {
     fun Render(item: T, config: C, onClick: () -> Unit = {}, modifier: Modifier = Modifier)
 }
 
-/** Captures [boundConfig] in a closure so the result can be stored / passed without exposing [C]. */
+/**
+ * The bound form of a renderer — config already applied. A `fun interface` so callers can
+ * supply a lambda (SAM conversion) without naming the type, while the runtime class is
+ * stable for storage and casts.
+ */
+fun interface ConfiguredRenderer<T> {
+    @Composable
+    fun Render(item: T, onClick: () -> Unit, modifier: Modifier)
+}
+
+/** Captures [boundConfig] in a closure, producing the bound form for registry storage. */
 @PublishedApi
-internal fun <T : Any, C : Any> ComponentRenderer<T, C>.withConfig(boundConfig: C): ComponentRenderer<T, Unit> {
+internal fun <T : Any, C : Any> ComponentRenderer<T, C>.withConfig(boundConfig: C): ConfiguredRenderer<T> {
     val source = this
-    return object : ComponentRenderer<T, Unit> {
-        @Composable
-        override fun Render(item: T, config: Unit, onClick: () -> Unit, modifier: Modifier) =
-            source.Render(item, boundConfig, onClick, modifier)
-    }
+    return ConfiguredRenderer { item, onClick, modifier -> source.Render(item, boundConfig, onClick, modifier) }
 }

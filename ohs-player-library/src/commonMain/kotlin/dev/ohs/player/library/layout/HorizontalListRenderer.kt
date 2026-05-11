@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 
 class HorizontalListRenderer<T>(
@@ -18,7 +18,7 @@ class HorizontalListRenderer<T>(
     @Composable
     override fun Render(
         items: List<T>,
-        component: ComponentRenderer<T, Unit>,
+        component: ConfiguredRenderer<T>,
         key: (T) -> Any,
         onItemClick: (T) -> Unit,
         modifier: Modifier,
@@ -29,12 +29,7 @@ class HorizontalListRenderer<T>(
             horizontalArrangement = Arrangement.spacedBy(itemSpacing),
         ) {
             items(items = items, key = key) { item ->
-                component.Render(
-                    item = item,
-                    config = Unit,
-                    onClick = { onItemClick(item) },
-                    modifier = Modifier,
-                )
+                component.Render(item, { onItemClick(item) }, Modifier)
             }
         }
     }

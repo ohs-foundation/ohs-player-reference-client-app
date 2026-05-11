@@ -14,6 +14,7 @@ import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.ViewTypeKey
 import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 import dev.ohs.player.library.renderer.withConfig
 import kotlin.reflect.KClass
@@ -22,7 +23,7 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
-    @PublishedApi internal var component: ComponentRenderer<T, Unit>? = null
+    @PublishedApi internal var component: ConfiguredRenderer<T>? = null
 
     @PublishedApi internal var layout: LayoutRenderer<T>? = null
 
@@ -37,12 +38,7 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
 
     /** Set the component renderer using an inline composable. Required. */
     fun component(content: @Composable (T, onClick: () -> Unit) -> Unit) {
-        component = object : ComponentRenderer<T, Unit> {
-            @Composable
-            override fun Render(item: T, config: Unit, onClick: () -> Unit, modifier: Modifier) {
-                content(item, onClick)
-            }
-        }
+        component = ConfiguredRenderer { item, onClick, _ -> content(item, onClick) }
     }
 
     /** Resolve the component renderer from the registry by [viewType]. */

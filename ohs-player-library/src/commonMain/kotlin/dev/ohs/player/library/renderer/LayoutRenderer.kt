@@ -7,7 +7,7 @@ interface LayoutRenderer<T> {
     @Composable
     fun Render(
         items: List<T>,
-        component: ComponentRenderer<T, Unit>,
+        component: ConfiguredRenderer<T>,
         key: (T) -> Any,
         onItemClick: (T) -> Unit,
         modifier: Modifier = Modifier,

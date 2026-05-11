@@ -9,7 +9,11 @@ import kotlinx.serialization.json.decodeFromJsonElement
 
 class FhirExtractionResult(
     val resource: Resource,
-    val values: Map<String, String?>
+    val values: Map<String, String?>,
+    @PublishedApi internal val json: Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 ) {
     operator fun get(field: String): String? = values[field]
 
@@ -20,5 +24,5 @@ class FhirExtractionResult(
     )
 
     inline fun <reified T : Any> decode(): T =
-        Json.decodeFromJsonElement(toJsonObject())
+        json.decodeFromJsonElement(toJsonObject())
 }

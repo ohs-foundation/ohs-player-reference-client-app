@@ -1,0 +1,73 @@
+package dev.ohs.player.library.model
+
+import kotlinx.serialization.Serializable
+
+// TODO: Generate this class from StructureDefinition using tools like:
+//  https://github.com/hapifhir/org.hl7.fhir.core/tree/master/org.hl7.fhir.core.generator
+@Serializable
+data class ViewDefinition(
+    val name: String? = null,
+    val resource: String? = null,
+    val status: String? = null,
+    val fhirVersion: List<String>? = null,
+    val select: List<SelectBlock>? = null,
+    val where: List<WhereClause>? = null,
+    val constant: List<Constant>? = null
+) {
+    fun allColumns(): List<ViewColumn> =
+        select?.flatMap { it.allColumns() } ?: emptyList()
+}
+
+@Serializable
+data class SelectBlock(
+    val column: List<ViewColumn>? = null,
+    val select: List<SelectBlock>? = null,
+    val forEach: String? = null,
+    val forEachOrNull: String? = null,
+    val unionAll: List<SelectBlock>? = null
+) {
+    fun allColumns(): List<ViewColumn> {
+        val direct = column ?: emptyList()
+        val nested = select?.flatMap { it.allColumns() } ?: emptyList()
+        val union  = unionAll?.flatMap { it.allColumns() } ?: emptyList()
+        return direct + nested + union
+    }
+}
+
+@Serializable
+data class ViewColumn(
+    val name: String? = null,
+    val path: String? = null,
+    val type: String? = null,
+    val collection: Boolean = false,
+    val description: String? = null
+)
+
+@Serializable
+data class WhereClause(
+    val path: String? = null
+)
+
+@Serializable
+data class Constant(
+    val name: String? = null,
+    val valueBase64Binary: String? = null,
+    val valueBoolean: Boolean? = null,
+    val valueCanonical: String? = null,
+    val valueCode: String? = null,
+    val valueDate: String? = null,
+    val valueDateTime: String? = null,
+    val valueDecimal: String? = null,
+    val valueId: String? = null,
+    val valueInstant: String? = null,
+    val valueInteger: Int? = null,
+    val valueInteger64: Long? = null,
+    val valueOid: String? = null,
+    val valueString: String? = null,
+    val valuePositiveInt: Int? = null,
+    val valueTime: String? = null,
+    val valueUnsignedInt: Int? = null,
+    val valueUri: String? = null,
+    val valueUrl: String? = null,
+    val valueUuid: String? = null
+)

@@ -46,9 +46,7 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
 
     /** Resolve the component renderer from the registry by [viewType]. */
     fun component(viewType: ViewType) {
-        component = requireNotNull(registry.getComponent(ViewTypeKey(viewType, dataType))) {
-            "No component renderer registered for (${dataType.simpleName}, ${viewType.value})."
-        }
+        component = registry.getComponent(ViewTypeKey(viewType, dataType))
     }
 
     /** Override the default vertical layout. */
@@ -58,9 +56,7 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
 
     /** Resolve the layout renderer from the registry by [viewType]. */
     fun layout(viewType: ViewType) {
-        layout = requireNotNull(registry.getLayout(ViewTypeKey(viewType, dataType))) {
-            "No layout renderer registered for (${dataType.simpleName}, ${viewType.value})."
-        }
+        layout = registry.getLayout(ViewTypeKey(viewType, dataType))
     }
 
     fun topBar(content: @Composable () -> Unit) {

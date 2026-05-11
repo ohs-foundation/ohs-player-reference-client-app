@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 import kotlin.test.Test
-import kotlin.test.assertNull
+import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
 private val FooViewType = ViewType("Foo")
@@ -40,12 +40,13 @@ class ViewRegistryTest {
     }
 
     @Test
-    fun differentDataType_isDifferentKey() {
+    fun differentDataType_throwsOnLookup() {
         val registry = ViewRegistry()
         registry.registerComponent<String>(FooViewType, StringRenderer())
 
-        // Same view-type value, different T, must miss; protects against accidental key
-        // collisions if T is ever dropped from the lookup key.
-        assertNull(registry.componentRenderer<Int>(FooViewType))
+        // Same view-type value, different T, must throw to prevent silent fallback.
+        assertFailsWith<NoSuchElementException> {
+            registry.componentRenderer<Int>(FooViewType)
+        }
     }
 }

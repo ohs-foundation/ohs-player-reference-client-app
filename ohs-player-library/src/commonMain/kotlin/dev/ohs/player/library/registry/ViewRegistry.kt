@@ -22,12 +22,25 @@ class ViewRegistry {
 
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ComponentRenderer<T>? =
-        components[key] as? ComponentRenderer<T>
+    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ComponentRenderer<T> {
+        val renderer = components[key]
+            ?: throw NoSuchElementException(
+                "No component renderer registered for " +
+                    "(${key.dataType.simpleName}, ${key.viewType.value}).",
+            )
+        return renderer as ComponentRenderer<T>
+    }
 
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getLayout(key: ViewTypeKey<T>): LayoutRenderer<T>? = layouts[key] as? LayoutRenderer<T>
+    internal fun <T : Any> getLayout(key: ViewTypeKey<T>): LayoutRenderer<T> {
+        val renderer = layouts[key]
+            ?: throw NoSuchElementException(
+                "No layout renderer registered for " +
+                    "(${key.dataType.simpleName}, ${key.viewType.value}).",
+            )
+        return renderer as LayoutRenderer<T>
+    }
 }
 
 inline fun <reified T : Any> ViewRegistry.registerComponent(viewType: ViewType, renderer: ComponentRenderer<T>) =
@@ -36,8 +49,8 @@ inline fun <reified T : Any> ViewRegistry.registerComponent(viewType: ViewType, 
 inline fun <reified T : Any> ViewRegistry.registerLayout(viewType: ViewType, renderer: LayoutRenderer<T>) =
     putLayout(ViewTypeKey(viewType, T::class), renderer)
 
-inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ComponentRenderer<T>? =
+inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ComponentRenderer<T> =
     getComponent(ViewTypeKey(viewType, T::class))
 
-inline fun <reified T : Any> ViewRegistry.layoutRenderer(viewType: ViewType): LayoutRenderer<T>? =
+inline fun <reified T : Any> ViewRegistry.layoutRenderer(viewType: ViewType): LayoutRenderer<T> =
     getLayout(ViewTypeKey(viewType, T::class))

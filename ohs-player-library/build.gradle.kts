@@ -36,8 +36,7 @@ kotlin {
     }
 
     sourceSets {
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
+        commonMain.dependencies {
 //            api(libs.kotlinx.serialization.json)
             implementation("dev.ohs.fhir:fhir-model:1.0.0-beta03")
             api("dev.ohs.fhir:fhir-path:1.0.0-beta02")

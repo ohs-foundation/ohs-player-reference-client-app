@@ -5,9 +5,11 @@ import androidx.compose.ui.Modifier
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.reference.app.data.model.PatientView
 
-class MedicalSectionRenderer : ComponentRenderer<PatientView> {
+data object MedicalSectionConfig
+
+class MedicalSectionRenderer : ComponentRenderer<PatientView, MedicalSectionConfig> {
     @Composable
-    override fun Render(item: PatientView, onClick: () -> Unit, modifier: Modifier) {
+    override fun Render(item: PatientView, config: MedicalSectionConfig, onClick: () -> Unit, modifier: Modifier) {
         MedicalSection(item)
     }
 }

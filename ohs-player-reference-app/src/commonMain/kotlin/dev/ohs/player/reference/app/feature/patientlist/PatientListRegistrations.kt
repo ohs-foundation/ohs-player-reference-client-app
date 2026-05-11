@@ -12,7 +12,11 @@ import dev.ohs.player.reference.app.AppViewTypes
 import dev.ohs.player.reference.app.data.model.PatientView
 
 fun ViewRegistry.registerPatientList() {
-    registerComponent<PatientView>(AppViewTypes.Card, PatientCardRenderer())
+    registerComponent<PatientView, PatientCardConfig>(
+        AppViewTypes.Card,
+        PatientCardRenderer(),
+        PatientCardConfig(),
+    )
 
     registerLayout<PatientView>(
         AppViewTypes.VerticalList,

@@ -18,29 +18,30 @@ import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.ViewTypeKey
 import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.withConfig
 import kotlin.reflect.KClass
 
 class DetailDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
-    @PublishedApi internal var sections: List<ComponentRenderer<T>> = emptyList()
+    @PublishedApi internal var sections: List<ComponentRenderer<T, Unit>> = emptyList()
         private set
 
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
 
     @PublishedApi internal var notFound: (@Composable () -> Unit)? = null
 
-    /** Append a pre-built [ComponentRenderer]. Use this to reuse renderers across screens. */
-    fun section(renderer: ComponentRenderer<T>) {
-        sections += renderer
+    /** Append a pre-built [ComponentRenderer] with its config. */
+    fun <C : Any> section(renderer: ComponentRenderer<T, C>, config: C) {
+        sections += renderer.withConfig(config)
     }
 
     /** Append an inline section. The lambda receives the detail item. */
     fun section(content: @Composable (T) -> Unit) {
-        sections += object : ComponentRenderer<T> {
+        sections += object : ComponentRenderer<T, Unit> {
             @Composable
-            override fun Render(item: T, onClick: () -> Unit, modifier: Modifier) {
+            override fun Render(item: T, config: Unit, onClick: () -> Unit, modifier: Modifier) {
                 content(item)
             }
         }
@@ -88,7 +89,7 @@ inline fun <reified T : Any> DetailScaffold(
                 verticalArrangement = Arrangement.spacedBy(sectionSpacing),
             ) {
                 items(scope.sections) { section ->
-                    section.Render(item = item, onClick = {}, modifier = Modifier)
+                    section.Render(item = item, config = Unit, onClick = {}, modifier = Modifier)
                 }
             }
         }

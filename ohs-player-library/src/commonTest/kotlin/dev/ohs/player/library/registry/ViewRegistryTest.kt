@@ -10,14 +10,16 @@ import kotlin.test.assertSame
 
 private val FooViewType = ViewType("Foo")
 
-private class StringRenderer : ComponentRenderer<String> {
-    @Composable override fun Render(item: String, onClick: () -> Unit, modifier: Modifier) {}
+private data object TestConfig
+
+private class StringRenderer : ComponentRenderer<String, TestConfig> {
+    @Composable override fun Render(item: String, config: TestConfig, onClick: () -> Unit, modifier: Modifier) {}
 }
 
 private class StringLayoutRenderer : LayoutRenderer<String> {
     @Composable override fun Render(
         items: List<String>,
-        component: ComponentRenderer<String>,
+        component: ComponentRenderer<String, Unit>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,
@@ -29,20 +31,21 @@ class ViewRegistryTest {
     @Test
     fun registerAndLookup_works_forItemAndLayout() {
         val registry = ViewRegistry()
-        val component = StringRenderer()
         val layout = StringLayoutRenderer()
 
-        registry.registerComponent<String>(FooViewType, component)
+        registry.registerComponent(FooViewType, StringRenderer(), TestConfig)
         registry.registerLayout<String>(FooViewType, layout)
 
-        assertSame(component, registry.componentRenderer<String>(FooViewType))
+        // Component lookup just has to succeed (the underlying renderer is captured
+        // inside a closure, so identity can't be asserted directly).
+        registry.componentRenderer<String>(FooViewType)
         assertSame(layout, registry.layoutRenderer<String>(FooViewType))
     }
 
     @Test
     fun differentDataType_throwsOnLookup() {
         val registry = ViewRegistry()
-        registry.registerComponent<String>(FooViewType, StringRenderer())
+        registry.registerComponent(FooViewType, StringRenderer(), TestConfig)
 
         // Same view-type value, different T, must throw to prevent silent fallback.
         assertFailsWith<NoSuchElementException> {

@@ -20,7 +20,7 @@ class GridListRenderer<T>(
     @Composable
     override fun Render(
         items: List<T>,
-        component: ComponentRenderer<T>,
+        component: ComponentRenderer<T, Unit>,
         key: (T) -> Any,
         onItemClick: (T) -> Unit,
         modifier: Modifier,
@@ -35,6 +35,7 @@ class GridListRenderer<T>(
             items(items = items, key = key) { item ->
                 component.Render(
                     item = item,
+                    config = Unit,
                     onClick = { onItemClick(item) },
                     modifier = Modifier,
                 )

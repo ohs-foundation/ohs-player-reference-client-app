@@ -26,9 +26,11 @@ import androidx.compose.foundation.text.BasicText as Text
 private val TextItemViewType = ViewType("TextItem")
 private val PlainListViewType = ViewType("PlainList")
 
-private class TextRenderer : ComponentRenderer<String> {
+private data object ListTestConfig
+
+private class TextRenderer : ComponentRenderer<String, ListTestConfig> {
     @Composable
-    override fun Render(item: String, onClick: () -> Unit, modifier: Modifier) {
+    override fun Render(item: String, config: ListTestConfig, onClick: () -> Unit, modifier: Modifier) {
         Text(text = item, modifier = modifier.clickable { onClick() })
     }
 }
@@ -40,7 +42,7 @@ private class RecordingLayout : LayoutRenderer<String> {
     @Composable
     override fun Render(
         items: List<String>,
-        component: ComponentRenderer<String>,
+        component: ComponentRenderer<String, Unit>,
         key: (String) -> Any,
         onItemClick: (String) -> Unit,
         modifier: Modifier,
@@ -48,7 +50,7 @@ private class RecordingLayout : LayoutRenderer<String> {
         renderInvocations++
         Column {
             items.forEach { item ->
-                component.Render(item = item, onClick = { onItemClick(item) }, modifier = Modifier)
+                component.Render(item = item, config = Unit, onClick = { onItemClick(item) }, modifier = Modifier)
             }
         }
     }
@@ -60,7 +62,7 @@ class ListScaffoldTest {
     @Test
     fun emptyList_showsEmptyState_andDoesNotInvokeLayout() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerComponent<String>(TextItemViewType, TextRenderer())
+            registerComponent(TextItemViewType, TextRenderer(), ListTestConfig)
         }
         val layout = RecordingLayout()
 
@@ -86,7 +88,7 @@ class ListScaffoldTest {
     fun rendersItems_andForwardsClicksFromRegistry() = runComposeUiTest {
         var clicked: String? = null
         val registry = ViewRegistry().apply {
-            registerComponent<String>(TextItemViewType, TextRenderer())
+            registerComponent(TextItemViewType, TextRenderer(), ListTestConfig)
             registerLayout<String>(PlainListViewType, RecordingLayout())
         }
 
@@ -114,7 +116,7 @@ class ListScaffoldTest {
     @Test
     fun omittingLayout_fallsBackToVerticalListRenderer() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerComponent<String>(TextItemViewType, TextRenderer())
+            registerComponent(TextItemViewType, TextRenderer(), ListTestConfig)
         }
 
         setContent {

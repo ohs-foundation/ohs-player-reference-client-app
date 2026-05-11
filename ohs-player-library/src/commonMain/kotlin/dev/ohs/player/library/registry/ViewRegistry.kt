@@ -2,16 +2,17 @@ package dev.ohs.player.library.registry
 
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
+import dev.ohs.player.library.renderer.withConfig
 
 class ViewRegistry {
     @PublishedApi
-    internal val components = mutableMapOf<ViewTypeKey<*>, ComponentRenderer<*>>()
+    internal val components = mutableMapOf<ViewTypeKey<*>, ComponentRenderer<*, Unit>>()
 
     @PublishedApi
     internal val layouts = mutableMapOf<ViewTypeKey<*>, LayoutRenderer<*>>()
 
     @PublishedApi
-    internal fun <T : Any> putComponent(key: ViewTypeKey<T>, renderer: ComponentRenderer<T>) {
+    internal fun <T : Any> putComponent(key: ViewTypeKey<T>, renderer: ComponentRenderer<T, Unit>) {
         components[key] = renderer
     }
 
@@ -22,13 +23,13 @@ class ViewRegistry {
 
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ComponentRenderer<T> {
+    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ComponentRenderer<T, Unit> {
         val renderer = components[key]
             ?: throw NoSuchElementException(
                 "No component renderer registered for " +
                     "(${key.dataType.simpleName}, ${key.viewType.value}).",
             )
-        return renderer as ComponentRenderer<T>
+        return renderer as ComponentRenderer<T, Unit>
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -43,13 +44,16 @@ class ViewRegistry {
     }
 }
 
-inline fun <reified T : Any> ViewRegistry.registerComponent(viewType: ViewType, renderer: ComponentRenderer<T>) =
-    putComponent(ViewTypeKey(viewType, T::class), renderer)
+inline fun <reified T : Any, C : Any> ViewRegistry.registerComponent(
+    viewType: ViewType,
+    renderer: ComponentRenderer<T, C>,
+    config: C,
+) = putComponent(ViewTypeKey(viewType, T::class), renderer.withConfig(config))
 
 inline fun <reified T : Any> ViewRegistry.registerLayout(viewType: ViewType, renderer: LayoutRenderer<T>) =
     putLayout(ViewTypeKey(viewType, T::class), renderer)
 
-inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ComponentRenderer<T> =
+inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ComponentRenderer<T, Unit> =
     getComponent(ViewTypeKey(viewType, T::class))
 
 inline fun <reified T : Any> ViewRegistry.layoutRenderer(viewType: ViewType): LayoutRenderer<T> =

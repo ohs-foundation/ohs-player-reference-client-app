@@ -21,9 +21,11 @@ private val SectionA = ViewType("SectionA")
 private val SectionB = ViewType("SectionB")
 private val SectionC = ViewType("SectionC")
 
-private class LabeledRenderer(private val label: String) : ComponentRenderer<String> {
+private data object DetailTestConfig
+
+private class LabeledRenderer(private val label: String) : ComponentRenderer<String, DetailTestConfig> {
     @Composable
-    override fun Render(item: String, onClick: () -> Unit, modifier: Modifier) {
+    override fun Render(item: String, config: DetailTestConfig, onClick: () -> Unit, modifier: Modifier) {
         Text("[$label] $item")
     }
 }
@@ -34,7 +36,7 @@ class DetailScaffoldTest {
     @Test
     fun nullItem_showsNotFound_andSkipsSections() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerComponent<String>(SectionA, LabeledRenderer("A"))
+            registerComponent(SectionA, LabeledRenderer("A"), DetailTestConfig)
         }
         setContent {
             CompositionLocalProvider(LocalViewRegistry provides registry) {
@@ -52,9 +54,9 @@ class DetailScaffoldTest {
     @Test
     fun sections_renderInDeclaredOrder() = runComposeUiTest {
         val registry = ViewRegistry().apply {
-            registerComponent<String>(SectionA, LabeledRenderer("A"))
-            registerComponent<String>(SectionB, LabeledRenderer("B"))
-            registerComponent<String>(SectionC, LabeledRenderer("C"))
+            registerComponent(SectionA, LabeledRenderer("A"), DetailTestConfig)
+            registerComponent(SectionB, LabeledRenderer("B"), DetailTestConfig)
+            registerComponent(SectionC, LabeledRenderer("C"), DetailTestConfig)
         }
         setContent {
             CompositionLocalProvider(LocalViewRegistry provides registry) {

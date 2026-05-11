@@ -1,4 +1,4 @@
-package dev.ohs.player.reference.app.feature.patientlist
+package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.lifecycle.ViewModel
 import dev.ohs.player.reference.app.data.model.PatientView

@@ -1,4 +1,4 @@
-package dev.ohs.player.reference.app.feature.patientlist
+package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

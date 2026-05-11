@@ -1,10 +1,10 @@
-package dev.ohs.player.reference.app.feature.patientprofile
+package dev.ohs.player.reference.app.feature.patient.profile
 
 import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.registerComponent
 import dev.ohs.player.reference.app.AppViewTypes
-import dev.ohs.player.reference.app.feature.patientlist.PatientCardConfig
-import dev.ohs.player.reference.app.feature.patientlist.PatientCardRenderer
+import dev.ohs.player.reference.app.feature.patient.list.PatientCardConfig
+import dev.ohs.player.reference.app.feature.patient.list.PatientCardRenderer
 
 fun ViewRegistry.registerPatientProfile() {
     registerComponent(

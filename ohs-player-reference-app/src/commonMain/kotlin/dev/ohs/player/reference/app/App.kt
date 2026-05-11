@@ -11,8 +11,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
 import dev.ohs.player.library.registry.LocalViewRegistry
-import dev.ohs.player.reference.app.feature.patientlist.PatientListScreen
-import dev.ohs.player.reference.app.feature.patientprofile.PatientProfileScreen
+import dev.ohs.player.reference.app.feature.patient.list.PatientListScreen
+import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 
 private const val PATIENT_LIST_ROUTE = "patientList"
 private const val PATIENT_PROFILE_ROUTE = "patientProfile"

@@ -1,4 +1,4 @@
-package dev.ohs.player.reference.app.feature.patientprofile
+package dev.ohs.player.reference.app.feature.patient.profile
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

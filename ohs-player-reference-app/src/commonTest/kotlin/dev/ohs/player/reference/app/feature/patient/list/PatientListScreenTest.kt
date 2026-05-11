@@ -1,4 +1,4 @@
-package dev.ohs.player.reference.app.feature.patientlist
+package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider

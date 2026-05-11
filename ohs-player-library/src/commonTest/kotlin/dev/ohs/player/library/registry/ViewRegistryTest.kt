@@ -30,7 +30,7 @@ private class StringLayoutRenderer : LayoutRenderer<String> {
 class ViewRegistryTest {
 
     @Test
-    fun registerAndLookup_works_forItemAndLayout() {
+    fun registerAndLookup_works_forComponentAndLayout() {
         val registry = ViewRegistry()
         val layout = StringLayoutRenderer()
 

@@ -3,7 +3,7 @@ package dev.ohs.player.reference.app
 import dev.ohs.player.library.registry.ViewType
 
 object AppViewTypes {
-    // Item styles
+    // Component styles
     val Card = ViewType("Card")
     val Row = ViewType("Row")
 

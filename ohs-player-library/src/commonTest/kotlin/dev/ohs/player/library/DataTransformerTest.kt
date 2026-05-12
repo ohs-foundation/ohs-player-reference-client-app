@@ -5,7 +5,7 @@ import dev.ohs.fhir.model.r4.FhirR4Json
 import dev.ohs.player.library.model.SelectBlock
 import dev.ohs.player.library.model.ViewColumn
 import dev.ohs.player.library.model.ViewDefinition
-import dev.ohs.player.library.transformer.DataTransformer
+import dev.ohs.player.library.transform.DataTransformer
 import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -307,5 +307,21 @@ class DataTransformerTest {
         )
         assertEquals("P-001", state.patientId)
         assertNull(state.familyName)
+    }
+    @Test
+    fun whereFilterWithNoMatchReturnsNull() {
+        val state = transformer.transform<PatientState>(
+            patient,
+            ViewDefinition(
+                name = "fax",
+                resource = "Patient",
+                select = listOf(SelectBlock(column = listOf(
+                    ViewColumn(name = "patientId", path = "id"),
+                    ViewColumn(name = "phone",     path = "telecom.where(system = 'fax').value.first()")
+                )))
+            )
+        )
+        assertEquals("P-001", state.patientId)
+        assertNull(state.phone)
     }
 }

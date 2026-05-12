@@ -1,0 +1,84 @@
+# PR validation. Runs ./gradlew check on every pull request and on pushes to
+# main. Catches test failures and compile errors before they reach a release tag.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  # Cancel superseded PR runs (e.g. force-push); queue main pushes so we never
+  # drop verification of a merge commit.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Build + test (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: gradle/actions/wrapper-validation@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Run check
+        run: ./gradlew check --stacktrace
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          retention-days: 7
+          if-no-files-found: ignore
+
+  ios-check:
+    # iOS targets can't be compiled on Linux. macos-latest billing is 10× so
+    # this is the most expensive job in the pipeline - keep it focused on the
+    # iOS-specific compile/link work that `check` on Ubuntu can't cover.
+    name: iOS compile (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: gradle/actions/wrapper-validation@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            konan-${{ runner.os }}-
+
+      - name: Compile + link iOS targets
+        run: |
+          ./gradlew --stacktrace \
+            :ohs-player-library:compileKotlinIosArm64 \
+            :ohs-player-library:compileKotlinIosSimulatorArm64 \
+            :ohs-player-reference-app:linkReleaseFrameworkIosArm64 \
+            :ohs-player-reference-app:linkReleaseFrameworkIosSimulatorArm64

@@ -70,6 +70,23 @@ in your IDE's toolbar or run it directly from the terminal:
 To build and run the development version of the iOS app, use the run configuration from the run widget
 in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
 
+### Local Release Signing (Android)
+
+Release Android builds are signed via environment variables in CI. To test a signed
+release build locally, copy `keystore.properties.template` to `keystore.properties`
+and fill in the four values:
+
+```shell
+cp keystore.properties.template keystore.properties
+# Edit keystore.properties with your keystore path, alias, and passwords, then:
+./gradlew :ohs-player-reference-app:bundleRelease
+```
+
+`keystore.properties` is gitignored — never commit it. Environment variables
+(`ANDROID_KEYSTORE_PATH`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`,
+`ANDROID_STORE_PASSWORD`) take precedence over the file when both are set. If
+neither is configured, release builds are emitted unsigned.
+
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),

@@ -44,10 +44,11 @@ interface ComponentRenderer<T, C> {
 }
 
 /**
- * The bound form of a renderer — config already applied. A `fun interface` so callers
- * can supply a lambda (SAM conversion) without naming the type, while the runtime class
- * is stable for storage and casts. Produced by [withConfig] and normally invoked by a
- * scaffold or layout — not by app code.
+ * A renderer with its config already applied.
+ *
+ * Created by [withConfig] when a [ComponentRenderer] is registered with its config,
+ * and then invoked by scaffolds and layouts during rendering. App code doesn't
+ * usually build these by hand — author a [ComponentRenderer] instead.
  *
  * ```
  * // Inside a LayoutRenderer.Render:
@@ -56,7 +57,7 @@ interface ComponentRenderer<T, C> {
  */
 fun interface ConfiguredRenderer<T> {
     /**
-     * Renders [item]; config is already closed over.
+     * Renders [item]; the config from registration is already applied.
      *
      * @param item the data model instance.
      * @param onClick tap handler.

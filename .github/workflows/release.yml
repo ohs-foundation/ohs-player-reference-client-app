@@ -1,4 +1,4 @@
-# Release pipeline. Triggered by semver tags (vX.Y.Z[-suffix]).
+# Release pipeline. Triggered by semantically versioned tags (vX.Y.Z[-suffix]).
 #
 # Action versions are pinned to majors here for readability. To harden
 # against tag-hijack supply-chain attacks, run a tool like `pin-github-action`

@@ -56,7 +56,7 @@ jobs:
           fi
 
           VERSION_NAME="${TAG#v}"
-          # Per SemVer 2.0.0 §9, any hyphen-suffix is a pre-release.
+          # Per Semantic Versioning 2.0.0 §9, any hyphen-suffix is a pre-release.
           case "$TAG" in
             *-*) IS_PRERELEASE=true ;;
             *)   IS_PRERELEASE=false ;;

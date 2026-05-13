@@ -157,7 +157,7 @@ dependencies {
 }
 
 // WiX/MSI requires a strict MAJOR.MINOR.PATCH numeric version, so strip any
-// SemVer pre-release suffix (e.g. -alpha.1) from VERSION_NAME for the desktop
+// Semantic Version pre-release suffix (e.g. -alpha.1) from VERSION_NAME for the desktop
 // installers. Android's versionName keeps the suffix; this drift is intentional.
 // Uses the providers API so the configuration cache tracks VERSION_NAME as a
 // declared input.

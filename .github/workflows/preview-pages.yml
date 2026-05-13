@@ -33,11 +33,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build web distribution
-        run: ./gradlew :ohs-player-reference-app:wasmJsBrowserDistribution
+        # Development distribution skips the Kotlin/Wasm IR optimize pass that
+        # makes production builds take 30+ min on CI. Bundle is larger, but
+        # that's an acceptable tradeoff for preview demo
+        run: ./gradlew :ohs-player-reference-app:wasmJsBrowserDevelopmentExecutableDistribution
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ohs-player-reference-app/build/dist/wasmJs/productionExecutable
+          path: ohs-player-reference-app/build/dist/wasmJs/developmentExecutable
 
   deploy:
     name: Deploy to GitHub Pages

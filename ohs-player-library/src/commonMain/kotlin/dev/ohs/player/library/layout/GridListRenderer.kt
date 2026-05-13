@@ -12,11 +12,30 @@ import androidx.compose.ui.unit.dp
 import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 
+/**
+ * Renders items in a vertically-scrolling `LazyVerticalGrid`.
+ *
+ * ```
+ * registry.registerLayout<PatientView>(
+ *     AppViewTypes.Grid,
+ *     GridListRenderer(
+ *         cells = GridCells.Fixed(2),
+ *         contentPadding = PaddingValues(16.dp),
+ *         itemSpacing = 12.dp,
+ *     ),
+ * )
+ * ```
+ *
+ * @param cells column specification; defaults to two equal columns.
+ * @param contentPadding padding around the grid content.
+ * @param itemSpacing gap between items in both axes.
+ */
 class GridListRenderer<T>(
     private val cells: GridCells = GridCells.Fixed(2),
     private val contentPadding: PaddingValues = PaddingValues(0.dp),
     private val itemSpacing: Dp = 0.dp,
 ) : LayoutRenderer<T> {
+    /** Lays out [items] in a `LazyVerticalGrid`, invoking [component] per item with [key]. */
     @Composable
     override fun Render(
         items: List<T>,

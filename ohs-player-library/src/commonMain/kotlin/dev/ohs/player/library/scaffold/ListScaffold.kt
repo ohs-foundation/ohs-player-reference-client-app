@@ -19,52 +19,144 @@ import dev.ohs.player.library.renderer.LayoutRenderer
 import dev.ohs.player.library.renderer.withConfig
 import kotlin.reflect.KClass
 
+/**
+ * Builder receiver for [ListScaffold]. Holds the chosen component renderer, layout
+ * renderer, top bar, and empty-state composable. One of the `component(...)` overloads
+ * is required; `layout(...)` is optional (defaults to [VerticalListRenderer]).
+ *
+ * ```
+ * ListScaffold<PatientView>(items = patients, onItemClick = ::onClick, key = { it.id }) {
+ *     component(AppViewTypes.Card)
+ *     layout(AppViewTypes.VerticalList)
+ *     topBar { TopAppBar(title = { Text("Patients") }) }
+ *     emptyState { Text("No patients") }
+ * }
+ * ```
+ *
+ * @param registry the registry to resolve view-type-based renderers from.
+ * @param dataType the data class for the list items, used in registry lookups.
+ */
 class ListDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
+    /** Per-item renderer; must be set via one of the `component(...)` overloads before render. */
     @PublishedApi internal var component: ConfiguredRenderer<T>? = null
 
+    /** Layout renderer; defaults to [VerticalListRenderer] if not set. */
     @PublishedApi internal var layout: LayoutRenderer<T>? = null
 
+    /** Optional top bar composable. */
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
 
+    /** Composable shown when the items list is empty. */
     @PublishedApi internal var emptyState: (@Composable () -> Unit)? = null
 
-    /** Set the component renderer using a pre-built [ComponentRenderer] and its config. Required. */
+    /**
+     * Sets the component renderer from a pre-built [ComponentRenderer] and its [config].
+     *
+     * ```
+     * component(PatientCardRenderer(), PatientCardConfig())
+     * ```
+     */
     fun <C : Any> component(renderer: ComponentRenderer<T, C>, config: C) {
         component = renderer.withConfig(config)
     }
 
-    /** Set the component renderer using an inline composable. Required. */
+    /**
+     * Sets the component renderer from an inline composable. Use for ad-hoc lists.
+     *
+     * ```
+     * component { item, onClick ->
+     *     Card(onClick = onClick) { Text(item.fullName) }
+     * }
+     * ```
+     */
     fun component(content: @Composable (T, onClick: () -> Unit) -> Unit) {
         component = ConfiguredRenderer { item, onClick, _ -> content(item, onClick) }
     }
 
-    /** Resolve the component renderer from the registry by [viewType]. */
+    /**
+     * Resolves the component renderer from the registry by [viewType].
+     *
+     * ```
+     * component(AppViewTypes.Card)
+     * ```
+     */
     fun component(viewType: ViewType) {
         component = registry.getComponent(ViewTypeKey(viewType, dataType))
     }
 
-    /** Override the default vertical layout. */
+    /**
+     * Overrides the default vertical layout with [renderer].
+     *
+     * ```
+     * layout(GridListRenderer(cells = GridCells.Fixed(2)))
+     * ```
+     */
     fun layout(renderer: LayoutRenderer<T>) {
         layout = renderer
     }
 
-    /** Resolve the layout renderer from the registry by [viewType]. */
+    /**
+     * Resolves the layout renderer from the registry by [viewType].
+     *
+     * ```
+     * layout(AppViewTypes.HorizontalList)
+     * ```
+     */
     fun layout(viewType: ViewType) {
         layout = registry.getLayout(ViewTypeKey(viewType, dataType))
     }
 
+    /**
+     * Sets the optional top bar composable.
+     *
+     * ```
+     * topBar { TopAppBar(title = { Text("Patients") }) }
+     * ```
+     */
     fun topBar(content: @Composable () -> Unit) {
         topBar = content
     }
 
+    /**
+     * Sets the composable shown when the items list is empty.
+     *
+     * ```
+     * emptyState { Text("No patients") }
+     * ```
+     */
     fun emptyState(content: @Composable () -> Unit) {
         emptyState = content
     }
 }
 
+/**
+ * Scaffold for a list of [T]. Builds via [ListDslScope]. Empty [items] renders the
+ * `emptyState` composable and never invokes the layout renderer; non-empty delegates
+ * to the chosen [LayoutRenderer] (defaults to [VerticalListRenderer]).
+ *
+ * ```
+ * val patients by viewModel.patients.collectAsStateWithLifecycle()
+ * ListScaffold<PatientView>(
+ *     items = patients,
+ *     onItemClick = { onPatientClick(it.id) },
+ *     key = { it.id },
+ * ) {
+ *     component(AppViewTypes.Card)
+ *     layout(AppViewTypes.VerticalList)
+ *     topBar { TopAppBar(title = { Text("Patients") }) }
+ *     emptyState { Text("No patients") }
+ * }
+ * ```
+ *
+ * @param items the data list.
+ * @param onItemClick invoked when the user taps an item.
+ * @param key stable key function used by the underlying lazy list.
+ * @param modifier applied to the root scaffold.
+ * @param builder DSL block configuring component, layout, top bar, and empty state.
+ */
 @Composable
 inline fun <reified T : Any> ListScaffold(
     items: List<T>,

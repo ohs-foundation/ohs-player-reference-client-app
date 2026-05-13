@@ -11,10 +11,27 @@ import androidx.compose.ui.unit.dp
 import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 
+/**
+ * Renders items horizontally as a `LazyRow`.
+ *
+ * ```
+ * registry.registerLayout<PatientView>(
+ *     AppViewTypes.HorizontalList,
+ *     HorizontalListRenderer(
+ *         contentPadding = PaddingValues(horizontal = 16.dp),
+ *         itemSpacing = 12.dp,
+ *     ),
+ * )
+ * ```
+ *
+ * @param contentPadding padding around the list content.
+ * @param itemSpacing horizontal gap between items.
+ */
 class HorizontalListRenderer<T>(
     private val contentPadding: PaddingValues = PaddingValues(0.dp),
     private val itemSpacing: Dp = 0.dp,
 ) : LayoutRenderer<T> {
+    /** Lays out [items] in a `LazyRow`, invoking [component] per item with [key]. */
     @Composable
     override fun Render(
         items: List<T>,

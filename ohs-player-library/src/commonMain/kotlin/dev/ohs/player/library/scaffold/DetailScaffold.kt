@@ -22,41 +22,117 @@ import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.withConfig
 import kotlin.reflect.KClass
 
+/**
+ * Builder receiver for [DetailScaffold]. Collects the ordered list of sections plus
+ * optional top bar and not-found composables. Sections are appended via the
+ * `section(...)` overloads and render in the order they're declared.
+ *
+ * ```
+ * DetailScaffold(patient) {
+ *     topBar { TopAppBar(title = { Text("Patient") }) }
+ *     notFound { Text("Patient not found") }
+ *     section(AppViewTypes.PersonalSection)
+ *     section(AppViewTypes.MedicalSection)
+ * }
+ * ```
+ *
+ * @param registry the registry to resolve view-type-based sections from.
+ * @param dataType the data class for the detail item, used in registry lookups.
+ */
 class DetailDslScope<T : Any> @PublishedApi internal constructor(
     @PublishedApi internal val registry: ViewRegistry,
     @PublishedApi internal val dataType: KClass<T>,
 ) {
+    /** Sections to render in declared order, each as a bound renderer. */
     @PublishedApi internal var sections: List<ConfiguredRenderer<T>> = emptyList()
         private set
 
+    /** Optional top bar composable. */
     @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
 
+    /** Composable shown when the detail item is null. */
     @PublishedApi internal var notFound: (@Composable () -> Unit)? = null
 
-    /** Append a pre-built [ComponentRenderer] with its config. */
+    /**
+     * Appends a pre-built [ComponentRenderer] with its [config] as a section.
+     *
+     * ```
+     * section(PersonalSectionRenderer(), PersonalSectionConfig)
+     * ```
+     */
     fun <C : Any> section(renderer: ComponentRenderer<T, C>, config: C) {
         sections += renderer.withConfig(config)
     }
 
-    /** Append an inline section. The lambda receives the detail item. */
+    /**
+     * Appends an inline section composable. Use for one-off sections that don't
+     * warrant a [ComponentRenderer] class.
+     *
+     * ```
+     * section { patient -> Text("ID: ${patient.id}") }
+     * ```
+     */
     fun section(content: @Composable (T) -> Unit) {
         sections += ConfiguredRenderer { item, _, _ -> content(item) }
     }
 
-    /** Resolve the section renderer from the registry by [viewType]. */
+    /**
+     * Resolves the section renderer from the registry by [viewType].
+     *
+     * ```
+     * section(AppViewTypes.PersonalSection)
+     * ```
+     */
     fun section(viewType: ViewType) {
         sections += registry.getComponent(ViewTypeKey(viewType, dataType))
     }
 
+    /**
+     * Sets the optional top bar composable.
+     *
+     * ```
+     * topBar { TopAppBar(title = { Text("Patient") }) }
+     * ```
+     */
     fun topBar(content: @Composable () -> Unit) {
         topBar = content
     }
 
+    /**
+     * Sets the composable shown when the detail item is null.
+     *
+     * ```
+     * notFound { Text("Patient not found") }
+     * ```
+     */
     fun notFound(content: @Composable () -> Unit) {
         notFound = content
     }
 }
 
+/**
+ * Scaffold for a single-item detail view of [T]. Null [item] renders the `notFound`
+ * composable and skips sections; non-null renders sections vertically in declared
+ * order inside a `LazyColumn`. Sections are read-only — their `onClick` is a no-op.
+ *
+ * ```
+ * val patient by viewModel.patient.collectAsStateWithLifecycle()
+ * DetailScaffold<PatientView>(item = patient) {
+ *     topBar { TopAppBar(title = { Text(patient?.fullName.orEmpty()) }) }
+ *     notFound { Text("Patient not found") }
+ *     section(AppViewTypes.PatientHeader)
+ *     section(AppViewTypes.PersonalSection)
+ *     section(AppViewTypes.MedicalSection)
+ *     section(AppViewTypes.ContactSection)
+ * }
+ * ```
+ *
+ * @param item the detail item; null renders [DetailDslScope.notFound].
+ * @param contentPadding padding around the section column.
+ * @param sectionSpacing vertical gap between sections.
+ * @param modifier applied to the root scaffold.
+ * @param builder DSL block configuring sections, top bar, and not-found state.
+ */
 @Composable
 inline fun <reified T : Any> DetailScaffold(
     item: T?,

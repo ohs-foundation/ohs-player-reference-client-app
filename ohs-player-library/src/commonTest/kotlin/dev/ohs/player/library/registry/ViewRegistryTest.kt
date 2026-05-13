@@ -32,14 +32,13 @@ class ViewRegistryTest {
     @Test
     fun registerAndLookup_works_forComponentAndLayout() {
         val registry = ViewRegistry()
+        val component = StringRenderer()
         val layout = StringLayoutRenderer()
 
-        registry.registerComponent(FooViewType, StringRenderer(), TestConfig)
+        registry.registerComponent(FooViewType, component, TestConfig)
         registry.registerLayout<String>(FooViewType, layout)
 
-        // Component lookup just has to succeed (the underlying renderer is captured
-        // inside a closure, so identity can't be asserted directly).
-        registry.componentRenderer<String>(FooViewType)
+        assertSame(component, registry.componentSource<String>(FooViewType))
         assertSame(layout, registry.layoutRenderer<String>(FooViewType))
     }
 

@@ -2,10 +2,10 @@ package dev.ohs.player.library
 
 import dev.ohs.fhir.fhirpath.FhirPathEngine
 import dev.ohs.fhir.model.r4.FhirR4Json
-import dev.ohs.player.library.model.SelectBlock
-import dev.ohs.player.library.model.ViewColumn
-import dev.ohs.player.library.model.ViewDefinition
-import dev.ohs.player.library.transform.DataTransformer
+import dev.ohs.player.library.domain.model.SelectBlock
+import dev.ohs.player.library.domain.model.ViewColumn
+import dev.ohs.player.library.domain.model.ViewDefinition
+import dev.ohs.player.library.domain.transform.DataTransformer
 import kotlinx.serialization.Serializable
 import kotlin.test.Test
 import kotlin.test.assertEquals

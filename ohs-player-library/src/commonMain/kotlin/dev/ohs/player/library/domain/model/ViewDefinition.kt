@@ -1,4 +1,4 @@
-package dev.ohs.player.library.model
+package dev.ohs.player.library.domain.model
 
 import kotlinx.serialization.Serializable
 

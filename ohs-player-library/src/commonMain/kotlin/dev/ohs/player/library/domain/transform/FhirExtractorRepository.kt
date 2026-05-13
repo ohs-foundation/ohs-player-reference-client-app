@@ -1,7 +1,7 @@
-package dev.ohs.player.library.transform
+package dev.ohs.player.library.domain.transform
 
 import dev.ohs.fhir.model.r4.Resource
-import dev.ohs.player.library.model.ViewDefinition
+import dev.ohs.player.library.domain.model.ViewDefinition
 
 interface FhirExtractorRepository {
     fun extract(resource: Resource, viewDefinition: ViewDefinition): FhirExtractionResult

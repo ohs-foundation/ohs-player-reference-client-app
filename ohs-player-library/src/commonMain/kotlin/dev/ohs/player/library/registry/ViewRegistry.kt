@@ -13,7 +13,14 @@ import dev.ohs.player.library.renderer.withConfig
  * renderers by name without the screen importing them directly. Lookups throw
  * [NoSuchElementException] on miss with a diagnostic message naming the absent key.
  *
+ * View-type constants are typically declared once in an `object`; see [ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val Card = ViewType("Card")
+ *     val VerticalList = ViewType("VerticalList")
+ * }
+ *
  * val registry = ViewRegistry().apply {
  *     registerComponent<PatientView, PatientCardConfig>(
  *         AppViewTypes.Card, PatientCardRenderer(), PatientCardConfig(),
@@ -113,9 +120,15 @@ class ViewRegistry {
  * Registers [renderer] under [viewType] for data type [T], with [config] baked in.
  *
  * The same renderer instance can be registered under multiple view-types with different
- * configs to vary visual behavior per role.
+ * configs to vary visual behavior per role. View-type constants are typically declared
+ * once in an `object`; see [ViewType].
  *
  * ```
+ * object AppViewTypes {
+ *     val Card = ViewType("Card")
+ *     val PatientHeader = ViewType("PatientHeader")
+ * }
+ *
  * registry.registerComponent<PatientView, PatientCardConfig>(
  *     AppViewTypes.Card, PatientCardRenderer(), PatientCardConfig(),
  * )
@@ -135,7 +148,13 @@ inline fun <reified T : Any, C : Any> ViewRegistry.registerComponent(
 /**
  * Registers [renderer] as the [LayoutRenderer] for [viewType] / data type [T].
  *
+ * View-type constants are typically declared once in an `object`; see [ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val VerticalList = ViewType("VerticalList")
+ * }
+ *
  * registry.registerLayout<PatientView>(
  *     AppViewTypes.VerticalList,
  *     VerticalListRenderer(contentPadding = PaddingValues(16.dp), itemSpacing = 12.dp),
@@ -150,7 +169,7 @@ inline fun <reified T : Any> ViewRegistry.registerLayout(viewType: ViewType, ren
  * scaffolds and layouts invoke.
  *
  * ```
- * val renderer = registry.componentRenderer<PatientView>(AppViewTypes.Card)
+ * val renderer = registry.componentRenderer<PatientView>(ViewType("Card"))
  * ```
  *
  * @throws NoSuchElementException if nothing is registered for the key.
@@ -164,7 +183,7 @@ inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType):
  * not normally needed by app code.
  *
  * ```
- * val original = registry.componentSource<PatientView>(AppViewTypes.Card)
+ * val original = registry.componentSource<PatientView>(ViewType("Card"))
  * assertSame(myRendererInstance, original)
  * ```
  *
@@ -177,7 +196,7 @@ inline fun <reified T : Any> ViewRegistry.componentSource(viewType: ViewType): C
  * Looks up the [LayoutRenderer] for [viewType] / data type [T].
  *
  * ```
- * val layout = registry.layoutRenderer<PatientView>(AppViewTypes.VerticalList)
+ * val layout = registry.layoutRenderer<PatientView>(ViewType("VerticalList"))
  * ```
  *
  * @throws NoSuchElementException if nothing is registered for the key.

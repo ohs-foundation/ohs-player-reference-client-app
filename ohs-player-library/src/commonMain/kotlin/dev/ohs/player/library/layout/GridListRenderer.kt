@@ -15,7 +15,14 @@ import dev.ohs.player.library.renderer.LayoutRenderer
 /**
  * Renders items in a vertically-scrolling `LazyVerticalGrid`.
  *
+ * View-type constants are typically declared once in an `object`; see
+ * [dev.ohs.player.library.registry.ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val Grid = ViewType("Grid")
+ * }
+ *
  * registry.registerLayout<PatientView>(
  *     AppViewTypes.Grid,
  *     GridListRenderer(

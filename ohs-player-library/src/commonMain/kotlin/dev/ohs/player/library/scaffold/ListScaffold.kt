@@ -24,7 +24,14 @@ import kotlin.reflect.KClass
  * renderer, top bar, and empty-state composable. One of the `component(...)` overloads
  * is required; `layout(...)` is optional (defaults to [VerticalListRenderer]).
  *
+ * View-type constants are typically declared once in an `object`; see [ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val Card = ViewType("Card")
+ *     val VerticalList = ViewType("VerticalList")
+ * }
+ *
  * ListScaffold<PatientView>(items = patients, onItemClick = ::onClick, key = { it.id }) {
  *     component(AppViewTypes.Card)
  *     layout(AppViewTypes.VerticalList)
@@ -80,7 +87,7 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
      * Resolves the component renderer from the registry by [viewType].
      *
      * ```
-     * component(AppViewTypes.Card)
+     * component(ViewType("Card"))
      * ```
      */
     fun component(viewType: ViewType) {
@@ -102,7 +109,7 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
      * Resolves the layout renderer from the registry by [viewType].
      *
      * ```
-     * layout(AppViewTypes.HorizontalList)
+     * layout(ViewType("HorizontalList"))
      * ```
      */
     fun layout(viewType: ViewType) {
@@ -137,7 +144,14 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
  * `emptyState` composable and never invokes the layout renderer; non-empty delegates
  * to the chosen [LayoutRenderer] (defaults to [VerticalListRenderer]).
  *
+ * View-type constants are typically declared once in an `object`; see [ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val Card = ViewType("Card")
+ *     val VerticalList = ViewType("VerticalList")
+ * }
+ *
  * val patients by viewModel.patients.collectAsStateWithLifecycle()
  * ListScaffold<PatientView>(
  *     items = patients,

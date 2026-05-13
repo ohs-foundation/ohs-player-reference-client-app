@@ -15,7 +15,14 @@ import dev.ohs.player.library.renderer.LayoutRenderer
  * Renders items vertically as a `LazyColumn`. The default layout for
  * [dev.ohs.player.library.scaffold.ListScaffold] when none is specified.
  *
+ * View-type constants are typically declared once in an `object`; see
+ * [dev.ohs.player.library.registry.ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val VerticalList = ViewType("VerticalList")
+ * }
+ *
  * registry.registerLayout<PatientView>(
  *     AppViewTypes.VerticalList,
  *     VerticalListRenderer(

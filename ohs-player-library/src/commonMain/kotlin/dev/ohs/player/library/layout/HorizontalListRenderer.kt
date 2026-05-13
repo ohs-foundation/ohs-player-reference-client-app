@@ -14,7 +14,14 @@ import dev.ohs.player.library.renderer.LayoutRenderer
 /**
  * Renders items horizontally as a `LazyRow`.
  *
+ * View-type constants are typically declared once in an `object`; see
+ * [dev.ohs.player.library.registry.ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val HorizontalList = ViewType("HorizontalList")
+ * }
+ *
  * registry.registerLayout<PatientView>(
  *     AppViewTypes.HorizontalList,
  *     HorizontalListRenderer(

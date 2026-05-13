@@ -27,7 +27,14 @@ import kotlin.reflect.KClass
  * optional top bar and not-found composables. Sections are appended via the
  * `section(...)` overloads and render in the order they're declared.
  *
+ * View-type constants are typically declared once in an `object`; see [ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val PersonalSection = ViewType("PersonalSection")
+ *     val MedicalSection = ViewType("MedicalSection")
+ * }
+ *
  * DetailScaffold(patient) {
  *     topBar { TopAppBar(title = { Text("Patient") }) }
  *     notFound { Text("Patient not found") }
@@ -80,7 +87,7 @@ class DetailDslScope<T : Any> @PublishedApi internal constructor(
      * Resolves the section renderer from the registry by [viewType].
      *
      * ```
-     * section(AppViewTypes.PersonalSection)
+     * section(ViewType("PersonalSection"))
      * ```
      */
     fun section(viewType: ViewType) {
@@ -115,7 +122,16 @@ class DetailDslScope<T : Any> @PublishedApi internal constructor(
  * composable and skips sections; non-null renders sections vertically in declared
  * order inside a `LazyColumn`. Sections are read-only — their `onClick` is a no-op.
  *
+ * View-type constants are typically declared once in an `object`; see [ViewType].
+ *
  * ```
+ * object AppViewTypes {
+ *     val PatientHeader = ViewType("PatientHeader")
+ *     val PersonalSection = ViewType("PersonalSection")
+ *     val MedicalSection = ViewType("MedicalSection")
+ *     val ContactSection = ViewType("ContactSection")
+ * }
+ *
  * val patient by viewModel.patient.collectAsStateWithLifecycle()
  * DetailScaffold<PatientView>(item = patient) {
  *     topBar { TopAppBar(title = { Text(patient?.fullName.orEmpty()) }) }

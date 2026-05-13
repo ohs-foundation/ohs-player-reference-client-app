@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
  * throws rather than returning a mismatched renderer.
  *
  * ```
- * val key = ViewTypeKey(AppViewTypes.Card, PatientView::class)
+ * val key = ViewTypeKey(ViewType("Card"), PatientView::class)
  * ```
  *
  * @param viewType the visual role label.

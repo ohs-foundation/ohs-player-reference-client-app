@@ -57,7 +57,7 @@ data class Constant(
     val valueCode: String? = null,
     val valueDate: String? = null,
     val valueDateTime: String? = null,
-    val valueDecimal: String? = null,
+    val valueDecimal: Double? = null,
     val valueId: String? = null,
     val valueInstant: String? = null,
     val valueInteger: Int? = null,

@@ -1,4 +1,4 @@
-package dev.ohs.player.library.util
+package dev.ohs.player.library.domain.util
 
 import kotlinx.serialization.json.Json
 

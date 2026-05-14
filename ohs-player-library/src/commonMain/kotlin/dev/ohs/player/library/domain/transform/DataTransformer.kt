@@ -100,13 +100,13 @@ class DataTransformer(private val fhirPathEngine:
             }
 
     private fun evaluatePath(
-        focus: Any?,
-        path: String,
+        base: Any?,
+        expression: String,
         contextVariablesMap: Map<String, Any>
     ): Any? = runCatching {
         fhirPathEngine.evaluateExpression(
-            expression = path,
-            base = focus,
+            expression = expression,
+            base = base,
             variables = contextVariablesMap
         ).firstOrNull()
     }.getOrNull()

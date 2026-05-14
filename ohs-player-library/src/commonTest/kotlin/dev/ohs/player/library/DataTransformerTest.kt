@@ -2,6 +2,7 @@ package dev.ohs.player.library
 
 import dev.ohs.fhir.fhirpath.FhirPathEngine
 import dev.ohs.fhir.model.r4.FhirR4Json
+import dev.ohs.player.library.domain.PatientState
 import dev.ohs.player.library.domain.model.SelectBlock
 import dev.ohs.player.library.domain.model.ViewColumn
 import dev.ohs.player.library.domain.model.ViewDefinition
@@ -16,247 +17,82 @@ class DataTransformerTest {
     private val fhirJson = FhirR4Json { ignoreUnknownKeys = true }
     private val transformer = DataTransformer(FhirPathEngine.forR4())
 
-    // ── Shared resource ───────────────────────────────────────────────────────
-    // Extend this JSON to support new ViewDefinition expressions in future tests.
-
-    private val patient by lazy {
-        fhirJson.decodeFromString(
-            """                                                                                                                                                                                                     
+    private val patient by lazy { fhirJson.decodeFromString(
+            """
               {
-                "resourceType": "Patient",                                                                                                                                                                            
+                "resourceType": "Patient",
                 "id": "P-001",
                 "active": true,
                 "name": [
                   {
                     "use": "official",
                     "family": "Smith",
-                    "given": ["John", "Michael"]                                                                                                                                                                      
+                    "given": ["John", "Michael"]
                   }
-                ],                                                                                                                                                                                                    
+                ],
                 "gender": "male",
                 "birthDate": "1980-05-15",
                 "telecom": [
-                  { "system": "phone", "value": "+254700000001", "use": "mobile" },
-                  { "system": "email", "value": "john.smith@example.com" }                                                                                                                                            
+                  { "system": "phone", "value":"+254700000001", "use": "mobile" },
+                  { "system": "email", "value":"john.smith@example.com" }
                 ],
-                "address": [                                                                                                                                                                                          
+                "address": [
                   {
-                    "use": "home",                                                                                                                                                                                    
+                    "use": "home",
                     "line": ["123 Main Street"],
-                    "city": "Nairobi",                                                                                                                                                                                
+                    "city": "Nairobi",
                     "country": "KE"
                   }
-                ]                                                                                                                                                                                                     
+                ]
               }
               """.trimIndent()
         )
     }
 
-    // ── Shared state class ────────────────────────────────────────────────────
-    // All fields are nullable with defaults. Each ViewDefinition populates only
-    // the fields it declares — unmapped fields remain null.
-    // Add new fields here when extending the patient JSON above.
-
-    @Serializable
-    private data class PatientState(
-        val patientId: String? = null,
-        val familyName: String? = null,
-        val fullName: String? = null,
-        val gender: String? = null,
-        val birthDate: String? = null,
-        val phone: String? = null,
-        val email: String? = null,
-        val city: String? = null,
-        val country: String? = null
-    )
-
-    // ── Single field extractions ──────────────────────────────────────────────
-
     @Test
-    fun extractPatientId() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "patient_id",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "patientId", path = "id")
-                )))
-            )
-        )
-        assertEquals("P-001", state.patientId)
-        assertNull(state.familyName)
-    }
-
-    @Test
-    fun extractFamilyName() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "family_name",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "familyName", path = "name.family.first()")
-                )))
-            )
-        )
-        assertEquals("Smith", state.familyName)
-        assertNull(state.patientId)
-    }
-
-    @Test
-    fun extractFullNameConcatenated() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "full_name",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "fullName", path = "name.select(family.first() + ' ' + given.first())")
-                )))
-            )
-        )
-        assertEquals("Smith John", state.fullName)
-    }
-
-    @Test
-    fun extractGender() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "gender",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "gender", path = "gender")
-                )))
-            )
-        )
-        assertEquals("male", state.gender)
-    }
-
-    @Test
-    fun extractBirthDate() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "birth_date",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "birthDate", path = "birthDate")
-                )))
-            )
-        )
-        assertEquals("1980-05-15", state.birthDate)
-    }
-
-    @Test
-    fun extractMobilePhone() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "phone",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "phone", path = "telecom.where(system = 'phone').value.first()")
-                )))
-            )
-        )
-        assertEquals("+254700000001", state.phone)
-    }
-
-    @Test
-    fun extractEmail() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "email",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "email", path = "telecom.where(system = 'email').value.first()")
-                )))
-            )
-        )
-        assertEquals("john.smith@example.com", state.email)
-    }
-
-    @Test
-    fun extractAddressFields() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "address",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "city",    path = "address.city.first()"),
-                    ViewColumn(name = "country", path = "address.country.first()")
-                )))
-            )
-        )
-        assertEquals("Nairobi", state.city)
-        assertEquals("KE",      state.country)
-    }
-
-    // ── Multiple fields in one ViewDefinition ─────────────────────────────────
-
-    @Test
-    fun extractPatientHeaderFields() {
+    fun transform_withFullViewDefinition_populatesAllStateFields() {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(
                 name = "patient_header",
                 resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "patientId",  path = "id"),
-                    ViewColumn(name = "familyName", path = "name.family.first()"),
-                    ViewColumn(name = "gender",     path = "gender"),
-                    ViewColumn(name = "birthDate",  path = "birthDate")
-                )))
+                select = listOf(SelectBlock(column =
+                    listOf(
+                        ViewColumn(name = "patientId",  path = "id"),
+                        ViewColumn(name = "familyName", path = "name.family.first()"),
+                        ViewColumn(name = "fullName",   path = "name.select(family.first() + ' ' + given.first())"),
+                        ViewColumn(name = "gender",     path = "gender"),
+                        ViewColumn(name = "birthDate",  path = "birthDate"),
+                        ViewColumn(name = "phone",      path = "telecom.where(system = 'phone').value.first()"),
+                        ViewColumn(name = "email",      path = "telecom.where(system = 'email').value.first()"),
+                        ViewColumn(name = "city",       path = "address.city.first()"),
+                        ViewColumn(name = "country",    path = "address.country.first()")
+                    )))
             )
         )
-        assertEquals("P-001",      state.patientId)
-        assertEquals("Smith",      state.familyName)
-        assertEquals("male",       state.gender)
+        assertEquals("P-001", state.patientId)
+        assertEquals("Smith", state.familyName)
+        assertEquals("Smith John", state.fullName)
+        assertEquals("male", state.gender)
         assertEquals("1980-05-15", state.birthDate)
-        assertNull(state.phone)
-        assertNull(state.email)
-    }
-
-    @Test
-    fun extractFullContactProfile() {
-        val state = transformer.transform<PatientState>(
-            patient,
-            ViewDefinition(
-                name = "contact_profile",
-                resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "patientId", path = "id"),
-                    ViewColumn(name = "fullName",  path = "name.select(family.first() + ' ' + given.first())"),
-                    ViewColumn(name = "phone",     path = "telecom.where(system = 'phone').value.first()"),
-                    ViewColumn(name = "email",     path = "telecom.where(system = 'email').value.first()"),
-                    ViewColumn(name = "city",      path = "address.city.first()")
-                )))
-            )
-        )
-        assertEquals("P-001",                  state.patientId)
-        assertEquals("Smith John",             state.fullName)
-        assertEquals("+254700000001",          state.phone)
+        assertEquals("+254700000001", state.phone)
         assertEquals("john.smith@example.com", state.email)
-        assertEquals("Nairobi",                state.city)
+        assertEquals("Nairobi", state.city)
+        assertEquals("KE", state.country)
     }
 
-    // ── Edge cases ────────────────────────────────────────────────────────────
-
     @Test
-    fun missingFieldRemainsNull() {
+    fun transform_withMissingResourceField_returnsNullForThatField() {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(
                 name = "missing_field",
                 resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "patientId", path = "id"),
-                    ViewColumn(name = "fullName",  path = "deceased")
-                )))
+                select = listOf(SelectBlock(column =
+                    listOf(
+                        ViewColumn(name = "patientId", path = "id"),
+                        ViewColumn(name = "fullName",  path = "deceased")
+                    )))
             )
         )
         assertEquals("P-001", state.patientId)
@@ -264,16 +100,18 @@ class DataTransformerTest {
     }
 
     @Test
-    fun invalidFhirPathFieldRemainsNull() {
+    fun
+            transform_withInvalidFhirPath_returnsNullForThatField() {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(
-                name = "broken",
+                name = "broken_path",
                 resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "patientId", path = "id"),
-                    ViewColumn(name = "fullName",  path = "%%%invalid@@@")
-                )))
+                select = listOf(SelectBlock(column =
+                    listOf(
+                        ViewColumn(name = "patientId", path = "id"),
+                        ViewColumn(name = "fullName",  path = "%%%invalid@@@")
+                    )))
             )
         )
         assertEquals("P-001", state.patientId)
@@ -281,7 +119,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun emptySelectAllFieldsNull() {
+    fun transform_withEmptySelect_returnsAllNullState() {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(name = "empty", resource = "Patient")
@@ -292,33 +130,38 @@ class DataTransformerTest {
     }
 
     @Test
-    fun columnsWithNullNameOrPathAreSkipped() {
+    fun transform_withNullColumnNameOrPath_skipsColumn() {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(
                 name = "null_columns",
                 resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "patientId",  path = "id"),
-                    ViewColumn(name = null,         path = "id"),
-                    ViewColumn(name = "familyName", path = null)
-                )))
+                select = listOf(SelectBlock(column =
+                    listOf(
+                        ViewColumn(name = "patientId",  path = "id"),
+                        ViewColumn(name = null,         path = "id"),
+                        ViewColumn(name = "familyName", path = null)
+                    )))
             )
         )
         assertEquals("P-001", state.patientId)
         assertNull(state.familyName)
     }
+
     @Test
-    fun whereFilterWithNoMatchReturnsNull() {
+    fun
+            transform_withWhereFilterNoMatch_returnsNullForThatField()
+    {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(
-                name = "fax",
+                name = "no_match",
                 resource = "Patient",
-                select = listOf(SelectBlock(column = listOf(
-                    ViewColumn(name = "patientId", path = "id"),
-                    ViewColumn(name = "phone",     path = "telecom.where(system = 'fax').value.first()")
-                )))
+                select = listOf(SelectBlock(column =
+                    listOf(
+                        ViewColumn(name = "patientId", path = "id"),
+                        ViewColumn(name = "phone",     path = "telecom.where(system = 'fax').value.first()")
+                    )))
             )
         )
         assertEquals("P-001", state.patientId)

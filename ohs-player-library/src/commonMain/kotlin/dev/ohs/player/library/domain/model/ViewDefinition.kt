@@ -1,6 +1,10 @@
 package dev.ohs.player.library.domain.model
 
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 // TODO: Generate this class from StructureDefinition using tools like:
 //  https://github.com/hapifhir/org.hl7.fhir.core/tree/master/org.hl7.fhir.core.generator
@@ -55,17 +59,17 @@ data class Constant(
     val valueBoolean: Boolean? = null,
     val valueCanonical: String? = null,
     val valueCode: String? = null,
-    val valueDate: String? = null,
-    val valueDateTime: String? = null,
+    val valueDate: LocalDate? = null,
+    val valueDateTime: LocalDateTime? = null,
     val valueDecimal: Double? = null,
     val valueId: String? = null,
-    val valueInstant: String? = null,
+    val valueInstant: Instant? = null,
     val valueInteger: Int? = null,
     val valueInteger64: Long? = null,
     val valueOid: String? = null,
     val valueString: String? = null,
     val valuePositiveInt: Int? = null,
-    val valueTime: String? = null,
+    val valueTime: LocalTime? = null,
     val valueUnsignedInt: Int? = null,
     val valueUri: String? = null,
     val valueUrl: String? = null,

@@ -100,8 +100,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun
-            transform_withInvalidFhirPath_returnsNullForThatField() {
+    fun transform_withInvalidFhirPath_returnsNullForThatField() {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(
@@ -149,9 +148,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun
-            transform_withWhereFilterNoMatch_returnsNullForThatField()
-    {
+    fun transform_withWhereFilterNoMatch_returnsNullForThatField() {
         val state = transformer.transform<PatientState>(
             patient,
             ViewDefinition(

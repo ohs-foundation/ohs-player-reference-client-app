@@ -38,7 +38,7 @@ jobs:
         # that's an acceptable tradeoff for preview demo
         run: |
           ./gradlew :ohs-player-reference-app:wasmJsBrowserDevelopmentExecutableDistribution \
-            -Pkotlin.daemon.jvmargs="-Xmx10g -XX:+UseParallelGC"
+            -Pkotlin.daemon.jvmargs="-Xmx10g -XX:+UseG1GC"
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -82,8 +82,7 @@ class ViewRegistry {
      */
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ConfiguredRenderer<T> =
-        (components[key] ?: missing("component", key)).configured as ConfiguredRenderer<T>
+    internal fun <T : Any> getComponent(key: ViewTypeKey<T>): ConfiguredRenderer<T> = (components[key] ?: missing("component", key)).configured as ConfiguredRenderer<T>
 
     /**
      * Returns the original [ComponentRenderer] registered under [key], before
@@ -93,8 +92,7 @@ class ViewRegistry {
      */
     @Suppress("UNCHECKED_CAST")
     @PublishedApi
-    internal fun <T : Any> getComponentSource(key: ViewTypeKey<T>): ComponentRenderer<T, *> =
-        (components[key] ?: missing("component", key)).renderer as ComponentRenderer<T, *>
+    internal fun <T : Any> getComponentSource(key: ViewTypeKey<T>): ComponentRenderer<T, *> = (components[key] ?: missing("component", key)).renderer as ComponentRenderer<T, *>
 
     /**
      * Returns the [LayoutRenderer] registered under [key].
@@ -109,11 +107,10 @@ class ViewRegistry {
     }
 
     /** Throws a [NoSuchElementException] naming the missing renderer kind and key. */
-    private fun missing(kind: String, key: ViewTypeKey<*>): Nothing =
-        throw NoSuchElementException(
-            "No $kind renderer registered for " +
-                "(${key.dataType.simpleName}, ${key.viewType.value}).",
-        )
+    private fun missing(kind: String, key: ViewTypeKey<*>): Nothing = throw NoSuchElementException(
+        "No $kind renderer registered for " +
+            "(${key.dataType.simpleName}, ${key.viewType.value}).",
+    )
 }
 
 /**
@@ -161,8 +158,7 @@ inline fun <reified T : Any, C : Any> ViewRegistry.registerComponent(
  * )
  * ```
  */
-inline fun <reified T : Any> ViewRegistry.registerLayout(viewType: ViewType, renderer: LayoutRenderer<T>) =
-    putLayout(ViewTypeKey(viewType, T::class), renderer)
+inline fun <reified T : Any> ViewRegistry.registerLayout(viewType: ViewType, renderer: LayoutRenderer<T>) = putLayout(ViewTypeKey(viewType, T::class), renderer)
 
 /**
  * Looks up the bound [ConfiguredRenderer] for [viewType] / data type [T] — the form
@@ -174,8 +170,7 @@ inline fun <reified T : Any> ViewRegistry.registerLayout(viewType: ViewType, ren
  *
  * @throws NoSuchElementException if nothing is registered for the key.
  */
-inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ConfiguredRenderer<T> =
-    getComponent(ViewTypeKey(viewType, T::class))
+inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType): ConfiguredRenderer<T> = getComponent(ViewTypeKey(viewType, T::class))
 
 /**
  * Looks up the original [ComponentRenderer] (pre-[withConfig]) for [viewType] / data
@@ -189,8 +184,7 @@ inline fun <reified T : Any> ViewRegistry.componentRenderer(viewType: ViewType):
  *
  * @throws NoSuchElementException if nothing is registered for the key.
  */
-inline fun <reified T : Any> ViewRegistry.componentSource(viewType: ViewType): ComponentRenderer<T, *> =
-    getComponentSource(ViewTypeKey(viewType, T::class))
+inline fun <reified T : Any> ViewRegistry.componentSource(viewType: ViewType): ComponentRenderer<T, *> = getComponentSource(ViewTypeKey(viewType, T::class))
 
 /**
  * Looks up the [LayoutRenderer] for [viewType] / data type [T].
@@ -201,5 +195,4 @@ inline fun <reified T : Any> ViewRegistry.componentSource(viewType: ViewType): C
  *
  * @throws NoSuchElementException if nothing is registered for the key.
  */
-inline fun <reified T : Any> ViewRegistry.layoutRenderer(viewType: ViewType): LayoutRenderer<T> =
-    getLayout(ViewTypeKey(viewType, T::class))
+inline fun <reified T : Any> ViewRegistry.layoutRenderer(viewType: ViewType): LayoutRenderer<T> = getLayout(ViewTypeKey(viewType, T::class))

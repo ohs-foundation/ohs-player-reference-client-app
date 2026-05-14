@@ -1,7 +1,7 @@
-import java.util.Properties
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -90,9 +90,8 @@ val keystoreProperties: Map<String, String> = providers
     }
     .getOrElse(emptyMap())
 
-fun envOrFile(envName: String, fileKey: String): String? =
-    providers.environmentVariable(envName).orNull?.takeIf { it.isNotBlank() }
-        ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
+fun envOrFile(envName: String, fileKey: String): String? = providers.environmentVariable(envName).orNull?.takeIf { it.isNotBlank() }
+    ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
 
 // "0.0.0-dev" makes any accidentally-shipped dev build obviously distinct from
 // a real release; a missing VERSION_NAME on CI is a misconfiguration, not a

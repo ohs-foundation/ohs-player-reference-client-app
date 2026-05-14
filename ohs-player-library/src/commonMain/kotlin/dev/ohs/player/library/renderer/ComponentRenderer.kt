@@ -40,7 +40,7 @@ interface ComponentRenderer<T, C> {
      * @param modifier applied to the root composable.
      */
     @Composable
-    fun Render(item: T, config: C, onClick: () -> Unit = {}, modifier: Modifier = Modifier)
+    fun Render(item: T, config: C, onClick: () -> Unit, modifier: Modifier)
 }
 
 /**

@@ -74,17 +74,12 @@ class DataTransformer(private val fhirPathEngine:
     against [resource]
      * and returns the raw extracted values as a map.
      *
-     * Columns with a null name or path are silently
-    skipped.
+     * Columns with a null name or path are silently skipped.
      *
-     * @param resource the FHIR resource to extract data
-    from
-     * @param viewDefinition declares the columns to
-    evaluate
-     * @param contextVariablesMap optional named variables
-    for FhirPath evaluation
-     * @return a map of column name to extracted value;
-    values are null if the path
+     * @param resource the FHIR resource to extract datafrom
+     * @param viewDefinition declares the columns to evaluate
+     * @param contextVariablesMap optional named variables for FhirPath evaluation
+     * @return a map of column name to extracted value; values are null if the path
      *         yields no result or evaluation fails
      */
     fun extract(
@@ -95,8 +90,7 @@ class DataTransformer(private val fhirPathEngine:
         viewDefinition.allColumns()
             .filter { it.name != null && it.path != null }
             .associate { column ->
-                column.name!! to evaluatePath(resource,
-                    column.path!!, contextVariablesMap)
+                column.name!! to evaluatePath(resource, column.path!!, contextVariablesMap)
             }
 
     private fun evaluatePath(

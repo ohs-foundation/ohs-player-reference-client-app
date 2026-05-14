@@ -36,8 +36,9 @@ jobs:
         # Development distribution skips the Kotlin/Wasm IR optimize pass that
         # makes production builds take 30+ min on CI. Bundle is larger, but
         # that's an acceptable tradeoff for preview demo
-        run: ./gradlew :ohs-player-reference-app:wasmJsBrowserDevelopmentExecutableDistribution \
-          -Pkotlin.daemon.jvmargs="-Xmx10g -XX:+UseParallelGC"
+        run: |
+          ./gradlew :ohs-player-reference-app:wasmJsBrowserDevelopmentExecutableDistribution \
+            -Pkotlin.daemon.jvmargs="-Xmx10g -XX:+UseParallelGC"
 
       - uses: actions/upload-pages-artifact@v3
         with:

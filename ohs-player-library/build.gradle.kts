@@ -5,14 +5,32 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.spotless)
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        ktlint()
+    }
+    kotlinGradle {
+        target("**/*.kts")
+        ktlint()
+    }
 }
 
 kotlin {
     // TODO(AGP-9.0): rename `androidLibrary { }` to `android { }` once AGP is upgraded.
     androidLibrary {
         namespace = "dev.ohs.player.library"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk =
+            libs.versions.android.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)

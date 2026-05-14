@@ -16,10 +16,9 @@ data class ViewDefinition(
     val fhirVersion: List<String>? = null,
     val select: List<SelectBlock>? = null,
     val where: List<WhereClause>? = null,
-    val constant: List<Constant>? = null
+    val constant: List<Constant>? = null,
 ) {
-    fun allColumns(): List<ViewColumn> =
-        select?.flatMap { it.allColumns() } ?: emptyList()
+    fun allColumns(): List<ViewColumn> = select?.flatMap { it.allColumns() } ?: emptyList()
 }
 
 @Serializable
@@ -28,12 +27,12 @@ data class SelectBlock(
     val select: List<SelectBlock>? = null,
     val forEach: String? = null,
     val forEachOrNull: String? = null,
-    val unionAll: List<SelectBlock>? = null
+    val unionAll: List<SelectBlock>? = null,
 ) {
     fun allColumns(): List<ViewColumn> {
         val direct = column ?: emptyList()
         val nested = select?.flatMap { it.allColumns() } ?: emptyList()
-        val union  = unionAll?.flatMap { it.allColumns() } ?: emptyList()
+        val union = unionAll?.flatMap { it.allColumns() } ?: emptyList()
         return direct + nested + union
     }
 }
@@ -44,12 +43,12 @@ data class ViewColumn(
     val path: String? = null,
     val type: String? = null,
     val collection: Boolean = false,
-    val description: String? = null
+    val description: String? = null,
 )
 
 @Serializable
 data class WhereClause(
-    val path: String? = null
+    val path: String? = null,
 )
 
 @Serializable
@@ -73,5 +72,5 @@ data class Constant(
     val valueUnsignedInt: Int? = null,
     val valueUri: String? = null,
     val valueUrl: String? = null,
-    val valueUuid: String? = null
+    val valueUuid: String? = null,
 )

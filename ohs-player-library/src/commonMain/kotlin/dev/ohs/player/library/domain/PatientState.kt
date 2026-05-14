@@ -19,5 +19,5 @@ data class PatientState(
     val phone: String? = null,
     val email: String? = null,
     val city: String? = null,
-    val country: String? = null
+    val country: String? = null,
 )

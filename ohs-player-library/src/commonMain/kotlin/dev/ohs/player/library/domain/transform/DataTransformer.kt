@@ -4,7 +4,6 @@ import dev.ohs.fhir.fhirpath.FhirPathEngine
 import dev.ohs.fhir.model.r4.Resource
 import dev.ohs.player.library.domain.model.ViewDefinition
 import dev.ohs.player.library.domain.util.JsonUtil
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -35,8 +34,9 @@ import kotlinx.serialization.json.decodeFromJsonElement
  * // state.familyName → "Smith"
  * ```
  */
-class DataTransformer(private val fhirPathEngine: FhirPathEngine) {
-
+class DataTransformer(
+    private val fhirPathEngine: FhirPathEngine,
+) {
     /**
      * Evaluates each FhirPath column declared in [viewDefinition] against [resource]
      * and decodes the result into an instance of [T].
@@ -49,12 +49,13 @@ class DataTransformer(private val fhirPathEngine: FhirPathEngine) {
     inline fun <reified T : Any> transform(
         resource: Resource,
         viewDefinition: ViewDefinition,
-        contextVariablesMap: Map<String, Any> = emptyMap()
+        contextVariablesMap: Map<String, Any> = emptyMap(),
     ): T {
-        val jsonElements = extract(resource, viewDefinition, contextVariablesMap)
-            .mapValues { (_, value) ->
-                if (value != null) JsonPrimitive(value.toString()) else JsonNull
-            }
+        val jsonElements =
+            extract(resource, viewDefinition, contextVariablesMap)
+                .mapValues { (_, value) ->
+                    if (value != null) JsonPrimitive(value.toString()) else JsonNull
+                }
         return JsonUtil.json.decodeFromJsonElement<T>(JsonObject(jsonElements))
     }
 
@@ -73,9 +74,10 @@ class DataTransformer(private val fhirPathEngine: FhirPathEngine) {
     fun extract(
         resource: Resource,
         viewDefinition: ViewDefinition,
-        contextVariablesMap: Map<String, Any> = emptyMap()
+        contextVariablesMap: Map<String, Any> = emptyMap(),
     ): Map<String, Any?> =
-        viewDefinition.allColumns()
+        viewDefinition
+            .allColumns()
             .filter { it.name != null && it.path != null }
             .associate { column ->
                 column.name!! to evaluatePath(resource, column.path!!, contextVariablesMap)
@@ -84,14 +86,16 @@ class DataTransformer(private val fhirPathEngine: FhirPathEngine) {
     private fun evaluatePath(
         focus: Any?,
         path: String,
-        contextVariablesMap: Map<String, Any>
-    ): Any? = runCatching {
-        fhirPathEngine.evaluateExpression(
-            expression = path,
-            base = focus,
-            variables = contextVariablesMap
-        ).firstOrNull()
-    }.getOrNull()
+        contextVariablesMap: Map<String, Any>,
+    ): Any? =
+        runCatching {
+            fhirPathEngine
+                .evaluateExpression(
+                    expression = path,
+                    base = focus,
+                    variables = contextVariablesMap,
+                ).firstOrNull()
+        }.getOrNull()
 
     companion object {
         /** Creates a [DataTransformer] configured for FHIR R4. */

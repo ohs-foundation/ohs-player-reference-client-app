@@ -284,9 +284,15 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # Disabled: the Kotlin/Wasm compile OOMs on ubuntu-latest (16 GB) with -Xmx10g 
+  # for the Kotlin daemon. Defer the task until move to a larger runner or shrink
+  # the bundle. The web preview is currently deployed manually to the `gh-pages` branch.
+  # To re-enable: remove `if: false` here and on `deploy-pages`, and add
+  # `build-web` back to the `release` job's `needs:` list.
   build-web:
     name: Build Web (Wasm)
     needs: preflight
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -328,10 +334,12 @@ jobs:
         with:
           path: ohs-player-reference-app/build/dist/wasmJs/productionExecutable
 
+  # Disabled alongside build-web. See the comment above build-web for the
+  # rationale and the steps to re-enable.
   deploy-pages:
     name: Deploy to GitHub Pages
     needs: [preflight, build-web]
-    if: needs.preflight.outputs.is_dry_run == 'false' && needs.preflight.outputs.is_prerelease == 'false'
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -346,7 +354,7 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    needs: [preflight, build-android, build-desktop, build-linux-tarball, build-web]
+    needs: [preflight, build-android, build-desktop, build-linux-tarball]
     if: needs.preflight.outputs.is_dry_run == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 10

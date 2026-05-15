@@ -1,3 +1,18 @@
+/*
+ * Copyright 2026 Open Health Stack Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.ohs.player.reference.app.feature.patient.profile
 
 import androidx.compose.material3.MaterialTheme
@@ -16,34 +31,28 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class PatientProfileScreenTest {
 
-    /**
-     * End-to-end smoke for the detail flow: app registry → DetailScaffold → each registered
-     * section renderer. The scaffold uses a LazyColumn, so off-screen sections aren't composed
-     * until scrolled into view — scroll to each section before asserting it's in the tree.
-     */
-    @Test
-    fun knownPatient_rendersNameAndAllSections() = runComposeUiTest {
-        val registry = buildAppViewRegistry()
-        setContent {
-            CompositionLocalProvider(LocalViewRegistry provides registry) {
-                MaterialTheme {
-                    PatientProfileScreen(patientId = "p1", onBack = {})
-                }
-            }
-        }
-
-        val scrollable = onNode(hasScrollAction())
-        listOf(
-            "Amina Diallo",
-            "Personal Information",
-            "Medical Information",
-            "Contact & Insurance",
-        ).forEach { text ->
-            scrollable.performScrollToNode(hasText(text))
-            assertTrue(
-                onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty(),
-                "Expected to find '$text' after scrolling the patient profile",
-            )
-        }
+  /**
+   * End-to-end smoke for the detail flow: app registry → DetailScaffold → each registered section
+   * renderer. The scaffold uses a LazyColumn, so off-screen sections aren't composed until scrolled
+   * into view — scroll to each section before asserting it's in the tree.
+   */
+  @Test
+  fun knownPatient_rendersNameAndAllSections() = runComposeUiTest {
+    val registry = buildAppViewRegistry()
+    setContent {
+      CompositionLocalProvider(LocalViewRegistry provides registry) {
+        MaterialTheme { PatientProfileScreen(patientId = "p1", onBack = {}) }
+      }
     }
+
+    val scrollable = onNode(hasScrollAction())
+    listOf("Amina Diallo", "Personal Information", "Medical Information", "Contact & Insurance")
+      .forEach { text ->
+        scrollable.performScrollToNode(hasText(text))
+        assertTrue(
+          onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty(),
+          "Expected to find '$text' after scrolling the patient profile",
+        )
+      }
+  }
 }

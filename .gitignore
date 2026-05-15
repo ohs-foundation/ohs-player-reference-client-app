@@ -46,4 +46,8 @@ node_modules/
 # General / Emerging Standards
 .noai
 .aiexclude
+.claude
+AGENT.MD
+CLAUDE.MD
+.skills
 

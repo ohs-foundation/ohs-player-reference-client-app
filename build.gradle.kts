@@ -17,21 +17,18 @@ allprojects {
     apply(plugin = rootProject.libs.plugins.spotless.get().pluginId)
 
     configure<SpotlessExtension> {
-        val ktlintVersion = rootProject.libs.versions.ktlint.get()
-        val ktlintOverrides = mapOf(
-            // @Composable functions are PascalCase by convention.
-            "ktlint_standard_function-naming" to "disabled",
-            // Compose UI files commonly hold multiple top-level composables.
-            "ktlint_standard_filename" to "disabled",
-        )
+        val ktfmtVersion = rootProject.libs.versions.ktfmt.get()
+        val licenseHeaderFile = rootProject.file("license-header.txt")
 
         kotlin {
             target("src/**/*.kt")
-            ktlint(ktlintVersion).editorConfigOverride(ktlintOverrides)
+            ktfmt(ktfmtVersion).googleStyle()
+            licenseHeaderFile(licenseHeaderFile)
         }
         kotlinGradle {
             target("*.gradle.kts")
-            ktlint(ktlintVersion).editorConfigOverride(ktlintOverrides)
+            ktfmt(ktfmtVersion).googleStyle()
+            licenseHeaderFile(licenseHeaderFile, "(^(?![\\/ ]\\*).*$)")
         }
     }
 }

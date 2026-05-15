@@ -46,7 +46,7 @@ class DataTransformer(
      * @param contextVariablesMap optional named variables available during FhirPath evaluation
      * @return an instance of [T] with fields populated from the extracted values
      */
-    inline suspend fun <reified T : Any> transform(
+    suspend inline fun <reified T : Any> transform(
         resource: Resource,
         viewDefinition: ViewDefinition,
         contextVariablesMap: Map<String, Any> = emptyMap(),

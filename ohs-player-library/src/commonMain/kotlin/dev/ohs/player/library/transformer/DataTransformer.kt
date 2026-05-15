@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.library.domain.transform
+package dev.ohs.player.library.transformer
 
 import dev.ohs.fhir.fhirpath.FhirPathEngine
 import dev.ohs.fhir.model.r4.Resource
 import dev.ohs.player.library.domain.model.ViewDefinition
-import dev.ohs.player.library.domain.util.JsonUtil
+import dev.ohs.player.library.util.JsonUtil
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive

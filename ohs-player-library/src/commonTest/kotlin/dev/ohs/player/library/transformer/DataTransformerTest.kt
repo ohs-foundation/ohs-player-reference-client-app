@@ -13,22 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.library
+package dev.ohs.player.library.transformer
 
 import dev.ohs.fhir.fhirpath.FhirPathEngine
 import dev.ohs.fhir.model.r4.FhirR4Json
 import dev.ohs.player.library.domain.model.SelectBlock
 import dev.ohs.player.library.domain.model.ViewColumn
 import dev.ohs.player.library.domain.model.ViewDefinition
-import dev.ohs.player.library.domain.transform.DataTransformer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.Serializable
 
 class DataTransformerTest {
+
+  @Serializable
+  data class PatientState(
+    val patientId: String? = null,
+    val familyName: String? = null,
+    val fullName: String? = null,
+    val gender: String? = null,
+    val birthDate: String? = null,
+    val phone: String? = null,
+    val email: String? = null,
+    val city: String? = null,
+    val country: String? = null,
+  )
+
   private val fhirJson = FhirR4Json { ignoreUnknownKeys = true }
-  private val transformer = DataTransformer(FhirPathEngine.forR4())
+  private val transformer = DataTransformer(FhirPathEngine.Companion.forR4())
 
   private val patient by lazy {
     fhirJson.decodeFromString(

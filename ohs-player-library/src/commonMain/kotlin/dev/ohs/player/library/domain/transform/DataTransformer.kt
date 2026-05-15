@@ -46,7 +46,7 @@ class DataTransformer(
      * @param contextVariablesMap optional named variables available during FhirPath evaluation
      * @return an instance of [T] with fields populated from the extracted values
      */
-    inline fun <reified T : Any> transform(
+    inline suspend fun <reified T : Any> transform(
         resource: Resource,
         viewDefinition: ViewDefinition,
         contextVariablesMap: Map<String, Any> = emptyMap(),
@@ -71,7 +71,7 @@ class DataTransformer(
      * @return a map of column name to extracted value; values are null if the
      *         path yields no result or evaluation fails
      */
-    fun extract(
+    suspend fun extract(
         resource: Resource,
         viewDefinition: ViewDefinition,
         contextVariablesMap: Map<String, Any> = emptyMap(),
@@ -83,7 +83,7 @@ class DataTransformer(
                 column.name!! to evaluatePath(resource, column.path!!, contextVariablesMap)
             }
 
-    private fun evaluatePath(
+    private suspend fun evaluatePath(
         focus: Any?,
         path: String,
         contextVariablesMap: Map<String, Any>,

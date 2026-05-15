@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.ohs.fhir.model)
             api(libs.ohs.fhir.path)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.coroutines.test)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

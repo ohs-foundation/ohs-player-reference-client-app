@@ -2,7 +2,7 @@ package dev.ohs.player.library
 
 import dev.ohs.fhir.fhirpath.FhirPathEngine
 import dev.ohs.fhir.model.r4.FhirR4Json
-import dev.ohs.player.library.domain.PatientState
+import dev.ohs.player.library.PatientState
 import dev.ohs.player.library.domain.model.SelectBlock
 import dev.ohs.player.library.domain.model.ViewColumn
 import dev.ohs.player.library.domain.model.ViewDefinition

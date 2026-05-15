@@ -1,47 +1,45 @@
 package dev.ohs.player.reference.app
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.savedstate.read
+import dev.ohs.player.library.registry.LocalViewRegistry
+import dev.ohs.player.reference.app.feature.patient.list.PatientListScreen
+import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.compose_multiplatform
+private const val PATIENT_LIST_ROUTE = "patientList"
+private const val PATIENT_PROFILE_ROUTE = "patientProfile"
+private const val PATIENT_ID_ARG = "patientId"
 
 @Composable
-@Preview
 fun App() {
-    MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+    val registry = remember { buildAppViewRegistry() }
+
+    CompositionLocalProvider(LocalViewRegistry provides registry) {
+        MaterialTheme {
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = PATIENT_LIST_ROUTE) {
+                composable(PATIENT_LIST_ROUTE) {
+                    PatientListScreen(
+                        onPatientClick = { id -> navController.navigate("$PATIENT_PROFILE_ROUTE/$id") },
+                    )
+                }
+                composable(
+                    route = "$PATIENT_PROFILE_ROUTE/{$PATIENT_ID_ARG}",
+                    arguments = listOf(navArgument(PATIENT_ID_ARG) { type = NavType.StringType }),
+                ) { backStackEntry ->
+                    val patientId = backStackEntry.arguments?.read { getString(PATIENT_ID_ARG) }.orEmpty()
+                    PatientProfileScreen(
+                        patientId = patientId,
+                        onBack = { navController.popBackStack() },
+                    )
                 }
             }
         }

@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
 }
 
 spotless {
@@ -59,10 +61,18 @@ kotlin {
             implementation(libs.ohs.fhir.model)
             api(libs.ohs.fhir.path)
             implementation(libs.kotlinx.datetime)
-            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.compose.uiTest)
+            implementation(libs.kotlinx.coroutines.test)
+        }
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
         }
     }
 }

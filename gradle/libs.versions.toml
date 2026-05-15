@@ -17,6 +17,9 @@ kotlinx-coroutines = "1.10.2"
 material3 = "1.10.0-alpha05"
 kotlinxSerializationJson = "1.11.0"
 spotless = "7.0.3"
+ohsFhirModel    = "1.0.0-beta03"
+ohsFhirPath     = "1.0.0-beta02"
+kotlinxDatetime = "0.6.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -38,6 +41,9 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+ohs-fhir-model    = { module = "dev.ohs.fhir:fhir-model",                        version.ref = "ohsFhirModel" }
+ohs-fhir-path     = { module = "dev.ohs.fhir:fhir-path",                         version.ref = "ohsFhirPath" }
+kotlinx-datetime  = { module = "org.jetbrains.kotlinx:kotlinx-datetime",         version.ref = "kotlinxDatetime" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

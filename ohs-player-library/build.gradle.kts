@@ -56,9 +56,9 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.kotlinx.serialization.json)
-            implementation("dev.ohs.fhir:fhir-model:1.0.0-beta03")
-            api("dev.ohs.fhir:fhir-path:1.0.0-beta02")
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+            implementation(libs.ohs.fhir.model)
+            api(libs.ohs.fhir.path)
+            implementation(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -7,6 +7,7 @@ import dev.ohs.player.library.domain.model.SelectBlock
 import dev.ohs.player.library.domain.model.ViewColumn
 import dev.ohs.player.library.domain.model.ViewDefinition
 import dev.ohs.player.library.domain.transform.DataTransformer
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -49,7 +50,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun transform_withFullViewDefinition_populatesAllStateFields() {
+    fun transform_withFullViewDefinition_populatesAllStateFields() = runTest {
         val state =
             transformer.transform<PatientState>(
                 patient,
@@ -87,7 +88,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun transform_withMissingResourceField_returnsNullForThatField() {
+    fun transform_withMissingResourceField_returnsNullForThatField() = runTest  {
         val state =
             transformer.transform<PatientState>(
                 patient,
@@ -111,7 +112,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun transform_withInvalidFhirPath_returnsNullForThatField() {
+    fun transform_withInvalidFhirPath_returnsNullForThatField() = runTest  {
         val state =
             transformer.transform<PatientState>(
                 patient,
@@ -135,7 +136,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun transform_withEmptySelect_returnsAllNullState() {
+    fun transform_withEmptySelect_returnsAllNullState() = runTest  {
         val state =
             transformer.transform<PatientState>(
                 patient,
@@ -147,7 +148,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun transform_withNullColumnNameOrPath_skipsColumn() {
+    fun transform_withNullColumnNameOrPath_skipsColumn() = runTest  {
         val state =
             transformer.transform<PatientState>(
                 patient,
@@ -172,7 +173,7 @@ class DataTransformerTest {
     }
 
     @Test
-    fun transform_withWhereFilterNoMatch_returnsNullForThatField() {
+    fun transform_withWhereFilterNoMatch_returnsNullForThatField() = runTest  {
         val state =
             transformer.transform<PatientState>(
                 patient,

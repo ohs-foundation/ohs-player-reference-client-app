@@ -25,10 +25,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Spotless `ratchetFrom = "origin/main"` resolves the ref against the
-          # local object database; the default shallow clone has no objects for
-          # origin/main and fails with "No such reference 'origin/main'".
+          # Need full history so spotless ratchet can walk back to the merge
+          # base with main without hitting a missing-object error.
           fetch-depth: 0
+
+      # actions/checkout only populates the ref it checked out (e.g.
+      # refs/pull/<N>/merge), so `refs/remotes/origin/main` is still absent
+      # and spotless ratchetFrom fails with "No such reference 'origin/main'".
+      # Create it explicitly. Cheap since fetch-depth: 0 already has the objects.
+      - name: Populate origin/main for spotless ratchet
+        run: git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
 
       - uses: gradle/actions/wrapper-validation@v4
 

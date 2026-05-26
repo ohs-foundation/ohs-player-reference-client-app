@@ -103,8 +103,7 @@ fun envOrAbsent(name: String): Provider<String> =
   providers.environmentVariable(name).filter { it.isNotBlank() }
 
 fun envOrFile(envName: String, fileKey: String): String? =
-  envOrAbsent(envName).orNull
-    ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
+  envOrAbsent(envName).orNull ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
 
 // "0.0.0-dev" makes any accidentally-shipped dev build obviously distinct from
 // a real release; a missing VERSION_NAME on CI is a misconfiguration, not a
@@ -183,9 +182,7 @@ val composePackageVersion: String =
       if (numeric.matches(Regex("""\d+\.\d+\.\d+"""))) {
         numeric
       } else {
-        error(
-          "VERSION_NAME='$raw' is not MAJOR.MINOR.PATCH; cannot derive jpackage packageVersion",
-        )
+        error("VERSION_NAME='$raw' is not MAJOR.MINOR.PATCH; cannot derive jpackage packageVersion")
       }
     }
     .getOrElse("1.0.0")

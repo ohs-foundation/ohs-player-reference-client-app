@@ -41,16 +41,22 @@ jobs:
     steps:
       - id: parse
         name: Resolve tag and signing mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_TAG: ${{ inputs.tag }}
+          PUSH_REF_NAME: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+          SIGN_RELEASE_BUILDS: ${{ vars.SIGN_RELEASE_BUILDS }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.tag }}"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="$DISPATCH_TAG"
             DRY_RUN=true
           else
-            TAG="${{ github.ref_name }}"
+            TAG="$PUSH_REF_NAME"
             DRY_RUN=false
           fi
 
-          if ! echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$'; then
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'; then
             echo "::error::Tag '$TAG' must match vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-suffix"
             exit 1
           fi
@@ -63,7 +69,7 @@ jobs:
           esac
 
           # SIGN_RELEASE_BUILDS is a repository variable. Default ON; set to "false" to opt out.
-          if [ "${{ vars.SIGN_RELEASE_BUILDS }}" = "false" ]; then
+          if [ "$SIGN_RELEASE_BUILDS" = "false" ]; then
             SIGNING_ENABLED=false
             echo "::warning::SIGN_RELEASE_BUILDS=false; producing UNSIGNED Android artifacts"
           else
@@ -73,7 +79,7 @@ jobs:
           {
             echo "version=$TAG"
             echo "version_name=$VERSION_NAME"
-            echo "version_code=${{ github.run_number }}"
+            echo "version_code=$RUN_NUMBER"
             echo "is_prerelease=$IS_PRERELEASE"
             echo "is_dry_run=$DRY_RUN"
             echo "signing_enabled=$SIGNING_ENABLED"
@@ -227,9 +233,19 @@ jobs:
 
       - name: Stage outputs
         shell: bash
+        env:
+          GLOB: ${{ matrix.glob }}
+          LABEL: ${{ matrix.label }}
         run: |
+          shopt -s nullglob
           mkdir -p out
-          cp ${{ matrix.glob }} out/
+          # Intentional word-split of $GLOB so bash expands the wildcard.
+          files=( $GLOB )
+          if [ ${#files[@]} -ne 1 ]; then
+            echo "::error::Expected exactly one $LABEL output matching '$GLOB', got ${#files[@]}: ${files[*]}"
+            exit 1
+          fi
+          cp "${files[0]}" out/
 
       - uses: actions/upload-artifact@v4
         with:

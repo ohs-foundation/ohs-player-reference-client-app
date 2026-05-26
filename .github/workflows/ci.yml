@@ -24,6 +24,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Spotless `ratchetFrom = "origin/main"` resolves the ref against the
+          # local object database; the default shallow clone has no objects for
+          # origin/main and fails with "No such reference 'origin/main'".
+          fetch-depth: 0
 
       - uses: gradle/actions/wrapper-validation@v4
 

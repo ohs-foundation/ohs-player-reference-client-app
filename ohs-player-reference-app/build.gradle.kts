@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 import java.util.Properties
-import org.gradle.declarative.dsl.schema.FqName.Empty.packageName
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.reload.core.Environment.Companion.application
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.internal.platform.wasm.WasmPlatforms.wasmJs
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
@@ -100,18 +97,25 @@ val keystoreProperties: Map<String, String> =
     }
     .getOrElse(emptyMap())
 
+// Treat blank/whitespace-only env vars as absent so an accidentally exported-
+// but-empty `VERSION_NAME=` doesn't slip past the fallback below.
+fun envOrAbsent(name: String): Provider<String> =
+  providers.environmentVariable(name).filter { it.isNotBlank() }
+
 fun envOrFile(envName: String, fileKey: String): String? =
-  providers.environmentVariable(envName).orNull?.takeIf { it.isNotBlank() }
+  envOrAbsent(envName).orNull
     ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
 
 // "0.0.0-dev" makes any accidentally-shipped dev build obviously distinct from
 // a real release; a missing VERSION_NAME on CI is a misconfiguration, not a
 // silent fallback to "1.0".
 val releaseVersionName: String =
-  providers.environmentVariable("VERSION_NAME").map { it.removePrefix("v") }.getOrElse("0.0.0-dev")
+  envOrAbsent("VERSION_NAME").map { it.removePrefix("v") }.getOrElse("0.0.0-dev")
 
 val releaseVersionCode: Int =
-  providers.environmentVariable("VERSION_CODE").map { it.toInt() }.getOrElse(1)
+  envOrAbsent("VERSION_CODE")
+    .map { raw -> raw.toIntOrNull() ?: error("VERSION_CODE='$raw' must be an integer") }
+    .getOrElse(1)
 
 val keystorePath = envOrFile("ANDROID_KEYSTORE_PATH", "KEYSTORE_PATH")
 val keystoreAlias = envOrFile("ANDROID_KEY_ALIAS", "KEY_ALIAS")
@@ -173,11 +177,16 @@ dependencies { debugImplementation(libs.compose.uiTooling) }
 // Uses the providers API so the configuration cache tracks VERSION_NAME as a
 // declared input.
 val composePackageVersion: String =
-  providers
-    .environmentVariable("VERSION_NAME")
+  envOrAbsent("VERSION_NAME")
     .map { raw ->
       val numeric = raw.removePrefix("v").substringBefore('-')
-      if (numeric.matches(Regex("""\d+\.\d+\.\d+"""))) numeric else "1.0.0"
+      if (numeric.matches(Regex("""\d+\.\d+\.\d+"""))) {
+        numeric
+      } else {
+        error(
+          "VERSION_NAME='$raw' is not MAJOR.MINOR.PATCH; cannot derive jpackage packageVersion",
+        )
+      }
     }
     .getOrElse("1.0.0")
 

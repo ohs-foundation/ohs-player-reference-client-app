@@ -1,56 +1,66 @@
+/*
+ * Copyright 2026 Open Health Stack Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidKotlinMultiplatformLibrary)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.kotlinMultiplatform)
+  alias(libs.plugins.androidKotlinMultiplatformLibrary)
+  alias(libs.plugins.kotlinSerialization)
+  alias(libs.plugins.composeMultiplatform)
+  alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
-    // TODO(AGP-9.0): rename `androidLibrary { }` to `android { }` once AGP is upgraded.
-    androidLibrary {
-        namespace = "dev.ohs.player.library"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+  // TODO(AGP-9.0): rename `androidLibrary { }` to `android { }` once AGP is upgraded.
+  androidLibrary {
+    namespace = "dev.ohs.player.library"
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    minSdk = libs.versions.android.minSdk.get().toInt()
 
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
+    compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
 
-        withHostTest {}
+    withHostTest {}
+  }
+
+  iosArm64()
+  iosSimulatorArm64()
+
+  jvm()
+
+  js { browser() }
+
+  @OptIn(ExperimentalWasmDsl::class) wasmJs { browser() }
+
+  sourceSets {
+    commonMain.dependencies {
+      api(libs.kotlinx.serialization.json)
+      implementation(libs.ohs.fhir.model)
+      api(libs.ohs.fhir.path)
+      implementation(libs.kotlinx.datetime)
+      implementation(libs.compose.runtime)
+      implementation(libs.compose.ui)
+      implementation(libs.compose.foundation)
+      implementation(libs.compose.material3)
     }
-
-    iosArm64()
-    iosSimulatorArm64()
-
-    jvm()
-
-    js {
-        browser()
+    commonTest.dependencies {
+      implementation(libs.kotlin.test)
+      implementation(libs.compose.uiTest)
+      implementation(libs.kotlinx.coroutines.test)
     }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-    }
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(libs.compose.runtime)
-            implementation(libs.compose.ui)
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
-            implementation(libs.fhir.model)
-            implementation(libs.fhir.path)
-        }
-        commonTest.dependencies {
-            implementation(libs.kotlin.test)
-            implementation(libs.compose.uiTest)
-        }
-        jvmTest.dependencies {
-            implementation(compose.desktop.currentOs)
-        }
-    }
+    jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+  }
 }

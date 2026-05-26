@@ -1,3 +1,18 @@
+/*
+ * Copyright 2026 Open Health Stack Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.compose.material3.MaterialTheme
@@ -14,23 +29,21 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalTestApi::class)
 class PatientListScreenTest {
 
-    /**
-     * End-to-end smoke for the list flow: app registry → ListScaffold → registered card
-     * renderer → click handler. If any link in that chain breaks, this test fails.
-     */
-    @Test
-    fun tappingPatient_invokesOnPatientClickWithMatchingId() = runComposeUiTest {
-        val registry = buildAppViewRegistry()
-        var clickedId: String? = null
-        setContent {
-            CompositionLocalProvider(LocalViewRegistry provides registry) {
-                MaterialTheme {
-                    PatientListScreen(onPatientClick = { clickedId = it })
-                }
-            }
-        }
-
-        onNodeWithText("Amina Diallo").performClick()
-        assertEquals("p1", clickedId)
+  /**
+   * End-to-end smoke for the list flow: app registry → ListScaffold → registered card renderer →
+   * click handler. If any link in that chain breaks, this test fails.
+   */
+  @Test
+  fun tappingPatient_invokesOnPatientClickWithMatchingId() = runComposeUiTest {
+    val registry = buildAppViewRegistry()
+    var clickedId: String? = null
+    setContent {
+      CompositionLocalProvider(LocalViewRegistry provides registry) {
+        MaterialTheme { PatientListScreen(onPatientClick = { clickedId = it }) }
+      }
     }
+
+    onNodeWithText("Amina Diallo").performClick()
+    assertEquals("p1", clickedId)
+  }
 }

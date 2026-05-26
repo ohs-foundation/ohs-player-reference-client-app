@@ -13,23 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app.feature.patient.profile
+package dev.ohs.player.library.util
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import dev.ohs.player.library.renderer.ComponentRenderer
-import dev.ohs.player.reference.app.data.model.PatientView
+import kotlinx.serialization.json.Json
 
-data object MedicalSectionConfig
-
-class MedicalSectionRenderer : ComponentRenderer<PatientView, MedicalSectionConfig> {
-  @Composable
-  override fun Render(
-    item: PatientView,
-    config: MedicalSectionConfig,
-    onClick: () -> Unit,
-    modifier: Modifier,
-  ) {
-    MedicalSection(item)
+object JsonUtil {
+  val json: Json = Json {
+    ignoreUnknownKeys = true
+    coerceInputValues = true
   }
 }

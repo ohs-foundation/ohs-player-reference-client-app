@@ -1,3 +1,18 @@
+/*
+ * Copyright 2026 Open Health Stack Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.ohs.player.library.scaffold
 
 import androidx.compose.foundation.layout.Box
@@ -20,9 +35,9 @@ import dev.ohs.player.library.renderer.withConfig
 import kotlin.reflect.KClass
 
 /**
- * Builder receiver for [ListScaffold]. Holds the chosen component renderer, layout
- * renderer, top bar, and empty-state composable. One of the `component(...)` overloads
- * is required; `layout(...)` is optional (defaults to [VerticalListRenderer]).
+ * Builder receiver for [ListScaffold]. Holds the chosen component renderer, layout renderer, top
+ * bar, and empty-state composable. One of the `component(...)` overloads is required; `layout(...)`
+ * is optional (defaults to [VerticalListRenderer]).
  *
  * View-type constants are typically declared once in an `object`; see [ViewType].
  *
@@ -43,106 +58,108 @@ import kotlin.reflect.KClass
  * @param registry the registry to resolve view-type-based renderers from.
  * @param dataType the data class for the list items, used in registry lookups.
  */
-class ListDslScope<T : Any> @PublishedApi internal constructor(
-    @PublishedApi internal val registry: ViewRegistry,
-    @PublishedApi internal val dataType: KClass<T>,
+class ListDslScope<T : Any>
+@PublishedApi
+internal constructor(
+  @PublishedApi internal val registry: ViewRegistry,
+  @PublishedApi internal val dataType: KClass<T>,
 ) {
-    /** Per-item renderer; must be set via one of the `component(...)` overloads before render. */
-    @PublishedApi internal var component: ConfiguredRenderer<T>? = null
+  /** Per-item renderer; must be set via one of the `component(...)` overloads before render. */
+  @PublishedApi internal var component: ConfiguredRenderer<T>? = null
 
-    /** Layout renderer; defaults to [VerticalListRenderer] if not set. */
-    @PublishedApi internal var layout: LayoutRenderer<T>? = null
+  /** Layout renderer; defaults to [VerticalListRenderer] if not set. */
+  @PublishedApi internal var layout: LayoutRenderer<T>? = null
 
-    /** Optional top bar composable. */
-    @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
+  /** Optional top bar composable. */
+  @PublishedApi internal var topBar: (@Composable () -> Unit)? = null
 
-    /** Composable shown when the items list is empty. */
-    @PublishedApi internal var emptyState: (@Composable () -> Unit)? = null
+  /** Composable shown when the items list is empty. */
+  @PublishedApi internal var emptyState: (@Composable () -> Unit)? = null
 
-    /**
-     * Sets the component renderer from a pre-built [ComponentRenderer] and its [config].
-     *
-     * ```
-     * component(PatientCardRenderer(), PatientCardConfig())
-     * ```
-     */
-    fun <C : Any> component(renderer: ComponentRenderer<T, C>, config: C) {
-        component = renderer.withConfig(config)
-    }
+  /**
+   * Sets the component renderer from a pre-built [ComponentRenderer] and its [config].
+   *
+   * ```
+   * component(PatientCardRenderer(), PatientCardConfig())
+   * ```
+   */
+  fun <C : Any> component(renderer: ComponentRenderer<T, C>, config: C) {
+    component = renderer.withConfig(config)
+  }
 
-    /**
-     * Sets the component renderer from an inline composable. Use for ad-hoc lists.
-     *
-     * ```
-     * component { item, onClick ->
-     *     Card(onClick = onClick) { Text(item.fullName) }
-     * }
-     * ```
-     */
-    fun component(content: @Composable (T, onClick: () -> Unit) -> Unit) {
-        component = ConfiguredRenderer { item, onClick, _ -> content(item, onClick) }
-    }
+  /**
+   * Sets the component renderer from an inline composable. Use for ad-hoc lists.
+   *
+   * ```
+   * component { item, onClick ->
+   *     Card(onClick = onClick) { Text(item.fullName) }
+   * }
+   * ```
+   */
+  fun component(content: @Composable (T, onClick: () -> Unit) -> Unit) {
+    component = ConfiguredRenderer { item, onClick, _ -> content(item, onClick) }
+  }
 
-    /**
-     * Resolves the component renderer from the registry by [viewType].
-     *
-     * ```
-     * component(ViewType("Card"))
-     * ```
-     */
-    fun component(viewType: ViewType) {
-        component = registry.getComponent(ViewTypeKey(viewType, dataType))
-    }
+  /**
+   * Resolves the component renderer from the registry by [viewType].
+   *
+   * ```
+   * component(ViewType("Card"))
+   * ```
+   */
+  fun component(viewType: ViewType) {
+    component = registry.getComponent(ViewTypeKey(viewType, dataType))
+  }
 
-    /**
-     * Overrides the default vertical layout with [renderer].
-     *
-     * ```
-     * layout(GridListRenderer(cells = GridCells.Fixed(2)))
-     * ```
-     */
-    fun layout(renderer: LayoutRenderer<T>) {
-        layout = renderer
-    }
+  /**
+   * Overrides the default vertical layout with [renderer].
+   *
+   * ```
+   * layout(GridListRenderer(cells = GridCells.Fixed(2)))
+   * ```
+   */
+  fun layout(renderer: LayoutRenderer<T>) {
+    layout = renderer
+  }
 
-    /**
-     * Resolves the layout renderer from the registry by [viewType].
-     *
-     * ```
-     * layout(ViewType("HorizontalList"))
-     * ```
-     */
-    fun layout(viewType: ViewType) {
-        layout = registry.getLayout(ViewTypeKey(viewType, dataType))
-    }
+  /**
+   * Resolves the layout renderer from the registry by [viewType].
+   *
+   * ```
+   * layout(ViewType("HorizontalList"))
+   * ```
+   */
+  fun layout(viewType: ViewType) {
+    layout = registry.getLayout(ViewTypeKey(viewType, dataType))
+  }
 
-    /**
-     * Sets the optional top bar composable.
-     *
-     * ```
-     * topBar { TopAppBar(title = { Text("Patients") }) }
-     * ```
-     */
-    fun topBar(content: @Composable () -> Unit) {
-        topBar = content
-    }
+  /**
+   * Sets the optional top bar composable.
+   *
+   * ```
+   * topBar { TopAppBar(title = { Text("Patients") }) }
+   * ```
+   */
+  fun topBar(content: @Composable () -> Unit) {
+    topBar = content
+  }
 
-    /**
-     * Sets the composable shown when the items list is empty.
-     *
-     * ```
-     * emptyState { Text("No patients") }
-     * ```
-     */
-    fun emptyState(content: @Composable () -> Unit) {
-        emptyState = content
-    }
+  /**
+   * Sets the composable shown when the items list is empty.
+   *
+   * ```
+   * emptyState { Text("No patients") }
+   * ```
+   */
+  fun emptyState(content: @Composable () -> Unit) {
+    emptyState = content
+  }
 }
 
 /**
- * Scaffold for a list of [T]. Builds via [ListDslScope]. Empty [items] renders the
- * `emptyState` composable and never invokes the layout renderer; non-empty delegates
- * to the chosen [LayoutRenderer] (defaults to [VerticalListRenderer]).
+ * Scaffold for a list of [T]. Builds via [ListDslScope]. Empty [items] renders the `emptyState`
+ * composable and never invokes the layout renderer; non-empty delegates to the chosen
+ * [LayoutRenderer] (defaults to [VerticalListRenderer]).
  *
  * View-type constants are typically declared once in an `object`; see [ViewType].
  *
@@ -173,39 +190,34 @@ class ListDslScope<T : Any> @PublishedApi internal constructor(
  */
 @Composable
 inline fun <reified T : Any> ListScaffold(
-    items: List<T>,
-    noinline onItemClick: (T) -> Unit,
-    noinline key: (T) -> Any,
-    modifier: Modifier = Modifier,
-    builder: ListDslScope<T>.() -> Unit,
+  items: List<T>,
+  noinline onItemClick: (T) -> Unit,
+  noinline key: (T) -> Any,
+  modifier: Modifier = Modifier,
+  builder: ListDslScope<T>.() -> Unit,
 ) {
-    val registry = LocalViewRegistry.current
-    val scope = ListDslScope(registry, T::class).apply(builder)
-    val component = requireNotNull(scope.component) {
-        "ListScaffold requires component(...) to be called in the builder."
+  val registry = LocalViewRegistry.current
+  val scope = ListDslScope(registry, T::class).apply(builder)
+  val component =
+    requireNotNull(scope.component) {
+      "ListScaffold requires component(...) to be called in the builder."
     }
-    val defaultLayout = remember { VerticalListRenderer<T>() }
-    val layoutRenderer = scope.layout ?: defaultLayout
+  val defaultLayout = remember { VerticalListRenderer<T>() }
+  val layoutRenderer = scope.layout ?: defaultLayout
 
-    Scaffold(
-        modifier = modifier,
-        topBar = scope.topBar ?: {},
-    ) { padding ->
-        if (items.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                scope.emptyState?.invoke()
-            }
-        } else {
-            layoutRenderer.Render(
-                items = items,
-                component = component,
-                key = key,
-                onItemClick = onItemClick,
-                modifier = Modifier.fillMaxSize().padding(padding),
-            )
-        }
+  Scaffold(modifier = modifier, topBar = scope.topBar ?: {}) { padding ->
+    if (items.isEmpty()) {
+      Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+        scope.emptyState?.invoke()
+      }
+    } else {
+      layoutRenderer.Render(
+        items = items,
+        component = component,
+        key = key,
+        onItemClick = onItemClick,
+        modifier = Modifier.fillMaxSize().padding(padding),
+      )
     }
+  }
 }

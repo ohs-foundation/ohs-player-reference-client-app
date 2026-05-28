@@ -63,6 +63,7 @@ jobs:
             tasks: >-
               :ohs-player-library:jvmTest
               :ohs-player-reference-app:jvmTest
+            kotlinDaemonHeap: '-Xmx6g -XX:+UseG1GC'
           - id: android
             label: Android
             # ohs-player-library uses the androidKotlinMultiplatformLibrary
@@ -73,6 +74,7 @@ jobs:
             tasks: >-
               :ohs-player-library:assembleAndroidMain
               :ohs-player-reference-app:lintDebug
+            kotlinDaemonHeap: '-Xmx6g -XX:+UseG1GC'
           - id: js
             label: Kotlin/JS
             # jsBrowserTest is disabled in build.gradle.kts, but requesting
@@ -80,11 +82,17 @@ jobs:
             # compileTestDevelopmentExecutableKotlinJs) — which is the work
             # we want covered.
             tasks: ':ohs-player-reference-app:jsBrowserTest'
+            # compileTestDevelopmentExecutableKotlinJs has historically OOMed
+            # at 6g; give the Kotlin daemon more room only for this leg.
+            kotlinDaemonHeap: '-Xmx10g -XX:+UseG1GC'
           - id: wasm
             label: Kotlin/Wasm
             tasks: >-
               :ohs-player-library:wasmJsBrowserTest
               :ohs-player-reference-app:wasmJsBrowserTest
+            # Same reason as the js leg: compileTestDevelopmentExecutableKotlinWasmJs
+            # exhausts 6g; needs more daemon heap, but only on this runner.
+            kotlinDaemonHeap: '-Xmx10g -XX:+UseG1GC'
     steps:
       - uses: actions/checkout@v4
 
@@ -98,7 +106,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Run ${{ matrix.label }}
-        run: ./gradlew ${{ matrix.tasks }} --stacktrace
+        run: >-
+          ./gradlew ${{ matrix.tasks }}
+          -Pkotlin.daemon.jvmargs="${{ matrix.kotlinDaemonHeap }}"
+          --stacktrace
 
       - name: Upload test reports
         if: failure()

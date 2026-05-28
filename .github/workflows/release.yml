@@ -104,7 +104,7 @@ jobs:
           fi
 
   build-android:
-    name: Build Android (AAB + APK)
+    name: Build Android (APK)
     needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -130,7 +130,7 @@ jobs:
           echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
           test -s "$RUNNER_TEMP/release.jks" || { echo "::error::Decoded keystore is empty"; exit 1; }
 
-      - name: Build AAB and APK
+      - name: Build APK
         env:
           VERSION_NAME: ${{ needs.preflight.outputs.version_name }}
           VERSION_CODE: ${{ needs.preflight.outputs.version_code }}
@@ -138,7 +138,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-        run: ./gradlew :ohs-player-reference-app:bundleRelease :ohs-player-reference-app:assembleRelease
+        run: ./gradlew :ohs-player-reference-app:assembleRelease
 
       - name: Stage outputs
         shell: bash
@@ -154,11 +154,6 @@ jobs:
 
           # Fail loud if AGP ever produces 0 or >1 outputs (e.g. someone enables
           # ABI/density splits) — the single-name cp below would silently corrupt.
-          aabs=(ohs-player-reference-app/build/outputs/bundle/release/*.aab)
-          if [ ${#aabs[@]} -ne 1 ]; then
-            echo "::error::Expected exactly one AAB, got ${#aabs[@]}: ${aabs[*]}"
-            exit 1
-          fi
           apks=(ohs-player-reference-app/build/outputs/apk/release/*.apk)
           if [ ${#apks[@]} -ne 1 ]; then
             echo "::error::Expected exactly one APK, got ${#apks[@]}: ${apks[*]}"
@@ -166,7 +161,6 @@ jobs:
             exit 1
           fi
 
-          cp "${aabs[0]}" "out/ohs-player-${VN}${SUFFIX}.aab"
           cp "${apks[0]}" "out/ohs-player-${VN}${SUFFIX}.apk"
 
       - uses: actions/upload-artifact@v4
@@ -389,7 +383,6 @@ jobs:
         run: |
           mkdir -p release
           find artifacts -type f \( \
-            -name '*.aab' -o \
             -name '*.apk' -o \
             -name '*.deb' -o \
             -name '*.rpm' -o \

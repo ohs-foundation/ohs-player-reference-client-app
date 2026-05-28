@@ -72,7 +72,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Run check
-        run: ./gradlew check --stacktrace
+        # --no-parallel serializes project tasks so the JS and WasmJs
+        # compileTestDevelopmentExecutable tasks don't race for the same
+        # Kotlin daemon heap on a 16 GB runner. org.gradle.parallel stays
+        # on for local dev; only this CI invocation opts out.
+        run: ./gradlew check --no-parallel --stacktrace
 
       - name: Upload test reports
         if: failure()

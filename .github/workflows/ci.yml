@@ -65,8 +65,13 @@ jobs:
               :ohs-player-reference-app:jvmTest
           - id: android
             label: Android
+            # ohs-player-library uses the androidKotlinMultiplatformLibrary
+            # plugin, which doesn't register `lintDebug` - assembleAndroidMain
+            # is the closest "compile + verify the Android variant" task it
+            # exposes. ohs-player-reference-app uses classic androidTarget
+            # and keeps lintDebug.
             tasks: >-
-              :ohs-player-library:lintDebug
+              :ohs-player-library:assembleAndroidMain
               :ohs-player-reference-app:lintDebug
           - id: js
             label: Kotlin/JS

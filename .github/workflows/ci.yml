@@ -49,9 +49,37 @@ jobs:
         run: ./gradlew spotlessCheck --stacktrace
 
   check:
-    name: Build + test (Linux)
+    name: Build + test (${{ matrix.label }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
+    strategy:
+      # Each leg gets its own 16 GB runner, so the JS and Wasm test-executable
+      # compiles don't compete with each other for Kotlin daemon heap.
+      fail-fast: false
+      matrix:
+        include:
+          - id: jvm
+            label: JVM/Desktop
+            tasks: >-
+              :ohs-player-library:jvmTest
+              :ohs-player-reference-app:jvmTest
+          - id: android
+            label: Android
+            tasks: >-
+              :ohs-player-library:lintDebug
+              :ohs-player-reference-app:lintDebug
+          - id: js
+            label: Kotlin/JS
+            # jsBrowserTest is disabled in build.gradle.kts, but requesting
+            # it still runs the compile prerequisites (compileKotlinJs +
+            # compileTestDevelopmentExecutableKotlinJs) — which is the work
+            # we want covered.
+            tasks: ':ohs-player-reference-app:jsBrowserTest'
+          - id: wasm
+            label: Kotlin/Wasm
+            tasks: >-
+              :ohs-player-library:wasmJsBrowserTest
+              :ohs-player-reference-app:wasmJsBrowserTest
     steps:
       - uses: actions/checkout@v4
 
@@ -64,14 +92,14 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Run check
-        run: ./gradlew check --stacktrace
+      - name: Run ${{ matrix.label }}
+        run: ./gradlew ${{ matrix.tasks }} --stacktrace
 
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-reports-${{ matrix.id }}
           path: |
             **/build/reports/**
             **/build/test-results/**

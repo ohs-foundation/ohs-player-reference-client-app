@@ -28,13 +28,36 @@ plugins {
   alias(libs.plugins.spotless)
 }
 
+// Spotless's `ratchetFrom` resolves at configuration time, so any Gradle
+// invocation on a checkout without `origin/main` (shallow CI jobs, tag-push
+// release builds) would fail to configure. Detect once and opt in only when
+// the ref is available; the dedicated `spotless` CI job fetches it.
+// Uses `providers.exec` so the result is captured by the configuration cache.
+val hasOriginMain: Boolean =
+  providers
+    .exec {
+      commandLine("git", "rev-parse", "--verify", "--quiet", "origin/main")
+      isIgnoreExitValue = true
+    }
+    .result
+    .map { it.exitValue == 0 }
+    .getOrElse(false)
+
 allprojects {
   apply(plugin = rootProject.libs.plugins.spotless.get().pluginId)
 
   configure<SpotlessExtension> {
     val ktfmtVersion = rootProject.libs.versions.ktfmt.get()
     val licenseHeaderFile = rootProject.file("license-header.txt")
-    ratchetFrom = "origin/main"
+
+    // Don't hook `spotlessCheck` into the lifecycle `check` task. The
+    // dedicated `spotless` CI job runs `spotlessCheck` directly, so every
+    // other job (and local `./gradlew check`) stays free of formatter work.
+    isEnforceCheck = false
+
+    if (hasOriginMain) {
+      ratchetFrom = "origin/main"
+    }
 
     kotlin {
       target("src/**/*.kt")

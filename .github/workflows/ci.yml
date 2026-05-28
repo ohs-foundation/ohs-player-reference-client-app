@@ -65,9 +65,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Run check
-        # spotlessCheck is covered by the dedicated `spotless` job; excluding
-        # it here avoids running the formatter twice per PR.
-        run: ./gradlew check -x spotlessCheck --stacktrace
+        run: ./gradlew check --stacktrace
 
       - name: Upload test reports
         if: failure()
@@ -89,13 +87,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
-      # This job doesn't execute spotless tasks, but allprojects { apply
-      # spotless } still runs setupRatchet at configuration time, which
-      # needs origin/main to be a resolvable ref. A shallow fetch of main
-      # is enough to satisfy that — we don't need full history here.
-      - name: Populate origin/main for spotless ratchet
-        run: git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
 
       - uses: gradle/actions/wrapper-validation@v4
 

@@ -154,5 +154,5 @@ jobs:
           ./gradlew --stacktrace \
             :ohs-player-library:compileKotlinIosArm64 \
             :ohs-player-library:compileKotlinIosSimulatorArm64 \
-            :ohs-player-reference-app:linkReleaseFrameworkIosArm64 \
-            :ohs-player-reference-app:linkReleaseFrameworkIosSimulatorArm64
+            :ohs-player-reference-app:linkDebugFrameworkIosArm64 \
+            :ohs-player-reference-app:linkDebugFrameworkIosSimulatorArm64

@@ -132,11 +132,21 @@ jobs:
 
   ios-check:
     # iOS targets can't be compiled on Linux. macos-latest billing is 10× so
-    # this is the most expensive job in the pipeline - keep it focused on the
-    # iOS-specific compile/link work that `check` on Ubuntu can't cover.
-    name: iOS compile (macOS)
+    # keep each leg focused on a single arch so the K/N compiler isn't
+    # fighting itself for the 14 GB runner. Debug link is sufficient to
+    # prove iOS code compiles and links; release link belongs in release.yml
+    # whenever iOS distribution is added.
+    name: iOS compile (${{ matrix.label }})
     runs-on: macos-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: iosArm64
+            target: IosArm64
+          - label: iosSimulatorArm64
+            target: IosSimulatorArm64
     steps:
       - uses: actions/checkout@v4
 
@@ -157,10 +167,8 @@ jobs:
           restore-keys: |
             konan-${{ runner.os }}-
 
-      - name: Compile + link iOS targets
+      - name: Compile + link ${{ matrix.label }}
         run: |
           ./gradlew --stacktrace \
-            :ohs-player-library:compileKotlinIosArm64 \
-            :ohs-player-library:compileKotlinIosSimulatorArm64 \
-            :ohs-player-reference-app:linkDebugFrameworkIosArm64 \
-            :ohs-player-reference-app:linkDebugFrameworkIosSimulatorArm64
+            :ohs-player-library:compileKotlin${{ matrix.target }} \
+            :ohs-player-reference-app:linkDebugFramework${{ matrix.target }}

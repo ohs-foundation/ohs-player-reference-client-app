@@ -105,9 +105,8 @@ fun envOrAbsent(name: String): Provider<String> =
 fun envOrFile(envName: String, fileKey: String): String? =
   envOrAbsent(envName).orNull ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
 
-// "0.0.0-dev" makes any accidentally-shipped dev build obviously distinct from
-// a real release; a missing VERSION_NAME on CI is a misconfiguration, not a
-// silent fallback to "1.0".
+// "0.0.0-dev" flags accidental dev builds and prevents silent "1.0" CI fallbacks if the version is unspecified.
+
 val releaseVersionName: String =
   envOrAbsent("VERSION_NAME").map { it.removePrefix("v") }.getOrElse("0.0.0-dev")
 

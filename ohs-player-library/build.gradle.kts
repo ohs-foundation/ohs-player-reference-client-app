@@ -65,7 +65,10 @@ kotlin {
   }
 }
 
-// Targets we skip until their respective test setups are sorted out:
+// Targets to be skipped on CI until their respective test setups are sorted out.
+// Only disabled when CI=true (set by GitHub Actions) so the CI build stays green;
+// Local development still runs these so contributors can reproduce and
+// fix the underlying failures.
 //
 //   * Kotlin/JS IR backend crashes lowering the generated sealed-interface
 //     dispatch tables in dev.ohs.fhir:fhir-path (StackOverflow in
@@ -83,15 +86,19 @@ kotlin {
 //
 // TODO: if a future Kotlin/AGP release renames these tasks, the matching
 //  predicate silently no-ops and the underlying errors return.
-tasks
-  .matching {
-    it.name in
-      setOf(
-        "compileTestDevelopmentExecutableKotlinJs",
-        "compileTestProductionExecutableKotlinJs",
-        "jsBrowserTest",
-        "wasmJsBrowserTest",
-        "testAndroidHostTest",
-      )
-  }
-  .configureEach { enabled = false }
+val isCi = providers.environmentVariable("CI").map(String::toBoolean).getOrElse(false)
+
+if (isCi) {
+  tasks
+    .matching {
+      it.name in
+        setOf(
+          "compileTestDevelopmentExecutableKotlinJs",
+          "compileTestProductionExecutableKotlinJs",
+          "jsBrowserTest",
+          "wasmJsBrowserTest",
+          "testAndroidHostTest",
+        )
+    }
+    .configureEach { enabled = false }
+}

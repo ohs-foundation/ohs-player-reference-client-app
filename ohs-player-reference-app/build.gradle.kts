@@ -190,12 +190,20 @@ val composePackageVersion: String =
 // TODO: Adopt Compose Multiplatform UI tests (runComposeUiTest) for commonTest.
 // JVM and iOS test execution cover the same logic in the meantime.
 // Remove once the multiplatform UI test setup is in place.
-tasks
-  .matching {
-    it.name in
-      setOf("testDebugUnitTest", "testReleaseUnitTest", "jsBrowserTest", "wasmJsBrowserTest")
-  }
-  .configureEach { enabled = false }
+//
+// Only disabled when CI=true (set by GitHub Actions) so the CI build stays green;
+// Local development still runs these so contributors can reproduce and
+// fix the underlying failures.
+val isCi = providers.environmentVariable("CI").map(String::toBoolean).getOrElse(false)
+
+if (isCi) {
+  tasks
+    .matching {
+      it.name in
+        setOf("testDebugUnitTest", "testReleaseUnitTest", "jsBrowserTest", "wasmJsBrowserTest")
+    }
+    .configureEach { enabled = false }
+}
 
 compose.desktop {
   application {

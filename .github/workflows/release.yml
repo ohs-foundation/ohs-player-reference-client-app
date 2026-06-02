@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to simulate (e.g. v1.2.3 or v1.2.3-beta.1). Dry run: no Release/Pages publish.'
+        description: 'Tag to simulate (e.g. v1.2.3). Dry run - builds & signs all platforms and uploads artifacts, but does NOT publish a Release or deploy Pages.'
         required: true
         type: string
 
@@ -62,7 +62,7 @@ jobs:
           fi
 
           VERSION_NAME="${TAG#v}"
-          # Per Semantic Versioning 2.0.0 §9, any hyphen-suffix is a pre-release.
+          # Per Semantic Versioning 2.0.0 section 9, any hyphen-suffix is a pre-release.
           case "$TAG" in
             *-*) IS_PRERELEASE=true ;;
             *)   IS_PRERELEASE=false ;;

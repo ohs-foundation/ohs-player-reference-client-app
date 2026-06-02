@@ -82,11 +82,8 @@ kotlin {
   }
 }
 
-// Env vars are the primary input (CI). keystore.properties is a dev-time
-// fallback so contributors can test release signing without exporting vars in
-// their shell. See keystore.properties.template for the expected keys; the
-// real file is gitignored — never commit secrets. Reads use the providers API
-// so the configuration cache tracks them as declared inputs.
+// Release signing inputs: env vars first (CI), then keystore.properties as a
+// dev-time fallback. Read via the providers API so the config cache tracks them.
 val keystoreProperties: Map<String, String> =
   providers
     .fileContents(rootProject.layout.projectDirectory.file("keystore.properties"))
@@ -97,29 +94,34 @@ val keystoreProperties: Map<String, String> =
     }
     .getOrElse(emptyMap())
 
-// Treat blank/whitespace-only env vars as absent so an accidentally exported-
-// but-empty `VERSION_NAME=` doesn't slip past the fallback below.
-fun envOrAbsent(name: String): Provider<String> =
+/*
+ * Reads an environment variable, but yields a value only when it is non-blank.
+ * Blank or whitespace-only vars are treated as absent, leaving the provider
+ * empty so downstream `.getOrElse(...)` / `.orNull` fallbacks take over. This
+ * stops an accidentally exported-but-empty var (e.g. `VERSION_NAME=`) from
+ * slipping past those fallbacks.
+ */
+fun nonBlankEnv(name: String): Provider<String> =
   providers.environmentVariable(name).filter { it.isNotBlank() }
 
-fun envOrFile(envName: String, fileKey: String): String? =
-  envOrAbsent(envName).orNull ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
+fun envOrKeystore(envName: String, fileKey: String): String? =
+  nonBlankEnv(envName).orNull ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
 
 // "0.0.0-dev" flags accidental dev builds and prevents silent "1.0" CI fallbacks if the version is
-// unspecified.
+// unspecified
 
 val releaseVersionName: String =
-  envOrAbsent("VERSION_NAME").map { it.removePrefix("v") }.getOrElse("0.0.0-dev")
+  nonBlankEnv("VERSION_NAME").map { it.removePrefix("v") }.getOrElse("0.0.0-dev")
 
 val releaseVersionCode: Int =
-  envOrAbsent("VERSION_CODE")
+  nonBlankEnv("VERSION_CODE")
     .map { raw -> raw.toIntOrNull() ?: error("VERSION_CODE='$raw' must be an integer") }
     .getOrElse(1)
 
-val keystorePath = envOrFile("ANDROID_KEYSTORE_PATH", "KEYSTORE_PATH")
-val keystoreAlias = envOrFile("ANDROID_KEY_ALIAS", "KEY_ALIAS")
-val keystoreKeyPassword = envOrFile("ANDROID_KEY_PASSWORD", "KEY_PASSWORD")
-val keystoreStorePassword = envOrFile("ANDROID_STORE_PASSWORD", "STORE_PASSWORD")
+val keystorePath = envOrKeystore("ANDROID_KEYSTORE_PATH", "KEYSTORE_PATH")
+val keystoreAlias = envOrKeystore("ANDROID_KEY_ALIAS", "KEY_ALIAS")
+val keystoreKeyPassword = envOrKeystore("ANDROID_KEY_PASSWORD", "KEY_PASSWORD")
+val keystoreStorePassword = envOrKeystore("ANDROID_STORE_PASSWORD", "STORE_PASSWORD")
 
 val hasReleaseSigning: Boolean =
   !keystorePath.isNullOrBlank() &&
@@ -170,13 +172,20 @@ android {
 
 dependencies { debugImplementation(libs.compose.uiTooling) }
 
-// WiX/MSI requires a strict MAJOR.MINOR.PATCH numeric version, so strip any
-// Semantic Version pre-release suffix (e.g. -alpha.1) from VERSION_NAME for the desktop
-// installers. Android's versionName keeps the suffix; this drift is intentional.
-// Uses the providers API so the configuration cache tracks VERSION_NAME as a
-// declared input.
+/*
+ * Desktop installer version. WiX/MSI (and jpackage) require a strict numeric
+ * MAJOR.MINOR.PATCH, so any Semantic Version pre-release suffix is stripped here. Android's
+ * versionName keeps the full string; this drift between platforms is intentional.
+ *
+ * Example — VERSION_NAME=v1.2.3-alpha.1:
+ *   before (raw input)          v1.2.3-alpha.1
+ *   Android versionName         1.2.3-alpha.1   (prefix dropped, suffix kept)
+ *   Desktop packageVersion      1.2.3           (prefix + suffix stripped)
+ *
+ * A plain release (VERSION_NAME=v1.2.3) yields 1.2.3 on both platforms.
+ */
 val composePackageVersion: String =
-  envOrAbsent("VERSION_NAME")
+  nonBlankEnv("VERSION_NAME")
     .map { raw ->
       val numeric = raw.removePrefix("v").substringBefore('-')
       if (numeric.matches(Regex("""\d+\.\d+\.\d+"""))) {

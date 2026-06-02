@@ -74,12 +74,13 @@ kotlin {
 //     source set actually exercises those types.
 //
 //   * Android host (JVM) tests blow up with NoClassDefFoundError on
-//     android/app/Activity because runComposeUiTest needs a real Android
-//     framework on the test classpath (Robolectric or instrumentation).
-//     Wiring that up requires per-class @RunWith annotations which aren't
-//     portable in commonTest - deferred to a follow-up.
+//     android/app/Activity.
+//
+//     TODO: adopt Compose Multiplatform UI tests (runComposeUiTest) for
+//      commonTest so these run without a host Android framework.
 //
 // JVM, iOS, and Wasm tests still run and cover the same logic.
+//
 // TODO: if a future Kotlin/AGP release renames these tasks, the matching
 //  predicate silently no-ops and the underlying errors return.
 tasks

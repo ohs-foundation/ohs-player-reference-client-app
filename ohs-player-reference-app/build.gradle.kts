@@ -105,7 +105,8 @@ fun envOrAbsent(name: String): Provider<String> =
 fun envOrFile(envName: String, fileKey: String): String? =
   envOrAbsent(envName).orNull ?: keystoreProperties[fileKey]?.takeIf { it.isNotBlank() }
 
-// "0.0.0-dev" flags accidental dev builds and prevents silent "1.0" CI fallbacks if the version is unspecified.
+// "0.0.0-dev" flags accidental dev builds and prevents silent "1.0" CI fallbacks if the version is
+// unspecified.
 
 val releaseVersionName: String =
   envOrAbsent("VERSION_NAME").map { it.removePrefix("v") }.getOrElse("0.0.0-dev")
@@ -141,7 +142,8 @@ android {
   signingConfigs {
     if (hasReleaseSigning) {
       create("release") {
-      // Disables legacy V1 JAR signing to rely entirely on V2+ signatures required by Android 7.0+.
+        // Disables legacy V1 JAR signing to rely entirely on V2+ signatures required by Android
+        // 7.0+.
 
         enableV1Signing = false
         enableV2Signing = true
@@ -185,10 +187,9 @@ val composePackageVersion: String =
     }
     .getOrElse("1.0.0")
 
-// Same as in ohs-player-library: Compose UI tests in commonTest don't run
-// cleanly on Android-host JVM (needs Robolectric + per-class @RunWith) nor in
-// JS/Wasm ChromeHeadless. JVM and iOS test execution still cover the same
-// logic. Remove once the test setup is sorted out.
+// TODO: Adopt Compose Multiplatform UI tests (runComposeUiTest) for commonTest.
+// JVM and iOS test execution cover the same logic in the meantime.
+// Remove once the multiplatform UI test setup is in place.
 tasks
   .matching {
     it.name in

@@ -141,9 +141,8 @@ android {
   signingConfigs {
     if (hasReleaseSigning) {
       create("release") {
-        // Disable the legacy JAR signing scheme (V1); rely on APK Signature
-        // Scheme V2+ which Android 7.0+ requires and which all current
-        // distribution channels expect.
+      // Disables legacy V1 JAR signing to rely entirely on V2+ signatures required by Android 7.0+.
+
         enableV1Signing = false
         enableV2Signing = true
         storeFile = file(keystorePath!!)

@@ -15,6 +15,9 @@
  */
 package dev.ohs.player.reference.app.feature.patient.list
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,11 +25,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.ohs.player.generated.state.PatientSummaryState
+import dev.ohs.player.generated.viewtype.ViewTypeCS
+import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.scaffold.ListScaffold
-import dev.ohs.player.reference.app.AppViewTypes
-import dev.ohs.player.reference.app.data.model.PatientView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,13 +40,20 @@ fun PatientListScreen(onPatientClick: (String) -> Unit) {
   val viewModel: PatientListViewModel = viewModel { PatientListViewModel() }
   val patients by viewModel.patients.collectAsStateWithLifecycle()
 
-  ListScaffold<PatientView>(
-    items = patients,
-    onItemClick = { onPatientClick(it.id) },
-    key = { it.id },
+  if (patients == null) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      CircularProgressIndicator()
+    }
+    return
+  }
+
+  ListScaffold<PatientSummaryState>(
+    items = patients!!,
+    onItemClick = { onPatientClick(it.patientId ?: "") },
+    key = { it.patientId ?: it.hashCode().toString() },
   ) {
-    component(AppViewTypes.Card)
-    layout(AppViewTypes.VerticalList)
+    component(ViewTypeCS.PatientCard)
+    layout(VerticalListRenderer.VIEW_TYPE)
     topBar {
       TopAppBar(
         title = { Text("Patients") },

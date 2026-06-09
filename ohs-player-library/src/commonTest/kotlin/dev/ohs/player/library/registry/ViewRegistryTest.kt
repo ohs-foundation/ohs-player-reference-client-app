@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
+import dev.ohs.player.library.renderer.RenderOptions
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
@@ -29,8 +30,7 @@ private val FooViewType = ViewType("Foo")
 private data object TestConfig
 
 private class StringRenderer : ComponentRenderer<String, TestConfig> {
-  @Composable
-  override fun Render(item: String, config: TestConfig, onClick: () -> Unit, modifier: Modifier) {}
+  @Composable override fun Render(item: String, config: TestConfig, options: RenderOptions) {}
 }
 
 private class StringLayoutRenderer : LayoutRenderer<String> {

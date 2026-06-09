@@ -34,6 +34,7 @@ import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.ViewTypeKey
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.ConfiguredRenderer
+import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.library.renderer.withConfig
 import kotlin.reflect.KClass
 
@@ -98,7 +99,7 @@ internal constructor(
    * ```
    */
   fun section(content: @Composable (T) -> Unit) {
-    sections += ConfiguredRenderer { item, _, _ -> content(item) }
+    sections += ConfiguredRenderer { item, _ -> content(item) }
   }
 
   /**
@@ -188,7 +189,7 @@ inline fun <reified T : Any> DetailScaffold(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(sectionSpacing),
       ) {
-        items(scope.sections) { section -> section.Render(item, {}, Modifier) }
+        items(scope.sections) { section -> section.Render(item, RenderOptions()) }
       }
     }
   }

@@ -18,7 +18,6 @@ package dev.ohs.player.library.scaffold
 import androidx.compose.foundation.text.BasicText as Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -30,6 +29,7 @@ import dev.ohs.player.library.registry.ViewRegistry
 import dev.ohs.player.library.registry.ViewType
 import dev.ohs.player.library.registry.registerComponent
 import dev.ohs.player.library.renderer.ComponentRenderer
+import dev.ohs.player.library.renderer.RenderOptions
 import kotlin.test.Test
 
 private val SectionA = ViewType("SectionA")
@@ -41,12 +41,7 @@ private data object DetailTestConfig
 private class LabeledRenderer(private val label: String) :
   ComponentRenderer<String, DetailTestConfig> {
   @Composable
-  override fun Render(
-    item: String,
-    config: DetailTestConfig,
-    onClick: () -> Unit,
-    modifier: Modifier,
-  ) {
+  override fun Render(item: String, config: DetailTestConfig, options: RenderOptions) {
     Text("[$label] $item")
   }
 }

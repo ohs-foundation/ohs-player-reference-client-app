@@ -31,13 +31,8 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalTestApi::class)
 class PatientProfileScreenTest {
 
-  /**
-   * End-to-end smoke for the detail flow: app registry → DetailScaffold → each registered section
-   * renderer. The scaffold uses a LazyColumn, so off-screen sections aren't composed until scrolled
-   * into view — scroll to each section before asserting it's in the tree.
-   */
   @Test
-  fun knownPatient_rendersNameAndAllSections() = runComposeUiTest {
+  fun knownPatient_rendersNameAndClinicalSections() = runComposeUiTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
@@ -45,14 +40,17 @@ class PatientProfileScreenTest {
       }
     }
 
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithText("Amina Diallo").fetchSemanticsNodes().isNotEmpty()
+    }
     val scrollable = onNode(hasScrollAction())
-    listOf("Amina Diallo", "Personal Information", "Medical Information", "Contact & Insurance")
-      .forEach { text ->
-        scrollable.performScrollToNode(hasText(text))
-        assertTrue(
-          onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty(),
-          "Expected to find '$text' after scrolling the patient profile",
-        )
-      }
+    listOf("Amina Diallo", "Allergies", "Medications", "Conditions", "Immunizations").forEach { text
+      ->
+      scrollable.performScrollToNode(hasText(text))
+      assertTrue(
+        onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty(),
+        "Expected to find '$text' after scrolling the patient profile",
+      )
+    }
   }
 }

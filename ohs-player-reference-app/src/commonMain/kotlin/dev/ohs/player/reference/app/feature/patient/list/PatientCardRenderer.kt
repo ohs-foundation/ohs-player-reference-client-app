@@ -16,18 +16,18 @@
 package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import dev.ohs.player.generated.config.PatientCardConfig
+import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.library.renderer.ComponentRenderer
-import dev.ohs.player.reference.app.data.model.PatientView
+import dev.ohs.player.library.renderer.RenderOptions
 
-class PatientCardRenderer : ComponentRenderer<PatientView, PatientCardConfig> {
+class PatientCardRenderer : ComponentRenderer<PatientSummaryState, PatientCardConfig> {
   @Composable
   override fun Render(
-    item: PatientView,
+    item: PatientSummaryState,
     config: PatientCardConfig,
-    onClick: () -> Unit,
-    modifier: Modifier,
+    options: RenderOptions,
   ) {
-    PatientCard(patient = item, config = config, onClick = onClick, modifier = modifier)
+    PatientCard(patient = item, config = config, onClick = options.onClick)
   }
 }

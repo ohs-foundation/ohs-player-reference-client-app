@@ -24,10 +24,8 @@ import kotlin.jvm.JvmInline
  * key. View-types are normally declared once per app as constants.
  *
  * ```
- * object AppViewTypes {
- *     val Card = ViewType("Card")
- *     val PatientHeader = ViewType("PatientHeader")
- * }
+ * val Card = ViewType("Card")
+ * val PatientHeader = ViewType("PatientHeader")
  * ```
  *
  * @param value the underlying identifier; conventionally PascalCase.

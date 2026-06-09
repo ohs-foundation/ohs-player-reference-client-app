@@ -34,6 +34,7 @@ import dev.ohs.player.library.registry.registerLayout
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
+import dev.ohs.player.library.renderer.RenderOptions
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -46,13 +47,8 @@ private data object ListTestConfig
 
 private class TextRenderer : ComponentRenderer<String, ListTestConfig> {
   @Composable
-  override fun Render(
-    item: String,
-    config: ListTestConfig,
-    onClick: () -> Unit,
-    modifier: Modifier,
-  ) {
-    Text(text = item, modifier = modifier.clickable { onClick() })
+  override fun Render(item: String, config: ListTestConfig, options: RenderOptions) {
+    Text(text = item, modifier = options.modifier.clickable { options.onClick?.invoke() })
   }
 }
 
@@ -69,7 +65,11 @@ private class RecordingLayout : LayoutRenderer<String> {
     modifier: Modifier,
   ) {
     renderInvocations++
-    Column { items.forEach { item -> component.Render(item, { onItemClick(item) }, Modifier) } }
+    Column {
+      items.forEach { item ->
+        component.Render(item, RenderOptions(onClick = { onItemClick(item) }))
+      }
+    }
   }
 }
 

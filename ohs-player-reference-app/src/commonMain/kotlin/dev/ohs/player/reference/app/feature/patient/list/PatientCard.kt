@@ -15,70 +15,135 @@
  */
 package dev.ohs.player.reference.app.feature.patient.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import dev.ohs.player.reference.app.data.model.PatientView
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import dev.ohs.player.generated.config.PatientCardConfig
+import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.reference.app.feature.component.common.CardView
 import dev.ohs.player.reference.app.feature.component.common.StatusChip
 
-data class PatientCardConfig(
-  val showStatusChip: Boolean = true,
-  val showGender: Boolean = true,
-  val showBirthDate: Boolean = true,
-  val showLastVisit: Boolean = true,
-  val elevationDp: Float = 2f,
-  val contentPaddingDp: Float = 16f,
-)
-
 @Composable
 fun PatientCard(
-  patient: PatientView,
+  patient: PatientSummaryState,
   config: PatientCardConfig = PatientCardConfig(),
   onClick: (() -> Unit)? = null,
-  modifier: Modifier = Modifier,
 ) {
+  val initials =
+    buildString {
+        patient.givenName?.firstOrNull()?.uppercaseChar()?.let { append(it) }
+        patient.familyName?.firstOrNull()?.uppercaseChar()?.let { append(it) }
+      }
+      .ifBlank { "?" }
+  val fullName =
+    listOfNotNull(patient.givenName, patient.familyName).joinToString(" ").ifBlank { "Unknown" }
+
   CardView(
-    elevationDp = config.elevationDp,
-    contentPaddingDp = config.contentPaddingDp,
+    elevationDp = config.elevation?.floatValue() ?: 2f,
+    contentPaddingDp = config.padding?.floatValue() ?: 16f,
     onClick = onClick,
   ) {
     header {
       Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text(patient.fullName, style = MaterialTheme.typography.titleMedium)
-        if (config.showStatusChip) {
-          StatusChip(isActive = patient.isActive)
+        Box(
+          modifier =
+            Modifier.size(52.dp)
+              .clip(CircleShape)
+              .background(MaterialTheme.colorScheme.primaryContainer),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = initials,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            fontWeight = FontWeight.Bold,
+          )
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+          Text(
+            text = fullName,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+          )
+          val subtitleParts = buildList {
+            if (config.showAge != false) {
+              calculateAge(patient.birthDate?.toString())?.let { add("Age $it") }
+            }
+            if (config.showGender != false) {
+              patient.gender?.let { add(it.replaceFirstChar { c -> c.uppercaseChar() }) }
+            }
+          }
+          if (subtitleParts.isNotEmpty()) {
+            Text(
+              text = subtitleParts.joinToString(" · "),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          patient.mrn?.let {
+            Text(
+              text = it,
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.outline,
+            )
+          }
+        }
+        Column(
+          horizontalAlignment = Alignment.End,
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          if (config.showStatusChip != false) {
+            StatusChip(isActive = patient.active ?: false)
+          }
+          if (onClick != null) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+              modifier = Modifier.size(16.dp),
+            )
+          }
         }
       }
     }
-    body {
-      val details = buildList {
-        if (config.showGender) add(patient.gender)
-        if (config.showBirthDate) add("Born: ${patient.birthDate}")
-      }
-      if (details.isNotEmpty()) {
-        Text(
-          text = details.joinToString("  •  "),
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-      if (config.showLastVisit) {
-        Text(
-          text = "Last visit: ${patient.lastVisitDate}",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-      }
-    }
+  }
+}
+
+internal fun calculateAge(birthDate: String?): String? {
+  if (birthDate == null) return null
+  return try {
+    val parts = birthDate.split("-")
+    if (parts.size != 3) return null
+    val birthYear = parts[0].toInt()
+    val birthMonth = parts[1].toInt()
+    val birthDay = parts[2].toInt()
+    val currentYear = 2026
+    val currentMonth = 5
+    val currentDay = 16
+    var age = currentYear - birthYear
+    if (currentMonth < birthMonth || (currentMonth == birthMonth && currentDay < birthDay)) age--
+    age.toString()
+  } catch (_: Exception) {
+    null
   }
 }

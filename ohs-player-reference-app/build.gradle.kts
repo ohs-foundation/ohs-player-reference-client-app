@@ -25,6 +25,8 @@ plugins {
   alias(libs.plugins.composeCompiler)
   alias(libs.plugins.composeHotReload)
   alias(libs.plugins.kotlinSerialization)
+//  id("dev.ohs.ig-codegen")
+//  id("spotless-conventions")
 }
 
 kotlin {
@@ -73,6 +75,7 @@ kotlin {
     commonTest.dependencies {
       implementation(libs.kotlin.test)
       implementation(libs.compose.uiTest)
+      implementation(libs.kotlinx.coroutines.test)
     }
     jvmMain.dependencies {
       implementation(compose.desktop.currentOs)
@@ -169,8 +172,6 @@ android {
     targetCompatibility = JavaVersion.VERSION_11
   }
 }
-
-dependencies { debugImplementation(libs.compose.uiTooling) }
 
 /*
  * Desktop installer version. WiX/MSI (and jpackage) require a strict numeric

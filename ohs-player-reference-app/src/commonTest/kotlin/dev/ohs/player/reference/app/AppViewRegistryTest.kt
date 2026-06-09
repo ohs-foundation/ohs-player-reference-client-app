@@ -15,33 +15,45 @@
  */
 package dev.ohs.player.reference.app
 
+import dev.ohs.player.generated.state.GroupListState
+import dev.ohs.player.generated.state.GroupMemberState
+import dev.ohs.player.generated.state.PatientAllergyState
+import dev.ohs.player.generated.state.PatientConditionState
+import dev.ohs.player.generated.state.PatientImmunizationState
+import dev.ohs.player.generated.state.PatientMedicationState
+import dev.ohs.player.generated.state.PatientSummaryState
+import dev.ohs.player.generated.viewtype.ViewTypeCS
+import dev.ohs.player.library.layout.GridListRenderer
+import dev.ohs.player.library.layout.HorizontalListRenderer
+import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.registry.componentRenderer
 import dev.ohs.player.library.registry.layoutRenderer
-import dev.ohs.player.reference.app.data.model.PatientView
 import kotlin.test.Test
 
 class AppViewRegistryTest {
 
-  /**
-   * The screens declare their layout via `component(...)` / `layout(...)` / `section(...)` calls
-   * that resolve from the registry at render time. A missed registration only surfaces when a user
-   * actually opens the screen, this test catches it ahead of that.
-   */
   @Test
   fun allRequiredRenderersAreRegistered() {
     val registry = buildAppViewRegistry()
-    // Each call throws if the registry is missing an entry.
 
-    // Patient list, component + every layout the screen may pick.
-    registry.componentRenderer<PatientView>(AppViewTypes.Card)
-    registry.layoutRenderer<PatientView>(AppViewTypes.VerticalList)
-    registry.layoutRenderer<PatientView>(AppViewTypes.HorizontalList)
-    registry.layoutRenderer<PatientView>(AppViewTypes.Grid)
+    // Group list
+    registry.componentRenderer<GroupListState>(ViewTypeCS.GroupCard)
+    registry.layoutRenderer<GroupListState>(VerticalListRenderer.VIEW_TYPE)
 
-    // Patient profile, header + each section the DetailScaffold composes.
-    registry.componentRenderer<PatientView>(AppViewTypes.PatientHeader)
-    registry.componentRenderer<PatientView>(AppViewTypes.PersonalSection)
-    registry.componentRenderer<PatientView>(AppViewTypes.MedicalSection)
-    registry.componentRenderer<PatientView>(AppViewTypes.ContactSection)
+    // Group profile
+    registry.componentRenderer<GroupMemberState>(ViewTypeCS.MemberItem)
+
+    // Patient list — component + every layout
+    registry.componentRenderer<PatientSummaryState>(ViewTypeCS.PatientCard)
+    registry.layoutRenderer<PatientSummaryState>(VerticalListRenderer.VIEW_TYPE)
+    registry.layoutRenderer<PatientSummaryState>(HorizontalListRenderer.VIEW_TYPE)
+    registry.layoutRenderer<PatientSummaryState>(GridListRenderer.VIEW_TYPE)
+
+    // Patient IPS profile — all IG-authored item types
+    registry.componentRenderer<PatientSummaryState>(ViewTypeCS.PatientHeader)
+    registry.componentRenderer<PatientAllergyState>(ViewTypeCS.AllergyItem)
+    registry.componentRenderer<PatientMedicationState>(ViewTypeCS.MedicationItem)
+    registry.componentRenderer<PatientConditionState>(ViewTypeCS.ConditionItem)
+    registry.componentRenderer<PatientImmunizationState>(ViewTypeCS.ImmunizationItem)
   }
 }

@@ -19,6 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 /**
+ * Groups the presentation-level options passed to every [ComponentRenderer.Render] call.
+ *
+ * @param onClick optional tap handler; null means the component is non-interactive.
+ * @param modifier applied to the root composable of the rendered item.
+ */
+data class RenderOptions(val onClick: (() -> Unit)? = null, val modifier: Modifier = Modifier)
+
+/**
  * Author-facing renderer for a single item of type [T] using config [C].
  *
  * The two type parameters let one renderer class be reused under multiple
@@ -33,10 +41,9 @@ import androidx.compose.ui.Modifier
  *     override fun Render(
  *         item: PatientView,
  *         config: PatientCardConfig,
- *         onClick: () -> Unit,
- *         modifier: Modifier,
+ *         options: RenderOptions,
  *     ) {
- *         Card(onClick = onClick, modifier = modifier) {
+ *         Card(onClick = options.onClick, modifier = options.modifier) {
  *             Text(item.fullName)
  *             if (config.showLastVisit) Text(item.lastVisitDate)
  *         }
@@ -46,16 +53,23 @@ import androidx.compose.ui.Modifier
  */
 interface ComponentRenderer<T, C> {
   /**
-   * Renders [item] with [config] applied.
+   * Renders [item] with [config] and [options] applied.
    *
    * @param item the data model instance.
    * @param config configuration for this render call.
-   * @param onClick tap handler; defaults to no-op.
-   * @param modifier applied to the root composable.
+   * @param options presentation options — tap handler and root modifier.
    */
-  @Composable
-  fun Render(item: T, config: C, onClick: () -> Unit = {}, modifier: Modifier = Modifier)
+  @Composable fun Render(item: T, config: C, options: RenderOptions)
 }
+
+/**
+ * Renders [item] with [config] and default [RenderOptions] (no click handler, [Modifier]).
+ *
+ * Convenience for Kotlin call sites that don't need custom options.
+ */
+@Composable
+fun <T, C> ComponentRenderer<T, C>.Render(item: T, config: C) =
+  Render(item, config, RenderOptions())
 
 /**
  * A renderer with its config already applied.
@@ -66,7 +80,7 @@ interface ComponentRenderer<T, C> {
  *
  * ```
  * // Inside a LayoutRenderer.Render:
- * component.Render(item, { onItemClick(item) }, Modifier)
+ * component.Render(item, RenderOptions(onClick = { onItemClick(item) }))
  * ```
  */
 fun interface ConfiguredRenderer<T> {
@@ -74,10 +88,9 @@ fun interface ConfiguredRenderer<T> {
    * Renders [item]; the config from registration is already applied.
    *
    * @param item the data model instance.
-   * @param onClick tap handler.
-   * @param modifier applied to the root composable.
+   * @param options presentation options — tap handler and root modifier.
    */
-  @Composable fun Render(item: T, onClick: () -> Unit, modifier: Modifier)
+  @Composable fun Render(item: T, options: RenderOptions)
 }
 
 /**
@@ -92,7 +105,5 @@ internal fun <T : Any, C : Any> ComponentRenderer<T, C>.withConfig(
   boundConfig: C
 ): ConfiguredRenderer<T> {
   val source = this
-  return ConfiguredRenderer { item, onClick, modifier ->
-    source.Render(item, boundConfig, onClick, modifier)
-  }
+  return ConfiguredRenderer { item, options -> source.Render(item, boundConfig, options) }
 }

@@ -58,7 +58,7 @@ class PatientCardRenderer : ComponentRenderer<PatientView, PatientCardConfig> {
     override fun Render(
         item: PatientView,
         config: PatientCardConfig,
-        onClick: () -> Unit,
+        onClick: (() -> Unit)?,
         modifier: Modifier,
     ) {
         Card(onClick = onClick, modifier = modifier) {

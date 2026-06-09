@@ -15,19 +15,53 @@
  */
 package dev.ohs.player.reference.app.data.repository
 
-import dev.ohs.player.reference.app.data.datasource.PATIENTS_JSON
-import dev.ohs.player.reference.app.data.model.PatientView
-import kotlinx.serialization.json.Json
+import dev.ohs.player.generated.state.AllergyReactionState
+import dev.ohs.player.generated.state.PatientAllergyState
+import dev.ohs.player.generated.state.PatientConditionState
+import dev.ohs.player.generated.state.PatientContactState
+import dev.ohs.player.generated.state.PatientImmunizationState
+import dev.ohs.player.generated.state.PatientMedicationState
+import dev.ohs.player.generated.state.PatientSummaryState
+import dev.ohs.player.generated.state.PatientTelecomState
+import dev.ohs.player.reference.app.data.Extraction.extractor
+import dev.ohs.player.reference.app.data.datasource.allPatientIds
+import dev.ohs.player.reference.app.data.datasource.patientProfileSearchResult
+import dev.ohs.player.reference.app.data.datasource.patientSummarySearchResult
+import dev.ohs.player.reference.app.feature.patient.profile.ProfileUiState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object PatientRepository {
 
-  private val json = Json { ignoreUnknownKeys = true }
+  // FhirPathEvaluator holds mutable state is not concurrent-safe.
+  // limitedParallelism(1) serializes all extraction on a single background thread without any
+  // explicit locking.
+  private val extractorDispatcher = Dispatchers.Default.limitedParallelism(1)
 
-  private val patients: List<PatientView> by lazy {
-    json.decodeFromString<List<PatientView>>(PATIENTS_JSON)
-  }
+  suspend fun getPatients(): List<PatientSummaryState> =
+    withContext(extractorDispatcher) {
+      allPatientIds().mapNotNull { id ->
+        patientSummarySearchResult(id)?.let {
+          extractor.extract<PatientSummaryState>(it).firstOrNull()
+        }
+      }
+    }
 
-  fun getAll(): List<PatientView> = patients
-
-  fun getById(id: String): PatientView? = patients.find { it.id == id }
+  suspend fun getPatientProfile(patientId: String): ProfileUiState =
+    withContext(extractorDispatcher) {
+      val result = patientProfileSearchResult(patientId) ?: return@withContext ProfileUiState()
+      ProfileUiState(
+        patient = extractor.extract<PatientSummaryState>(result).firstOrNull(),
+        allergies = extractor.extract<PatientAllergyState>(result),
+        allergyReactions = extractor.extract<AllergyReactionState>(result),
+        medications = extractor.extract<PatientMedicationState>(result),
+        conditions = extractor.extract<PatientConditionState>(result),
+        immunizations = extractor.extract<PatientImmunizationState>(result),
+        contacts =
+          extractor.extract<PatientContactState>(result).filter {
+            it.contactGivenName != null || it.contactFamilyName != null
+          },
+        telecoms = extractor.extract<PatientTelecomState>(result).filter { it.telecomValue != null },
+      )
+    }
 }

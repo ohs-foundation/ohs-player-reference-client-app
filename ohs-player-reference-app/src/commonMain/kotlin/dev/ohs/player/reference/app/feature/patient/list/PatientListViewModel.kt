@@ -16,18 +16,19 @@
 package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.lifecycle.ViewModel
-import dev.ohs.player.reference.app.data.model.PatientView
+import androidx.lifecycle.viewModelScope
+import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.reference.app.data.repository.PatientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class PatientListViewModel : ViewModel() {
-
-  private val _patients = MutableStateFlow<List<PatientView>>(emptyList())
-  val patients: StateFlow<List<PatientView>> = _patients.asStateFlow()
+  private val _patients = MutableStateFlow<List<PatientSummaryState>?>(null)
+  val patients: StateFlow<List<PatientSummaryState>?> = _patients.asStateFlow()
 
   init {
-    _patients.value = PatientRepository.getAll()
+    viewModelScope.launch { _patients.value = PatientRepository.getPatients() }
   }
 }

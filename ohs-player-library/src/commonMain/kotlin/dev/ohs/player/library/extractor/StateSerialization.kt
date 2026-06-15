@@ -24,7 +24,8 @@ import kotlinx.serialization.json.Json
  * the FHIR scalar types they reference (`FhirDate`, `FhirDateTime`, `BigDecimal`) — shared with the
  * config store via [fhirScalarSerializers].
  */
-//TODO delete this once kotlin-fhir beta04 is available, a contextualized Json is no longer required
+// TODO delete this once kotlin-fhir beta04 is available, a contextualized Json is no longer
+// required
 
 internal val stateJson: Json = Json {
   ignoreUnknownKeys = true

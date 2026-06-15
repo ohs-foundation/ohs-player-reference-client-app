@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 plugins {
-  // this is necessary to avoid the plugins to be loaded multiple times
-  // in each subproject's classloader
-  alias(libs.plugins.androidApplication) apply false
-  alias(libs.plugins.androidLibrary) apply false
-  alias(libs.plugins.androidKotlinMultiplatformLibrary) apply false
-  alias(libs.plugins.composeCompiler) apply false
-  alias(libs.plugins.composeHotReload) apply false
-  alias(libs.plugins.composeMultiplatform) apply false
-  alias(libs.plugins.kotlinMultiplatform) apply false
+  `java-gradle-plugin`
+  kotlin("jvm") version "2.3.20"
+  kotlin("plugin.serialization") version "2.3.20"
   id("spotless-conventions")
+}
+
+repositories {
+  mavenCentral()
+  gradlePluginPortal()
+}
+
+dependencies {
+  implementation(libs.kotlinpoet)
+  implementation(libs.kotlinx.serialization.json)
+}
+
+gradlePlugin {
+  plugins {
+    create("igCodegen") {
+      id = "dev.ohs.ig-codegen"
+      implementationClass = "dev.ohs.player.codegen.IgCodegenPlugin"
+    }
+  }
 }

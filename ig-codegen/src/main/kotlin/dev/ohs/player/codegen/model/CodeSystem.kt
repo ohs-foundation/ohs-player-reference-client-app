@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-  // this is necessary to avoid the plugins to be loaded multiple times
-  // in each subproject's classloader
-  alias(libs.plugins.androidApplication) apply false
-  alias(libs.plugins.androidLibrary) apply false
-  alias(libs.plugins.androidKotlinMultiplatformLibrary) apply false
-  alias(libs.plugins.composeCompiler) apply false
-  alias(libs.plugins.composeHotReload) apply false
-  alias(libs.plugins.composeMultiplatform) apply false
-  alias(libs.plugins.kotlinMultiplatform) apply false
-  id("spotless-conventions")
+package dev.ohs.player.codegen.model
+
+import kotlinx.serialization.Serializable
+
+/** Minimal model for deserializing a FHIR CodeSystem JSON artifact from the IG. */
+@Serializable
+data class CodeSystem(
+  val resourceType: String,
+  val id: String,
+  val name: String,
+  val title: String? = null,
+  val description: String? = null,
+  val concept: List<Concept> = emptyList(),
+) {
+  @Serializable data class Concept(val code: String, val display: String? = null)
 }

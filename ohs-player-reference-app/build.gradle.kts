@@ -25,8 +25,8 @@ plugins {
   alias(libs.plugins.composeCompiler)
   alias(libs.plugins.composeHotReload)
   alias(libs.plugins.kotlinSerialization)
-//  id("dev.ohs.ig-codegen")
-//  id("spotless-conventions")
+  id("dev.ohs.ig-codegen")
+  id("spotless-conventions")
 }
 
 kotlin {
@@ -172,6 +172,13 @@ android {
     targetCompatibility = JavaVersion.VERSION_11
   }
 }
+
+igCodegen {
+  // sourcesDir defaults to src/commonMain/composeResources/files
+  packageName = "dev.ohs.player.generated"
+}
+
+dependencies { debugImplementation(libs.compose.uiTooling) }
 
 /*
  * Desktop installer version. WiX/MSI (and jpackage) require a strict numeric

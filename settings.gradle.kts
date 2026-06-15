@@ -18,7 +18,6 @@ rootProject.name = "OhsPlayerReferenceClientApp"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 // Standalone build that provides the dev.ohs.ig-codegen plugin.
-// The plugin reads FHIR IG artifacts and generates Kotlin sources at build time.
 includeBuild("ig-codegen")
 
 pluginManagement {

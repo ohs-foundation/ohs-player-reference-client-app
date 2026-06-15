@@ -49,7 +49,7 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       api(libs.kotlinx.serialization.json)
-      implementation(libs.ohs.fhir.model)
+      api(libs.ohs.fhir.model)
       api(libs.ohs.fhir.path)
       implementation(libs.ionspin.bignum)
       implementation(libs.kotlinx.datetime)

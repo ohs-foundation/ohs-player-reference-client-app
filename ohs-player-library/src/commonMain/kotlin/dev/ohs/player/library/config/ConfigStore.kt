@@ -15,14 +15,25 @@
  */
 package dev.ohs.player.library.config
 
-import dev.ohs.player.library.extractor.stateJson
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
+
+/**
+ * Plain JSON used to parse authored config resources and decode extracted state rows. FHIR scalar
+ * types resolve via the `@file:UseSerializers` annotations on the `@Serializable` classes, so no
+ * contextual `SerializersModule` is needed. `ignoreUnknownKeys` skips the config metadata fields
+ * (url, title, publisher, …) that the runtime models intentionally omit.
+ */
+internal val fhirJson: Json = Json {
+  ignoreUnknownKeys = true
+  isLenient = true
+}
 
 /**
  * A generic store of runtime configuration resources loaded from a [ConfigSource].
@@ -50,14 +61,14 @@ class ConfigStore(private val source: ConfigSource) {
   ): T? {
     ensureLoaded()
     val raw = resources[indexKey(resourceType, key)] ?: return null
-    return stateJson.decodeFromJsonElement(deserializer, raw)
+    return fhirJson.decodeFromJsonElement(deserializer, raw)
   }
 
   private suspend fun ensureLoaded() {
     if (loaded) return
     mutex.withLock {
       if (loaded) return
-      source.readAll().forEach { index(stateJson.parseToJsonElement(it).jsonObject) }
+      source.readAll().forEach { index(fhirJson.parseToJsonElement(it).jsonObject) }
       loaded = true
     }
   }

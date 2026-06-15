@@ -24,6 +24,7 @@ import dev.ohs.fhir.model.r4.Resource
 import dev.ohs.player.library.config.ConfigStore
 import dev.ohs.player.library.config.ViewDefinition
 import dev.ohs.player.library.config.ViewJoinMap
+import dev.ohs.player.library.config.fhirJson
 import dev.ohs.player.library.model.SearchResult
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonArray
@@ -81,7 +82,7 @@ class GenericStateExtractor(
     validate(configName, deserializer, pivotView, joins.map { it.second })
 
     return buildRows(result, pivotView, joinMap, joins).map {
-      stateJson.decodeFromJsonElement(deserializer, it)
+      fhirJson.decodeFromJsonElement(deserializer, it)
     }
   }
 

@@ -15,6 +15,7 @@
  */
 package dev.ohs.player.reference.app.data.datasource
 
+import dev.ohs.player.generated.GeneratedConfigManifest
 import dev.ohs.player.library.config.ConfigSource
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
 
@@ -23,22 +24,16 @@ import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.
  * `composeResources/files/states`. This stands in for a backend download — swapping it for an HTTP
  * fetch is the only change needed to go live, and other resource kinds can be added the same way.
  *
- * Compose resources cannot enumerate a directory at runtime, so the folder carries a
- * `manifest.txt`.
+ * Compose resources cannot enumerate a directory at runtime, so the file names come from
+ * [GeneratedConfigManifest] — emitted by ig-codegen from the actual files on disk — and each is
+ * read directly by path.
  */
 object LocalConfigSource : ConfigSource {
 
-  private const val DIR = "files/states"
+  private const val DIR_NAME = "states"
 
-  override suspend fun readAll(): List<String> {
-    val fileNames =
-      Res.readBytes("$DIR/manifest.txt")
-        .decodeToString()
-        .lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-    return buildList {
-      fileNames.forEach { fileName -> add(Res.readBytes("$DIR/$fileName").decodeToString()) }
+  override suspend fun readAll(): List<String> =
+    GeneratedConfigManifest.byDirectory[DIR_NAME].orEmpty().map { fileName ->
+      Res.readBytes("files/$DIR_NAME/$fileName").decodeToString()
     }
-  }
 }

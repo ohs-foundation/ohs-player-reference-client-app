@@ -26,21 +26,18 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.modules.SerializersModule
 
 /**
- * Contextual serializers for the FHIR R4 scalar types that ViewDefinition/ViewConfig values carry.
- * They read each type's canonical representation: a `BigDecimal` from a JSON number or string
- * (precision preserved), and `FhirDate`/`FhirDateTime` from their ISO strings. Shared by the config
- * store and the state-row decoder so both produce the same kotlin-fhir model types.
+ * Serializers for the FHIR R4 scalar types that ViewDefinition/ViewConfig values and the generated
+ * state classes carry. They read each type's canonical representation: a `BigDecimal` from a JSON
+ * number or string (precision preserved), and `FhirDate`/`FhirDateTime` from their ISO strings.
+ *
+ * kotlin-fhir's own model serializers cover these types inside resource models, but they are
+ * `internal`, so our own `@Serializable` classes still need these. They are attached directly via
+ * `@file:UseSerializers(...)` on the classes that reference them — no contextual
+ * `SerializersModule` or specially-configured `Json` is required; a plain `Json` resolves them.
  */
-internal val fhirScalarSerializers: SerializersModule = SerializersModule {
-  contextual(BigDecimal::class, FhirDecimalSerializer)
-  contextual(FhirDate::class, FhirDateSerializer)
-  contextual(FhirDateTime::class, FhirDateTimeSerializer)
-}
-
-internal object FhirDecimalSerializer : KSerializer<BigDecimal> {
+object FhirDecimalSerializer : KSerializer<BigDecimal> {
   override val descriptor = PrimitiveSerialDescriptor("decimal", PrimitiveKind.STRING)
 
   // Read the raw JSON token (number or string) so no precision is lost via Double.
@@ -51,7 +48,7 @@ internal object FhirDecimalSerializer : KSerializer<BigDecimal> {
     encoder.encodeString(value.toStringExpanded())
 }
 
-internal object FhirDateSerializer : KSerializer<FhirDate> {
+object FhirDateSerializer : KSerializer<FhirDate> {
   override val descriptor = PrimitiveSerialDescriptor("date", PrimitiveKind.STRING)
 
   override fun deserialize(decoder: Decoder): FhirDate {
@@ -62,7 +59,7 @@ internal object FhirDateSerializer : KSerializer<FhirDate> {
   override fun serialize(encoder: Encoder, value: FhirDate) = encoder.encodeString(value.toString())
 }
 
-internal object FhirDateTimeSerializer : KSerializer<FhirDateTime> {
+object FhirDateTimeSerializer : KSerializer<FhirDateTime> {
   override val descriptor = PrimitiveSerialDescriptor("dateTime", PrimitiveKind.STRING)
 
   override fun deserialize(decoder: Decoder): FhirDateTime {

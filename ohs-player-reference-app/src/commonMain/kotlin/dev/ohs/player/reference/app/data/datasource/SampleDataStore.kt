@@ -18,7 +18,6 @@ package dev.ohs.player.reference.app.data.datasource
 import dev.ohs.fhir.model.r4.AllergyIntolerance
 import dev.ohs.fhir.model.r4.Bundle
 import dev.ohs.fhir.model.r4.Condition
-import dev.ohs.fhir.model.r4.FhirR4Json
 import dev.ohs.fhir.model.r4.Group
 import dev.ohs.fhir.model.r4.Immunization
 import dev.ohs.fhir.model.r4.MedicationRequest
@@ -28,7 +27,10 @@ import dev.ohs.fhir.model.r4.Resource
 import dev.ohs.player.library.model.SearchResult
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+
+private val fhirJson = Json { ignoreUnknownKeys = true }
 
 private object SampleDataStore {
   private val mutex = Mutex()
@@ -47,7 +49,7 @@ private object SampleDataStore {
     mutex.withLock {
       if (initialized) return
       val json = Res.readBytes("files/SampleResourcesBundle.json").decodeToString()
-      val bundle = FhirR4Json().decodeFromString(json) as Bundle
+      val bundle = fhirJson.decodeFromString(Bundle.serializer(), json)
       bundle.entry.forEach { entry ->
         when (val res = entry.resource) {
           is Patient -> patients[res.id ?: return@forEach] = res

@@ -15,6 +15,7 @@
  */
 package dev.ohs.player.codegen
 
+import dev.ohs.player.codegen.generator.ConfigManifestGenerator
 import dev.ohs.player.codegen.generator.ViewConfigGenerator
 import dev.ohs.player.codegen.generator.ViewStateGenerator
 import dev.ohs.player.codegen.generator.ViewTypeGenerator
@@ -24,6 +25,7 @@ import dev.ohs.player.codegen.model.ViewDefinition
 import dev.ohs.player.codegen.model.ViewJoinMap
 import dev.ohs.player.codegen.util.json
 import dev.ohs.player.codegen.util.resourceType
+import java.io.File
 import kotlinx.serialization.json.jsonObject
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
@@ -74,7 +76,7 @@ abstract class IgCodegenTask : DefaultTask() {
 
     val pkg = packageName.get()
 
-    val resources =
+    val configFiles =
       sourcesRoot
         .walkTopDown()
         .filter {
@@ -82,10 +84,16 @@ abstract class IgCodegenTask : DefaultTask() {
             (it.name.startsWith("Binary-") || it.name.startsWith("CodeSystem-")) &&
             it.extension == "json"
         }
-        .mapNotNull { file ->
-          runCatching { json.parseToJsonElement(file.readText()).jsonObject }.getOrNull()
-        }
         .toList()
+
+    val filesByDirectory =
+      configFiles.groupBy { it.parentFile.name }.mapValues { it.value.map(File::getName) }
+    ConfigManifestGenerator(pkg, outDir).generate(filesByDirectory)
+
+    val resources =
+      configFiles.mapNotNull { file ->
+        runCatching { json.parseToJsonElement(file.readText()).jsonObject }.getOrNull()
+      }
 
     // ViewDefinitions provide the columns; index them by name for the state generator.
     val viewDefs =

@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:UseSerializers(
+  FhirDateSerializer::class,
+  FhirDateTimeSerializer::class,
+  FhirDecimalSerializer::class,
+)
+
 package dev.ohs.player.library.config
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.model.r4.FhirDate
 import dev.ohs.fhir.model.r4.FhirDateTime
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 
 /**
  * Runtime model of a SQL-on-FHIR ViewDefinition — a projection of a FHIR resource into flat rows.
@@ -50,11 +56,11 @@ data class ViewDefinition(
     val valueBoolean: Boolean? = null,
     val valueCanonical: String? = null,
     val valueCode: String? = null,
-    @Contextual val valueDate: FhirDate? = null,
-    @Contextual val valueDateTime: FhirDateTime? = null,
-    @Contextual val valueDecimal: BigDecimal? = null,
+    val valueDate: FhirDate? = null,
+    val valueDateTime: FhirDateTime? = null,
+    val valueDecimal: BigDecimal? = null,
     val valueId: String? = null,
-    @Contextual val valueInstant: FhirDateTime? = null,
+    val valueInstant: FhirDateTime? = null,
     val valueInteger: Int? = null,
     val valueInteger64: Long? = null,
     val valueOid: String? = null,

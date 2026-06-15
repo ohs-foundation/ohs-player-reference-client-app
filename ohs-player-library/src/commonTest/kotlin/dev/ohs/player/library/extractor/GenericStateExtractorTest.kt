@@ -13,23 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:UseSerializers(
+  FhirDateSerializer::class,
+  FhirDateTimeSerializer::class,
+  FhirDecimalSerializer::class,
+)
+
 package dev.ohs.player.library.extractor
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.model.r4.FhirDate
 import dev.ohs.fhir.model.r4.FhirDateTime
-import dev.ohs.fhir.model.r4.FhirR4Json
 import dev.ohs.fhir.model.r4.Resource
 import dev.ohs.player.library.config.ConfigSource
 import dev.ohs.player.library.config.ConfigStore
+import dev.ohs.player.library.config.FhirDateSerializer
+import dev.ohs.player.library.config.FhirDateTimeSerializer
+import dev.ohs.player.library.config.FhirDecimalSerializer
 import dev.ohs.player.library.model.SearchResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import kotlinx.serialization.json.Json
 
 @Serializable
 private data class PatientAllergyTestState(
@@ -52,15 +61,13 @@ private data class PatientTelecomTestState(
 @Serializable
 private data class ScalarTypesTestState(
   val active: Boolean? = null,
-  @Contextual val birthDate: FhirDate? = null,
+  val birthDate: FhirDate? = null,
   val gender: String? = null,
 )
 
-@Serializable
-private data class DecimalTypesTestState(@Contextual val longitude: BigDecimal? = null)
+@Serializable private data class DecimalTypesTestState(val longitude: BigDecimal? = null)
 
-@Serializable
-private data class DateTimeTypesTestState(@Contextual val recorded: FhirDateTime? = null)
+@Serializable private data class DateTimeTypesTestState(val recorded: FhirDateTime? = null)
 
 @Serializable private data class DecimalConstTestState(val locId: String? = null)
 
@@ -145,8 +152,10 @@ class GenericStateExtractorTest {
       "name": "patientTelecomTest", "from": "root", "resource": "Patient", "view": "TelecomView" }
     """
 
-  // TODO replace all FhirR4Json with regular Json once beta04 is available
-  private fun resource(json: String): Resource = FhirR4Json().decodeFromString(json)
+  private val jsonFormat = Json { ignoreUnknownKeys = true }
+
+  private fun resource(json: String): Resource =
+    jsonFormat.decodeFromString(Resource.serializer(), json)
 
   private fun extractorOf(vararg configs: String): GenericStateExtractor =
     GenericStateExtractor(ConfigStore(ConfigSource { configs.toList() }))

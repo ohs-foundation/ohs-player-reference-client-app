@@ -33,6 +33,7 @@ import dev.ohs.player.library.config.FhirDecimalSerializer
 import dev.ohs.player.library.model.SearchResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
@@ -336,5 +337,55 @@ class GenericStateExtractorTest {
     // birthDate 1990-03-14 < 2000-01-01 → kept only if the %cutoff date constant compares
     // correctly.
     assertEquals(listOf("p1"), states.map { it.patientId })
+  }
+
+  @Test
+  fun extract_fails_whenNonStringColumnHasNoType() = runTest {
+    val view =
+      rootView(
+        "ScalarTypesView",
+        "Patient",
+        """{ "name": "active", "path": "active" }""",
+        """{ "name": "birthDate", "path": "birthDate", "type": "date" }""",
+        """{ "name": "gender", "path": "gender", "type": "code" }""",
+      )
+    val extractor = extractorOf(view, rootMap("scalarTypesTest", "Patient", "ScalarTypesView"))
+
+    val error =
+      assertFailsWith<IllegalArgumentException> {
+        extractor.extract<ScalarTypesTestState>(SearchResult(resource = resource(patient)))
+      }
+    assertTrue(
+      error.message?.contains("active") == true,
+      "expected the error to name the untyped boolean column, was: ${error.message}",
+    )
+  }
+
+  @Test
+  fun extract_fails_whenJoinMatchKeyIsNotAProducedColumn() = runTest {
+    val badMap =
+      """
+      { "resourceType": "http://ohs.dev/StructureDefinition/ViewJoinMap",
+        "name": "patientAllergyTest", "from": "revIncluded", "resource": "AllergyIntolerance", "view": "AllergyView",
+        "joins": [{ "view": "PatientView", "from": "included", "resource": "Patient",
+                    "searchParam": "patient", "matchKey": "noSuchColumn" }] }
+      """
+    val p1 = resource(patient)
+    val result =
+      SearchResult(
+        resource = p1,
+        included = mapOf("patient" to listOf(p1)),
+        revIncluded = mapOf("AllergyIntolerance" to "patient" to listOf(resource(activeAllergy))),
+      )
+    val extractor = extractorOf(allergyView, patientView, badMap)
+
+    val error =
+      assertFailsWith<IllegalArgumentException> {
+        extractor.extract<PatientAllergyTestState>(result)
+      }
+    assertTrue(
+      error.message?.contains("noSuchColumn") == true,
+      "expected the error to name the bad matchKey, was: ${error.message}",
+    )
   }
 }

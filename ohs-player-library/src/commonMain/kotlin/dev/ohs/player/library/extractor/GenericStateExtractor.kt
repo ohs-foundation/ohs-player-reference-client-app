@@ -27,6 +27,8 @@ import dev.ohs.player.library.config.ViewJoinMap
 import dev.ohs.player.library.config.fhirJson
 import dev.ohs.player.library.model.SearchResult
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -42,6 +44,10 @@ import kotlinx.serialization.serializer
  * [SearchResult] — pivots, joins, `where` filters, `forEach`/`forEachOrNull`/`unionAll` expansion
  * and constants — into one JSON row per output row, and deserializes each row into the typed state
  * using the state's own (compiler-generated) serializer.
+ *
+ * Not safe for concurrent use: the underlying [FhirPathEngine] holds mutable evaluation state, so
+ * callers must serialize calls to [extract] (e.g. confine them to a single-threaded dispatcher).
+ * [ConfigStore] loading is internally synchronized and may be shared.
  */
 class GenericStateExtractor(
   private val configStore: ConfigStore,
@@ -79,7 +85,7 @@ class GenericStateExtractor(
         join to view
       }
 
-    validate(configName, deserializer, pivotView, joins.map { it.second })
+    validate(configName, deserializer, pivotView, joinMap, joins.map { it.second })
 
     return buildRows(result, pivotView, joinMap, joins).map {
       fhirJson.decodeFromJsonElement(deserializer, it)
@@ -215,18 +221,39 @@ class GenericStateExtractor(
     configName: String,
     deserializer: KSerializer<*>,
     pivotView: ViewDefinition,
+    joinMap: ViewJoinMap,
     joinViews: List<ViewDefinition>,
   ) {
-    val stateColumns =
-      (0 until deserializer.descriptor.elementsCount)
-        .map { deserializer.descriptor.getElementName(it) }
-        .toSet()
-    val produced =
-      (pivotView.allColumns() + joinViews.flatMap { it.allColumns() }).map { it.name }.toSet()
-    val unexpected = produced - stateColumns
+    val descriptor = deserializer.descriptor
+    val fieldKinds =
+      (0 until descriptor.elementsCount).associate {
+        descriptor.getElementName(it) to descriptor.getElementDescriptor(it).kind
+      }
+    val producedColumns = pivotView.allColumns() + joinViews.flatMap { it.allColumns() }
+
+    val unexpected = producedColumns.map { it.name }.toSet() - fieldKinds.keys
     require(unexpected.isEmpty()) {
-      "Config '$configName' produces columns $unexpected absent from the generated state $stateColumns. " +
+      "Config '$configName' produces columns $unexpected absent from the generated state ${fieldKinds.keys}. " +
         "The provided binaries do not match the generated state."
+    }
+
+    producedColumns.forEach { col ->
+      if (col.collection) return@forEach
+      val required = requiredTypeCategory(fieldKinds[col.name]) ?: return@forEach
+      require(typeCategory(col.type) == required) {
+        "Column '${col.name}' in config '$configName' feeds a $required state field but its " +
+          "ViewDefinition type is '${col.type}'. Declare a matching scalar 'type' so the value is " +
+          "not decoded as a string."
+      }
+    }
+
+    val scalarColumns = producedColumns.filterNot { it.collection }.map { it.name }.toSet()
+    joinMap.joins.forEach { join ->
+      val matchKey = join.matchKey ?: return@forEach
+      require(matchKey in scalarColumns) {
+        "Join matchKey '$matchKey' in config '$configName' must reference a scalar (non-collection) " +
+          "column produced by the pivot or an earlier join; produced scalar columns are $scalarColumns."
+      }
     }
   }
 
@@ -275,6 +302,30 @@ class GenericStateExtractor(
 
     const val VIEW_JOIN_MAP = "http://ohs.dev/StructureDefinition/ViewJoinMap"
     const val VIEW_DEFINITION = "https://sql-on-fhir.org/ig/StructureDefinition/ViewDefinition"
+
+    /**
+     * The scalar category a non-string state field requires, or `null` if a string value is fine.
+     */
+    fun requiredTypeCategory(kind: SerialKind?): String? =
+      when (kind) {
+        PrimitiveKind.BOOLEAN -> "boolean"
+        PrimitiveKind.BYTE,
+        PrimitiveKind.SHORT,
+        PrimitiveKind.INT -> "integer"
+        PrimitiveKind.LONG -> "long"
+        else -> null
+      }
+
+    /** The scalar category a ViewDefinition column [type] resolves to, mirroring [scalarValue]. */
+    fun typeCategory(type: String?): String? =
+      when (type?.substringAfterLast('/')) {
+        "boolean" -> "boolean"
+        "integer",
+        "positiveInt",
+        "unsignedInt" -> "integer"
+        "integer64" -> "long"
+        else -> null
+      }
 
     /**
      * Cartesian product of two row sets (empty if either side is empty — i.e. inner-join

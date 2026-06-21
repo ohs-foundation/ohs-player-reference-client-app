@@ -74,7 +74,7 @@ class SectionCardLayoutRenderer<T>(
   override fun Render(
     items: List<T>,
     component: ConfiguredRenderer<T>,
-    key: (T) -> Any,
+    key: ((T) -> Any)?,
     onItemClick: (T) -> Unit,
     modifier: Modifier,
   ) {
@@ -112,7 +112,7 @@ class SectionCardLayoutRenderer<T>(
               color = MaterialTheme.colorScheme.onSurface,
               modifier = Modifier.weight(1f),
             )
-            if (config.showItemCount != false && items.isNotEmpty()) {
+            if (config.showItemCount != false) {
               Box(
                 modifier =
                   Modifier.clip(CircleShape)
@@ -151,26 +151,13 @@ class SectionCardLayoutRenderer<T>(
                 modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
                 color = MaterialTheme.colorScheme.outlineVariant,
               )
-              if (items.isEmpty()) {
-                Box(
-                  modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                  contentAlignment = Alignment.Center,
-                ) {
-                  Text(
-                    text = "No ${title.lowercase()} recorded",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+              items.forEachIndexed { i, item ->
+                if (i > 0)
+                  HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 2.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                   )
-                }
-              } else {
-                items.forEachIndexed { i, item ->
-                  if (i > 0)
-                    HorizontalDivider(
-                      modifier = Modifier.padding(vertical = 2.dp),
-                      color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                    )
-                  component.Render(item, RenderOptions(onClick = { onItemClick(item) }))
-                }
+                component.Render(item, RenderOptions(onClick = { onItemClick(item) }))
               }
             }
           }

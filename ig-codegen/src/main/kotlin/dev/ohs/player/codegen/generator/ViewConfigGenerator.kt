@@ -15,7 +15,6 @@
  */
 package dev.ohs.player.codegen.generator
 
-import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -25,7 +24,7 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import dev.ohs.player.codegen.model.ViewConfigDefinition
 import dev.ohs.player.codegen.util.fieldType
-import dev.ohs.player.codegen.util.scalarSerializerFor
+import dev.ohs.player.codegen.util.useSerializersAnnotation
 import dev.ohs.player.codegen.writeFormattedTo
 import java.io.File
 
@@ -40,7 +39,6 @@ class ViewConfigGenerator(basePackage: String, private val outputDir: File) {
 
   private val configPkg = "$basePackage.config"
   private val serializableClass = ClassName("kotlinx.serialization", "Serializable")
-  private val useSerializersClass = ClassName("kotlinx.serialization", "UseSerializers")
 
   fun generate(def: ViewConfigDefinition) {
     require(def.viewType.isNotBlank()) {
@@ -65,22 +63,9 @@ class ViewConfigGenerator(basePackage: String, private val outputDir: File) {
 
     FileSpec.builder(configPkg, name)
       .addFileComment("Generated from ViewConfig Binary '${def.viewType}'. Do not edit manually.")
-      .apply { scalarSerializersFor(def).let { if (it != null) addAnnotation(it) } }
+      .apply { useSerializersAnnotation(def.property.map { it.type })?.let { addAnnotation(it) } }
       .addType(clazz.primaryConstructor(constructor.build()).build())
       .build()
       .writeFormattedTo(outputDir)
-  }
-
-  /**
-   * A `@file:UseSerializers(...)` annotation listing the scalar serializers [def]'s properties
-   * reference, or `null` if none are needed. Lets a plain `Json` decode the FHIR scalar fields
-   * without a contextual `SerializersModule`.
-   */
-  private fun scalarSerializersFor(def: ViewConfigDefinition): AnnotationSpec? {
-    val serializers = def.property.mapNotNull { scalarSerializerFor(it.type) }.distinct()
-    if (serializers.isEmpty()) return null
-    return AnnotationSpec.builder(useSerializersClass)
-      .apply { serializers.forEach { addMember("%T::class", it) } }
-      .build()
   }
 }

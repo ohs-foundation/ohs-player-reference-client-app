@@ -15,30 +15,15 @@
  */
 package dev.ohs.player.reference.app.feature.patient.profile
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.AllergyItemConfig
 import dev.ohs.player.generated.state.PatientAllergyState
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
-import dev.ohs.player.reference.app.feature.component.common.Chip
+import dev.ohs.player.reference.app.feature.component.common.StatusChipData
+import dev.ohs.player.reference.app.feature.component.common.StatusRow
 
 class AllergyItemRenderer : ComponentRenderer<PatientAllergyState, AllergyItemConfig> {
   @Composable
@@ -47,64 +32,29 @@ class AllergyItemRenderer : ComponentRenderer<PatientAllergyState, AllergyItemCo
     config: AllergyItemConfig,
     options: RenderOptions,
   ) {
-    AllergyItemRow(item = item, config = config, modifier = options.modifier)
-  }
-}
-
-@Composable
-fun AllergyItemRow(
-  item: PatientAllergyState,
-  config: AllergyItemConfig = AllergyItemConfig(),
-  modifier: Modifier = Modifier,
-) {
-  Row(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(6.dp))
-        .background(
-          if (item.criticality?.lowercase() == "high")
-            criticalityColor(item.criticality).copy(alpha = 0.06f)
-          else Color.Transparent
-        )
-        .padding(vertical = 6.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(10.dp),
-  ) {
-    if (config.showCriticality != false) {
-      Box(
-        modifier =
-          Modifier.width(3.dp)
-            .height(36.dp)
-            .clip(RoundedCornerShape(2.dp))
-            .background(criticalityColor(item.criticality))
-      )
-    }
-    Column(modifier = Modifier.weight(1f)) {
-      Text(
-        text = item.substance ?: "Unknown substance",
-        style = MaterialTheme.typography.bodyMedium,
-        fontWeight = FontWeight.SemiBold,
-      )
-      if (config.showCriticality != false) {
-        item.criticality?.let {
-          Text(
-            text = it.replaceFirstChar { c -> c.uppercaseChar() },
-            style = MaterialTheme.typography.bodySmall,
-            color = criticalityColor(it).copy(alpha = 0.85f),
-          )
-        }
-      }
-    }
-    if (config.showStatus != false) {
-      item.allergyStatus?.let { status ->
-        Chip(
-          label = status.replaceFirstChar { it.uppercaseChar() },
-          containerColor = MaterialTheme.colorScheme.secondaryContainer,
-          contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        )
-      }
-    }
+    val showCriticality = config.showCriticality != false
+    StatusRow(
+      title = item.substance ?: "Unknown substance",
+      modifier = options.modifier,
+      subtitle =
+        if (showCriticality) item.criticality?.replaceFirstChar { it.uppercaseChar() } else null,
+      subtitleColor = criticalityColor(item.criticality).copy(alpha = 0.85f),
+      accentColor = if (showCriticality) criticalityColor(item.criticality) else null,
+      rowBackground =
+        if (item.criticality?.lowercase() == "high")
+          criticalityColor(item.criticality).copy(alpha = 0.06f)
+        else Color.Transparent,
+      status =
+        if (config.showStatus != false)
+          item.allergyStatus?.let {
+            StatusChipData(
+              label = it.replaceFirstChar { c -> c.uppercaseChar() },
+              containerColor = MaterialTheme.colorScheme.secondaryContainer,
+              contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+          }
+        else null,
+    )
   }
 }
 

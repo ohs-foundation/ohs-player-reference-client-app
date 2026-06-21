@@ -15,6 +15,7 @@
  */
 package dev.ohs.player.codegen.util
 
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
@@ -23,6 +24,7 @@ import com.squareup.kotlinpoet.asTypeName
 import dev.ohs.player.codegen.model.ViewConfigDefinition
 import dev.ohs.player.codegen.model.ViewDefinition
 
+private val useSerializersClass = ClassName("kotlinx.serialization", "UseSerializers")
 private val fhirDateClass = ClassName("dev.ohs.fhir.model.r4", "FhirDate")
 private val fhirDateTimeClass = ClassName("dev.ohs.fhir.model.r4", "FhirDateTime")
 private val bigDecimalClass = ClassName("com.ionspin.kotlin.bignum.decimal", "BigDecimal")
@@ -79,3 +81,16 @@ fun scalarSerializerFor(fhirType: String?): ClassName? =
     "instant" -> fhirDateTimeSerializer
     else -> null
   }
+
+/**
+ * A `@file:UseSerializers(...)` annotation listing the scalar serializers the given FHIR [types]
+ * reference, or `null` if none are needed. Attaching them file-wide lets a plain `Json` decode the
+ * FHIR scalar fields (including `List<T>` collections) without a contextual `SerializersModule`.
+ */
+fun useSerializersAnnotation(types: List<String?>): AnnotationSpec? {
+  val serializers = types.mapNotNull { scalarSerializerFor(it) }.distinct()
+  if (serializers.isEmpty()) return null
+  return AnnotationSpec.builder(useSerializersClass)
+    .apply { serializers.forEach { addMember("%T::class", it) } }
+    .build()
+}

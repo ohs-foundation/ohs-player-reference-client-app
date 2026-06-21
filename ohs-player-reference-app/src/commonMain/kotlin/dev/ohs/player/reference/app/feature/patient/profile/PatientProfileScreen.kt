@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.generated.state.AllergyReactionState
 import dev.ohs.player.generated.state.PatientAllergyState
 import dev.ohs.player.generated.state.PatientConditionState
@@ -59,34 +60,53 @@ import dev.ohs.player.library.renderer.RenderOptions
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
-  val viewModel = remember(patientId) { IpsPatientProfileViewModel(patientId) }
+  val viewModel = viewModel(key = patientId) { IpsPatientProfileViewModel(patientId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
 
-  val headerRenderer = registry.componentRenderer<PatientSummaryState>(ViewTypeCS.PatientHeader)
-  val allergySection = registry.layoutRenderer<PatientAllergyState>(ViewTypeCS.SectionCard)
-  val allergyRenderer = registry.componentRenderer<PatientAllergyState>(ViewTypeCS.AllergyItem)
-  val allergyReactionSection = registry.layoutRenderer<AllergyReactionState>(ViewTypeCS.SectionCard)
+  val headerRenderer =
+    remember(registry) { registry.componentRenderer<PatientSummaryState>(ViewTypeCS.PatientHeader) }
+  val allergySection =
+    remember(registry) { registry.layoutRenderer<PatientAllergyState>(ViewTypeCS.SectionCard) }
+  val allergyRenderer =
+    remember(registry) { registry.componentRenderer<PatientAllergyState>(ViewTypeCS.AllergyItem) }
+  val allergyReactionSection =
+    remember(registry) { registry.layoutRenderer<AllergyReactionState>(ViewTypeCS.SectionCard) }
   val allergyReactionRenderer =
-    registry.componentRenderer<AllergyReactionState>(ViewTypeCS.AllergyReactionItem)
-  val medicationSection = registry.layoutRenderer<PatientMedicationState>(ViewTypeCS.SectionCard)
+    remember(registry) {
+      registry.componentRenderer<AllergyReactionState>(ViewTypeCS.AllergyReactionItem)
+    }
+  val medicationSection =
+    remember(registry) { registry.layoutRenderer<PatientMedicationState>(ViewTypeCS.SectionCard) }
   val medicationRenderer =
-    registry.componentRenderer<PatientMedicationState>(ViewTypeCS.MedicationItem)
-  val conditionSection = registry.layoutRenderer<PatientConditionState>(ViewTypeCS.SectionCard)
+    remember(registry) {
+      registry.componentRenderer<PatientMedicationState>(ViewTypeCS.MedicationItem)
+    }
+  val conditionSection =
+    remember(registry) { registry.layoutRenderer<PatientConditionState>(ViewTypeCS.SectionCard) }
   val conditionRenderer =
-    registry.componentRenderer<PatientConditionState>(ViewTypeCS.ConditionItem)
+    remember(registry) {
+      registry.componentRenderer<PatientConditionState>(ViewTypeCS.ConditionItem)
+    }
   val immunizationSection =
-    registry.layoutRenderer<PatientImmunizationState>(ViewTypeCS.SectionCard)
+    remember(registry) { registry.layoutRenderer<PatientImmunizationState>(ViewTypeCS.SectionCard) }
   val immunizationRenderer =
-    registry.componentRenderer<PatientImmunizationState>(ViewTypeCS.ImmunizationItem)
-  val contactSection = registry.layoutRenderer<PatientContactState>(ViewTypeCS.SectionCard)
-  val contactRenderer = registry.componentRenderer<PatientContactState>(ViewTypeCS.ContactItem)
-  val telecomSection = registry.layoutRenderer<PatientTelecomState>(ViewTypeCS.SectionCard)
-  val telecomRenderer = registry.componentRenderer<PatientTelecomState>(ViewTypeCS.TelecomItem)
+    remember(registry) {
+      registry.componentRenderer<PatientImmunizationState>(ViewTypeCS.ImmunizationItem)
+    }
+  val contactSection =
+    remember(registry) { registry.layoutRenderer<PatientContactState>(ViewTypeCS.SectionCard) }
+  val contactRenderer =
+    remember(registry) { registry.componentRenderer<PatientContactState>(ViewTypeCS.ContactItem) }
+  val telecomSection =
+    remember(registry) { registry.layoutRenderer<PatientTelecomState>(ViewTypeCS.SectionCard) }
+  val telecomRenderer =
+    remember(registry) { registry.componentRenderer<PatientTelecomState>(ViewTypeCS.TelecomItem) }
 
+  val patient = state?.patient
   val patientName =
-    listOfNotNull(state?.patient?.givenName, state?.patient?.familyName).joinToString(" ").ifBlank {
-      "Patient"
+    remember(patient) {
+      listOfNotNull(patient?.givenName, patient?.familyName).joinToString(" ").ifBlank { "Patient" }
     }
 
   Scaffold(
@@ -142,12 +162,7 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
 
       if (s.allergies.isNotEmpty()) {
         item(key = "allergies") {
-          allergySection.Render(
-            items = s.allergies,
-            component = allergyRenderer,
-            key = { it.allergyId ?: it.hashCode().toString() },
-            onItemClick = {},
-          )
+          allergySection.Render(items = s.allergies, component = allergyRenderer, onItemClick = {})
         }
       }
       if (s.allergyReactions.isNotEmpty()) {
@@ -155,7 +170,6 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
           allergyReactionSection.Render(
             items = s.allergyReactions,
             component = allergyReactionRenderer,
-            key = { "${it.allergyId}:${it.severity}:${it.manifestation}" },
             onItemClick = {},
           )
         }
@@ -165,7 +179,6 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
           medicationSection.Render(
             items = s.medications,
             component = medicationRenderer,
-            key = { it.medicationId ?: it.hashCode().toString() },
             onItemClick = {},
           )
         }
@@ -175,7 +188,6 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
           conditionSection.Render(
             items = s.conditions,
             component = conditionRenderer,
-            key = { it.conditionId ?: it.hashCode().toString() },
             onItemClick = {},
           )
         }
@@ -185,29 +197,18 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
           immunizationSection.Render(
             items = s.immunizations,
             component = immunizationRenderer,
-            key = { it.immunizationId ?: it.hashCode().toString() },
             onItemClick = {},
           )
         }
       }
       if (s.telecoms.isNotEmpty()) {
         item(key = "telecoms") {
-          telecomSection.Render(
-            items = s.telecoms,
-            component = telecomRenderer,
-            key = { "${it.telecomSystem}:${it.telecomValue}" },
-            onItemClick = {},
-          )
+          telecomSection.Render(items = s.telecoms, component = telecomRenderer, onItemClick = {})
         }
       }
       if (s.contacts.isNotEmpty()) {
         item(key = "contacts") {
-          contactSection.Render(
-            items = s.contacts,
-            component = contactRenderer,
-            key = { "${it.contactFamilyName}:${it.contactPhone}" },
-            onItemClick = {},
-          )
+          contactSection.Render(items = s.contacts, component = contactRenderer, onItemClick = {})
         }
       }
     }

@@ -60,7 +60,7 @@ private class RecordingLayout : LayoutRenderer<String> {
   override fun Render(
     items: List<String>,
     component: ConfiguredRenderer<String>,
-    key: (String) -> Any,
+    key: ((String) -> Any)?,
     onItemClick: (String) -> Unit,
     modifier: Modifier,
   ) {

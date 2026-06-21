@@ -17,7 +17,13 @@ package dev.ohs.player.library.extractor
 
 import dev.ohs.fhir.fhirpath.FhirPathEngine
 
-/** Shared, lazily-initialized R4 FHIRPath engine. [GenericStateExtractor] uses it by default. */
+/**
+ * Shared, lazily-initialized R4 FHIRPath engine. [GenericStateExtractor] uses it by default.
+ *
+ * The engine holds mutable evaluation state and is therefore not safe for concurrent evaluation:
+ * callers sharing this singleton must serialize their use of it (e.g. a single-threaded
+ * dispatcher).
+ */
 object FhirPathEngineProvider {
   val r4: FhirPathEngine by lazy { FhirPathEngine.forR4() }
 }

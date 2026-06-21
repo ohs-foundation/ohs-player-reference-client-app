@@ -18,6 +18,7 @@ package dev.ohs.player.library.config
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 
@@ -61,6 +62,22 @@ class ConfigStoreTest {
       "Intake form",
       store.get("Questionnaire", "intake", Questionnaire.serializer())?.title,
     )
+  }
+
+  @Test
+  fun get_loadsSourceOnce_andMemoizesDecodedResults() = runTest {
+    var reads = 0
+    val store = ConfigStore {
+      reads++
+      listOf(viewDefinition, viewJoinMap)
+    }
+
+    val first = store.get(VIEW_DEFINITION, "PatientSummary", ViewDefinition.serializer())
+    val second = store.get(VIEW_DEFINITION, "PatientSummary", ViewDefinition.serializer())
+    store.get(VIEW_JOIN_MAP, "patientSummary", ViewJoinMap.serializer())
+
+    assertEquals(1, reads)
+    assertSame(first, second)
   }
 
   @Test

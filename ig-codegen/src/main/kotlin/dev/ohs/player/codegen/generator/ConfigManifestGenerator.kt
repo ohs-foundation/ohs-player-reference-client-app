@@ -30,13 +30,10 @@ import java.io.File
  *
  * Compose resources cannot enumerate a directory at runtime, so the runtime [ConfigSource] needs
  * the file names up front. Emitting them as compiled-in constants — derived from the actual files
- * on disk at build time — removes the hand-maintained `manifest.txt` while still letting the runtime
- * read each resource directly by path.
+ * on disk at build time — removes the hand-maintained `manifest.txt` while still letting the
+ * runtime read each resource directly by path.
  */
-class ConfigManifestGenerator(
-  private val basePackage: String,
-  private val outputDir: File,
-) {
+class ConfigManifestGenerator(private val basePackage: String, private val outputDir: File) {
 
   fun generate(filesByDirectory: Map<String, List<String>>) {
     val listOfString = List::class.asClassName().parameterizedBy(String::class.asClassName())
@@ -49,8 +46,9 @@ class ConfigManifestGenerator(
         .indent()
         .apply {
           filesByDirectory.toSortedMap().forEach { (directory, files) ->
-            val elements = files.sorted().joinToString(", ") { "%S" }
-            add("%S to listOf($elements),\n", directory, *files.sorted().toTypedArray())
+            val sorted = files.sorted()
+            val elements = sorted.joinToString(", ") { "%S" }
+            add("%S to listOf($elements),\n", directory, *sorted.toTypedArray())
           }
         }
         .unindent()

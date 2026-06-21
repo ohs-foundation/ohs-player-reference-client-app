@@ -15,7 +15,6 @@
  */
 package dev.ohs.player.codegen.generator
 
-import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -26,7 +25,7 @@ import com.squareup.kotlinpoet.TypeSpec
 import dev.ohs.player.codegen.model.ViewDefinition
 import dev.ohs.player.codegen.model.ViewJoinMap
 import dev.ohs.player.codegen.util.fieldType
-import dev.ohs.player.codegen.util.scalarSerializerFor
+import dev.ohs.player.codegen.util.useSerializersAnnotation
 import dev.ohs.player.codegen.writeFormattedTo
 import java.io.File
 
@@ -43,7 +42,6 @@ class ViewStateGenerator(
   private val statePkg = "$basePackage.state"
 
   private val serializableClass = ClassName("kotlinx.serialization", "Serializable")
-  private val useSerializersClass = ClassName("kotlinx.serialization", "UseSerializers")
 
   fun generate(map: ViewJoinMap) {
     val columns = mergedColumns(map)
@@ -88,22 +86,11 @@ class ViewStateGenerator(
 
     FileSpec.builder(statePkg, name)
       .addFileComment("Generated from ViewJoinMap '$mapName'. Do not edit manually.")
-      .apply { scalarSerializersFor(distinctColumns)?.let { addAnnotation(it) } }
+      .apply {
+        useSerializersAnnotation(distinctColumns.map { it.type })?.let { addAnnotation(it) }
+      }
       .addType(stateClass.primaryConstructor(constructor.build()).build())
       .build()
       .writeFormattedTo(outputDir)
-  }
-
-  /**
-   * A `@file:UseSerializers(...)` annotation listing the scalar serializers the [columns] reference,
-   * or `null` if none are needed. Attaching them file-wide lets a plain `Json` decode the FHIR
-   * scalar fields (including `List<T>` collections) without a contextual `SerializersModule`.
-   */
-  private fun scalarSerializersFor(columns: List<ViewDefinition.Column>): AnnotationSpec? {
-    val serializers = columns.mapNotNull { scalarSerializerFor(it.type) }.distinct()
-    if (serializers.isEmpty()) return null
-    return AnnotationSpec.builder(useSerializersClass)
-      .apply { serializers.forEach { addMember("%T::class", it) } }
-      .build()
   }
 }

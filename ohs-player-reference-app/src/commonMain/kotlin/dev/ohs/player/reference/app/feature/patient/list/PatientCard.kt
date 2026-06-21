@@ -38,6 +38,10 @@ import dev.ohs.player.generated.config.PatientCardConfig
 import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.reference.app.feature.component.common.CardView
 import dev.ohs.player.reference.app.feature.component.common.StatusChip
+import kotlin.time.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @Composable
 fun PatientCard(
@@ -129,19 +133,17 @@ fun PatientCard(
   }
 }
 
-internal fun calculateAge(birthDate: String?): String? {
+internal fun calculateAge(
+  birthDate: String?,
+  today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+): String? {
   if (birthDate == null) return null
   return try {
-    val parts = birthDate.split("-")
-    if (parts.size != 3) return null
-    val birthYear = parts[0].toInt()
-    val birthMonth = parts[1].toInt()
-    val birthDay = parts[2].toInt()
-    val currentYear = 2026
-    val currentMonth = 5
-    val currentDay = 16
-    var age = currentYear - birthYear
-    if (currentMonth < birthMonth || (currentMonth == birthMonth && currentDay < birthDay)) age--
+    val birth = LocalDate.parse(birthDate)
+    var age = today.year - birth.year
+    if (today.month < birth.month || (today.month == birth.month && today.day < birth.day)) {
+      age--
+    }
     age.toString()
   } catch (_: Exception) {
     null

@@ -72,7 +72,7 @@ class GridListRenderer<T>(
   override fun Render(
     items: List<T>,
     component: ConfiguredRenderer<T>,
-    key: (T) -> Any,
+    key: ((T) -> Any)?,
     onItemClick: (T) -> Unit,
     modifier: Modifier,
   ) {

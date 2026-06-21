@@ -44,7 +44,8 @@ interface LayoutRenderer<T> {
    *
    * @param items the data to render.
    * @param component the bound per-item renderer.
-   * @param key stable key function used by the underlying lazy list.
+   * @param key optional stable key function for the underlying lazy list; non-lazy renderers ignore
+   *   it, and lazy renderers fall back to positional keys when it is `null`.
    * @param onItemClick invoked when the user taps an item.
    * @param modifier applied to the outer container.
    */
@@ -52,7 +53,7 @@ interface LayoutRenderer<T> {
   fun Render(
     items: List<T>,
     component: ConfiguredRenderer<T>,
-    key: (T) -> Any,
+    key: ((T) -> Any)? = null,
     onItemClick: (T) -> Unit,
     modifier: Modifier = Modifier,
   )

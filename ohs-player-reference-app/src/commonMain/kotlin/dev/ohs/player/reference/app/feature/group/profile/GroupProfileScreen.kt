@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.generated.state.GroupHeaderState
 import dev.ohs.player.generated.state.GroupMemberState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
@@ -50,13 +51,16 @@ import dev.ohs.player.library.renderer.RenderOptions
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupProfileScreen(groupId: String, onBack: () -> Unit, onMemberClick: (String) -> Unit) {
-  val viewModel = remember(groupId) { GroupProfileViewModel(groupId) }
+  val viewModel = viewModel(key = groupId) { GroupProfileViewModel(groupId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
 
-  val headerRenderer = registry.componentRenderer<GroupHeaderState>(ViewTypeCS.GroupHeader)
-  val memberRenderer = registry.componentRenderer<GroupMemberState>(ViewTypeCS.MemberItem)
-  val memberSectionLayout = registry.layoutRenderer<GroupMemberState>(ViewTypeCS.SectionCard)
+  val headerRenderer =
+    remember(registry) { registry.componentRenderer<GroupHeaderState>(ViewTypeCS.GroupHeader) }
+  val memberRenderer =
+    remember(registry) { registry.componentRenderer<GroupMemberState>(ViewTypeCS.MemberItem) }
+  val memberSectionLayout =
+    remember(registry) { registry.layoutRenderer<GroupMemberState>(ViewTypeCS.SectionCard) }
 
   val groupName = state?.groupHeader?.groupName ?: "Household"
 
@@ -103,7 +107,6 @@ fun GroupProfileScreen(groupId: String, onBack: () -> Unit, onMemberClick: (Stri
           memberSectionLayout.Render(
             items = s.members,
             component = memberRenderer,
-            key = { it.memberId ?: it.hashCode().toString() },
             onItemClick = { member -> member.memberId?.let { onMemberClick(it) } },
           )
         }

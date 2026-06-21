@@ -47,30 +47,36 @@ internal val fhirJson: Json = Json {
 class ConfigStore(private val source: ConfigSource) {
 
   private val resources = mutableMapOf<String, JsonObject>()
+  private val decoded = mutableMapOf<String, Any?>()
   private val mutex = Mutex()
   private var loaded = false
 
   /**
    * The resource of [resourceType] identified by [key] (its `name`/`id`/`url`), decoded via
-   * [deserializer], or `null` if no such resource was provided.
+   * [deserializer], or `null` if no such resource was provided. Configs are immutable once loaded,
+   * so decoded results are memoized and reused across calls.
    */
   suspend fun <T> get(
     resourceType: String,
     key: String,
     deserializer: DeserializationStrategy<T>,
-  ): T? {
-    ensureLoaded()
-    val raw = resources[indexKey(resourceType, key)] ?: return null
-    return fhirJson.decodeFromJsonElement(deserializer, raw)
-  }
+  ): T? =
+    mutex.withLock {
+      ensureLoaded()
+      val resourceKey = indexKey(resourceType, key)
+      val cacheKey = "$resourceKey|${deserializer.descriptor.serialName}"
+      if (!decoded.containsKey(cacheKey)) {
+        decoded[cacheKey] =
+          resources[resourceKey]?.let { fhirJson.decodeFromJsonElement(deserializer, it) }
+      }
+      @Suppress("UNCHECKED_CAST")
+      decoded[cacheKey] as T?
+    }
 
   private suspend fun ensureLoaded() {
     if (loaded) return
-    mutex.withLock {
-      if (loaded) return
-      source.readAll().forEach { index(fhirJson.parseToJsonElement(it).jsonObject) }
-      loaded = true
-    }
+    source.readAll().forEach { index(fhirJson.parseToJsonElement(it).jsonObject) }
+    loaded = true
   }
 
   private fun index(resource: JsonObject) {

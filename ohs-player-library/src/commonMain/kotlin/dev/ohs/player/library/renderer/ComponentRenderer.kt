@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
  * @param onClick optional tap handler; null means the component is non-interactive.
  * @param modifier applied to the root composable of the rendered item.
  */
-data class RenderOptions(val onClick: (() -> Unit)? = null, val modifier: Modifier = Modifier)
+data class RenderOptions(val modifier: Modifier = Modifier, val onClick: (() -> Unit)? = null)
 
 /**
  * Author-facing renderer for a single item of type [T] using config [C].

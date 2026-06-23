@@ -15,6 +15,7 @@
  */
 package dev.ohs.player.library.extractor
 
+import co.touchlab.kermit.Logger
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dev.ohs.fhir.fhirpath.FhirPathEngine
 import dev.ohs.fhir.fhirpath.types.FhirPathDate
@@ -114,6 +115,7 @@ fun FhirPathEngine.eval(
     runCatching {
         evaluateExpression(expression = path, base = focus, variables = variables).firstOrNull()
       }
+      .onFailure { Logger.e(it) { it.message ?: "Error evaluating expression: $path" } }
       .getOrNull()
   )
 
@@ -134,4 +136,5 @@ fun FhirPathEngine.evalList(
         EvalResult(it)
       }
     }
+    .onFailure { Logger.e(it) { it.message ?: "Error evaluating list for the expression: $path" } }
     .getOrElse { emptyList() }

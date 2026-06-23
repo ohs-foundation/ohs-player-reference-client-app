@@ -69,9 +69,12 @@ kotlin {
       implementation(libs.compose.uiToolingPreview)
       implementation(libs.androidx.lifecycle.viewmodelCompose)
       implementation(libs.androidx.lifecycle.runtimeCompose)
+      implementation(libs.kermit)
       implementation(libs.kotlinx.serialization.json)
       implementation(libs.kotlinx.datetime)
       implementation(libs.navigation.compose)
+      implementation(libs.ohs.fhir.model)
+      implementation(libs.ohs.fhir.path)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

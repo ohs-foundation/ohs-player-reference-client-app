@@ -13,6 +13,7 @@ composeHotReload = "1.1.1"
 composeMultiplatform = "1.11.0"
 composeMaterialIcons = "1.7.3"
 junit = "4.13.2"
+kermit = "2.1.0"
 kotlin = "2.3.21"
 kotlinx-coroutines = "1.11.0"
 kotlinpoet = "2.3.0"
@@ -29,6 +30,7 @@ kotlinxDatetime = "0.8.0"
 ionspin-bignum = "0.3.10"
 
 [libraries]
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }

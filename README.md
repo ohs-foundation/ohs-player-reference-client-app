@@ -1,98 +1,243 @@
 # OHS Player Reference Client App
 
-A Kotlin Multiplatform + Compose Multiplatform reference client for [Open Health Stack (OHS)](https://developers.google.com/open-health-stack/overview). Targets Android, iOS, JVM desktop, JS browser, and Wasm browser from a single Kotlin source tree.
+A Kotlin Multiplatform and Compose Multiplatform reference client for [Open Health Stack (OHS)](https://developers.google.com/open-health-stack/overview). A single Kotlin source tree targets Android, iOS, JVM desktop, JS browser, and Wasm browser.
 
-## What's in this repo
+The application renders healthcare UI from configuration rather than hand-written mapping code. FHIR resources are projected into typed view-state by declarative configuration, and that state is rendered by renderers resolved through a registry. The two halves — extraction and rendering — are described below, then joined in a single end-to-end example.
 
-The project is split into two Gradle modules.
+## Getting started
 
-**`:ohs-player-library`** — a small Compose Multiplatform framework for building data-driven screens. Defines a typed renderer registry that lets screens describe layouts by name (view-types) and resolve them at composition time, decoupling screen code from concrete UI components. Pulls in FHIR model + FHIRPath dependencies, intended for healthcare data models.
+### Prerequisites
 
-**`:ohs-player-reference-app`** — the consumer app. Built with Compose Multiplatform, targeting Android, iOS (arm64 + simulator arm64), JVM desktop, JS browser, and Wasm browser. Implements a patient list and patient detail feature on top of the library as a worked example.
+- JDK 21
+- Android SDK (for Android builds)
+- Xcode (for iOS builds, macOS only)
 
-Application ID and root package: `dev.ohs.player.reference.app`.
+Use `./gradlew` on macOS and Linux, and `gradlew.bat` on Windows. All commands run from the repository root.
 
-## Architecture: the registry pattern
+### Build
 
-The library is built around three types that map onto three roles:
-
-- **`ComponentRenderer<T, C>`** — the renderer you author. Renders a single item of data type `T` using a config of type `C`.
-- **`ConfiguredRenderer<T>`** — the bound, callable form of a renderer with the config already applied via closure. This is what scaffolds and layouts invoke; it doesn't carry `C`.
-- **`ViewRegistry`** — a mutable map keyed by `(ViewType, KClass<T>)`. Populated once at app start, then made available to the composition via `LocalViewRegistry` so screens can look renderers up by name.
-
-The compositional flow when a screen renders:
-
-```
-buildAppViewRegistry()             populate the registry
-CompositionLocalProvider           install at composition root
-ListScaffold / DetailScaffold      look up renderers by ViewType
-LayoutRenderer.Render              arrange items
-ConfiguredRenderer.Render          paint each item
+```shell
+git clone <repository-url>
+cd ohs-player-reference-client-app
+./gradlew build
 ```
 
-A single `ComponentRenderer` instance can be registered under multiple view-types with different configs, e.g. one card class used for both list items and a detail header.
+Code generation is part of compilation. The `ig-codegen` Gradle plugin runs its `generateIgCode` task automatically before Kotlin compilation, so there is no separate generation step.
 
-## Library usage
+### Run
 
-### 1. Define view-types
+| Target | Command |
+| --- | --- |
+| Android | `./gradlew :ohs-player-reference-app:assembleDebug` |
+| Desktop (JVM) | `./gradlew :ohs-player-reference-app:run` |
+| Web (Wasm) | `./gradlew :ohs-player-reference-app:wasmJsBrowserDevelopmentRun` |
+| Web (JS) | `./gradlew :ohs-player-reference-app:jsBrowserDevelopmentRun` |
 
-View-types are opaque labels for visual roles. Declare them once as constants. See [`AppViewTypes.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewTypes.kt).
+For iOS, open [`iosApp/`](./iosApp) in Xcode and run, or use the run-configuration widget in a Kotlin Multiplatform IDE.
 
-```kotlin
-object AppViewTypes {
-    val Card = ViewType("Card")
-    val PatientHeader = ViewType("PatientHeader")
-    val VerticalList = ViewType("VerticalList")
+## From FHIR data to view state
+
+A screen never consumes a raw FHIR resource. It consumes a typed *view-state* — a flat, serializable data class containing exactly the fields the screen needs. View-state is produced by a configuration-driven pipeline:
+
+1. **Author** configuration as FHIR `Binary` resources (a `ViewDefinition`, a `ViewJoinMap`, and a `ViewConfig`).
+2. **Generate** typed Kotlin from those Binaries at build time via the `ig-codegen` plugin.
+3. **Load** the Binaries at runtime through a `ConfigStore`.
+4. **Extract** view-state from a `SearchResult` with `GenericStateExtractor.extract<T>()`.
+
+### 1. Author configuration
+
+A `ViewDefinition` declares the columns of a view as FHIRPath expressions over a FHIR resource. Each column carries a name, a path, and a FHIR type. Excerpt from [`Binary-PatientSummary.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummary.json):
+
+```json
+{
+  "resourceType": "https://sql-on-fhir.org/ig/StructureDefinition/ViewDefinition",
+  "name": "PatientSummary",
+  "status": "active",
+  "resource": "Patient",
+  "select": [
+    {
+      "column": [
+        { "name": "patientId", "path": "id", "type": "http://hl7.org/fhir/StructureDefinition/string" },
+        { "name": "familyName", "path": "name.family.first()", "type": "http://hl7.org/fhir/StructureDefinition/string" },
+        { "name": "gender", "path": "gender", "type": "http://hl7.org/fhir/StructureDefinition/code" },
+        { "name": "active", "path": "active", "type": "http://hl7.org/fhir/StructureDefinition/boolean" }
+      ]
+    }
+  ]
 }
 ```
 
-### 2. Author a renderer
+A `ViewJoinMap` names the view-state and binds it to a pivot `ViewDefinition` (and, where needed, joined views). [`Binary-PatientSummaryState.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummaryState.json):
 
-Implement `ComponentRenderer<T, C>` and write the Compose body. See [`PatientCardRenderer.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientCardRenderer.kt) for the real version.
+```json
+{
+  "resourceType": "http://ohs.dev/StructureDefinition/ViewJoinMap",
+  "name": "patientSummary",
+  "from": "root",
+  "resource": "Patient",
+  "view": "PatientSummary"
+}
+```
+
+A `ViewConfig` declares the configuration a renderer accepts, with defaults. [`Binary-PatientCardConfig.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/configs/Binary-PatientCardConfig.json):
+
+```json
+{
+  "resourceType": "http://ohs.dev/StructureDefinition/ViewConfig",
+  "viewType": "PatientCard",
+  "property": [
+    { "name": "showStatusChip", "type": "boolean", "valueBoolean": true },
+    { "name": "showAge", "type": "boolean", "valueBoolean": true },
+    { "name": "elevation", "type": "decimal", "valueDecimal": 2.0 }
+  ]
+}
+```
+
+A single `CodeSystem` Binary enumerates the view-types the app renders; see [`CodeSystem-ViewTypes.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/viewtypes/CodeSystem-ViewTypes.json).
+
+### 2. Generate typed Kotlin
+
+The `ig-codegen` plugin reads these Binaries and emits typed sources. It is applied and configured in [`ohs-player-reference-app/build.gradle.kts`](./ohs-player-reference-app/build.gradle.kts):
 
 ```kotlin
-data class PatientCardConfig(val showLastVisit: Boolean = true)
+plugins {
+    id("dev.ohs.ig-codegen")
+}
 
-class PatientCardRenderer : ComponentRenderer<PatientView, PatientCardConfig> {
+igCodegen {
+    // sourcesDir defaults to src/commonMain/composeResources/files
+    packageName = "dev.ohs.player.generated"
+}
+```
+
+Inputs live under `src/commonMain/composeResources/files/`, organised as `states/` (ViewDefinition and ViewJoinMap), `configs/` (ViewConfig), and `viewtypes/` (the CodeSystem). The generated symbols are:
+
+| Generated symbol | Source | Package |
+| --- | --- | --- |
+| `PatientSummaryState` and other `*State` classes | ViewJoinMap + columns | `dev.ohs.player.generated.state` |
+| `PatientCardConfig` and other `*Config` classes | ViewConfig | `dev.ohs.player.generated.config` |
+| `ViewTypeCS` | CodeSystem | `dev.ohs.player.generated.viewtype` |
+| `GeneratedConfigManifest` | file listing | `dev.ohs.player.generated` |
+
+`PatientSummaryState`, for example, is generated as:
+
+```kotlin
+@Serializable
+data class PatientSummaryState(
+    val patientId: String? = null,
+    val familyName: String? = null,
+    val givenName: String? = null,
+    val gender: String? = null,
+    val birthDate: FhirDate? = null,
+    val active: Boolean? = null,
+    val mrn: String? = null,
+    val phone: String? = null,
+)
+```
+
+### 3. Load configuration at runtime
+
+A `ConfigStore` holds the parsed configuration, fed by a `ConfigSource`. The reference app reads the bundled Binaries; replacing this with a network fetch is the only change required to load configuration from a backend. See [`LocalConfigSource.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/datasource/LocalConfigSource.kt):
+
+```kotlin
+object LocalConfigSource : ConfigSource {
+    private const val DIR_NAME = "states"
+
+    override suspend fun readAll(): List<String> =
+        GeneratedConfigManifest.byDirectory[DIR_NAME].orEmpty().map { fileName ->
+            Res.readBytes("files/$DIR_NAME/$fileName").decodeToString()
+        }
+}
+```
+
+The store and a single extractor are wired once in [`Extraction.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/Extraction.kt):
+
+```kotlin
+object Extraction {
+    private val configStore: ConfigStore = ConfigStore(LocalConfigSource)
+    val extractor: GenericStateExtractor = GenericStateExtractor(configStore)
+}
+```
+
+### 4. Extract view-state
+
+`GenericStateExtractor.extract<T>()` selects the configuration for `T` by name, evaluates its FHIRPath columns against a `SearchResult`, and returns a list of typed `T`. A `SearchResult` carries the pivot resource plus any forward-included and reverse-included resources, mirroring a FHIR search response.
+
+From [`PatientRepository.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/repository/PatientRepository.kt):
+
+```kotlin
+suspend fun getPatients(): List<PatientSummaryState> =
+    withContext(extractorDispatcher) {
+        allPatientIds().mapNotNull { id ->
+            patientSummarySearchResult(id)?.let {
+                extractor.extract<PatientSummaryState>(it).firstOrNull()
+            }
+        }
+    }
+```
+
+The FHIRPath engine holds mutable evaluation state and is not safe for concurrent use. Serialize extraction onto a single thread; the repository does this with `Dispatchers.Default.limitedParallelism(1)`.
+
+## Rendering view state
+
+View-state is rendered by renderers resolved through a registry, so screens depend on view-types rather than concrete UI classes:
+
+1. **Author** a `ComponentRenderer` for a view-state type.
+2. **Register** it under a generated `ViewTypeCS` view-type in a `ViewRegistry`.
+3. **Install** the registry into the composition via `LocalViewRegistry`.
+4. **Render** with `ListScaffold` or `DetailScaffold`, which resolve renderers by view-type.
+
+### 1. Author a renderer
+
+A `ComponentRenderer<T, C>` renders one item of state `T` with configuration `C`. One renderer class can be registered under several view-types with different configurations.
+
+```kotlin
+class PatientCardRenderer : ComponentRenderer<PatientSummaryState, PatientCardConfig> {
     @Composable
     override fun Render(
-        item: PatientView,
+        item: PatientSummaryState,
         config: PatientCardConfig,
-        onClick: (() -> Unit)?,
-        modifier: Modifier,
+        options: RenderOptions,
     ) {
-        Card(onClick = onClick, modifier = modifier) {
-            Text(item.fullName)
-            if (config.showLastVisit) Text("Last visit: ${item.lastVisitDate}")
-        }
+        PatientCard(patient = item, config = config, onClick = options.onClick, modifier = options.modifier)
     }
 }
 ```
 
-### 3. Build the registry
+`RenderOptions` carries the optional tap handler and root modifier. `LayoutRenderer<T>` is the corresponding arrangement abstraction; the library ships `VerticalListRenderer`, `HorizontalListRenderer`, and `GridListRenderer`.
 
-Group registrations for a feature into a `*Registrations.kt` extension on `ViewRegistry`, then assemble them in a single builder. See [`PatientListRegistrations.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListRegistrations.kt) and [`AppViewRegistry.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewRegistry.kt).
+### 2. Register renderers
+
+Group a feature's registrations into an extension on `ViewRegistry`. See [`PatientListRegistrations.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListRegistrations.kt):
 
 ```kotlin
 fun ViewRegistry.registerPatientList() {
-    registerComponent<PatientView, PatientCardConfig>(
-        AppViewTypes.Card, PatientCardRenderer(), PatientCardConfig(),
+    registerComponent<PatientSummaryState, PatientCardConfig>(
+        ViewTypeCS.PatientCard,
+        PatientCardRenderer(),
+        PatientCardConfig(),
     )
-    registerLayout<PatientView>(
-        AppViewTypes.VerticalList,
+    registerLayout<PatientSummaryState>(
+        VerticalListRenderer.VIEW_TYPE,
         VerticalListRenderer(contentPadding = PaddingValues(16.dp), itemSpacing = 12.dp),
     )
 }
+```
 
+Assemble all feature registrations in one builder, as in [`AppViewRegistry.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewRegistry.kt):
+
+```kotlin
 fun buildAppViewRegistry(): ViewRegistry = ViewRegistry().apply {
     registerPatientList()
     registerPatientProfile()
 }
 ```
 
-### 4. Install the registry
+A registry lookup is keyed by both view-type and state type, and throws `NoSuchElementException` naming the missing key if a renderer was not registered.
 
-Provide the registry at the top of the composition. See [`App.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/App.kt).
+### 3. Install the registry
+
+Provide the registry at the composition root so every screen can resolve renderers. See [`App.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/App.kt):
 
 ```kotlin
 @Composable
@@ -106,130 +251,37 @@ fun App() {
 }
 ```
 
-### 5. Render a list
+### 4. Render
 
-Use `ListScaffold` and refer to the registered view-types in the DSL. See [`PatientListScreen.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListScreen.kt).
+`ListScaffold` renders a list; `component(...)` and `layout(...)` name the view-types to resolve. An empty list short-circuits to `emptyState` without invoking the layout renderer, and omitting `layout(...)` falls back to `VerticalListRenderer`. See [`PatientListScreen.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListScreen.kt):
 
 ```kotlin
-@Composable
-fun PatientListScreen(onPatientClick: (String) -> Unit) {
-    val viewModel: PatientListViewModel = viewModel { PatientListViewModel() }
-    val patients by viewModel.patients.collectAsStateWithLifecycle()
-
-    ListScaffold<PatientView>(
-        items = patients,
-        onItemClick = { onPatientClick(it.id) },
-        key = { it.id },
-    ) {
-        component(AppViewTypes.Card)
-        layout(AppViewTypes.VerticalList)
-        topBar { TopAppBar(title = { Text("Patients") }) }
-        emptyState { Text("No patients") }
-    }
+ListScaffold<PatientSummaryState>(
+    items = patients,
+    onItemClick = { onPatientClick(it.patientId ?: "") },
+    key = { it.patientId ?: it.hashCode().toString() },
+) {
+    component(ViewTypeCS.PatientCard)
+    layout(VerticalListRenderer.VIEW_TYPE)
+    topBar { TopAppBar(title = { Text("Patients") }) }
+    emptyState { Text("No patients") }
 }
 ```
 
-An empty `items` list short-circuits to `emptyState` without invoking the layout renderer. If you omit `layout(...)`, the scaffold falls back to `VerticalListRenderer`.
+`DetailScaffold` is the single-item counterpart: it renders a stack of sections for one nullable item, falling back to a `notFound` slot when the item is absent.
 
-### 6. Render a detail view
+## End-to-end example
 
-Use `DetailScaffold` for a stack of sections rendering one item. See [`PatientProfileScreen.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/profile/PatientProfileScreen.kt).
+A patient list screen exercises both halves of the pipeline:
 
-```kotlin
-@Composable
-fun PatientProfileScreen(patientId: String, onBack: () -> Unit) {
-    val viewModel = remember(patientId) { PatientProfileViewModel(patientId) }
-    val patient by viewModel.patient.collectAsStateWithLifecycle()
+1. **Configuration.** `Binary-PatientSummary.json` declares the columns; `Binary-PatientSummaryState.json` names the `patientSummary` view-state. `ig-codegen` generates `PatientSummaryState`.
+2. **Extraction.** `PatientRepository.getPatients()` builds a `SearchResult` per patient and calls `extractor.extract<PatientSummaryState>(result)`, yielding `List<PatientSummaryState>`.
+3. **Registration.** `registerPatientList()` binds `PatientCardRenderer` to `ViewTypeCS.PatientCard` for `PatientSummaryState`, and `buildAppViewRegistry()` installs it at the composition root.
+4. **Rendering.** `PatientListScreen` passes the extracted states to `ListScaffold`, which resolves `PatientCard` by view-type and renders each row.
 
-    DetailScaffold<PatientView>(item = patient) {
-        topBar { TopAppBar(title = { Text(patient?.fullName.orEmpty()) }) }
-        notFound { Text("Patient not found") }
-        section(AppViewTypes.PatientHeader)
-        section(AppViewTypes.PersonalSection)
-        section(AppViewTypes.MedicalSection)
-        section(AppViewTypes.ContactSection)
-    }
-}
-```
+Adding a field is a configuration change: add a column to the `ViewDefinition`, then reference the regenerated state field in the renderer. No extraction or wiring code changes.
 
-Sections render vertically in declared order. A null `item` renders `notFound` and skips sections entirely. Sections are read-only — their `onClick` is a no-op.
-
-### 7. Reuse one renderer under multiple roles
-
-The same renderer class can be registered under different view-types with different configs:
-
-```kotlin
-fun ViewRegistry.registerPatientProfile() {
-    registerComponent(
-        AppViewTypes.PatientHeader,
-        PatientCardRenderer(),
-        PatientCardConfig(showLastVisit = false),
-    )
-    registerComponent(AppViewTypes.PersonalSection, PersonalSectionRenderer(), PersonalSectionConfig)
-    // ...
-}
-```
-
-Here `PatientCardRenderer` does double duty: as a list card with default config, and as a detail header with `showLastVisit = false`.
-
-## Reference app: patient feature tour
-
-The patient list and profile feature exercises every interesting surface of the library. Read the files in this order to see the end-to-end flow:
-
-- [`App.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/App.kt) — builds the registry, installs it via `LocalViewRegistry`, sets up the `NavHost`.
-- [`AppViewRegistry.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewRegistry.kt) and [`AppViewTypes.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewTypes.kt) — the registry builder and the view-type constants.
-- [`feature/patient/list/PatientListRegistrations.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListRegistrations.kt) and [`feature/patient/profile/PatientProfileRegistrations.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/profile/PatientProfileRegistrations.kt) — what each screen registers.
-- [`feature/patient/list/PatientListScreen.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListScreen.kt) and [`feature/patient/profile/PatientProfileScreen.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/profile/PatientProfileScreen.kt) — the screens themselves.
-- [`feature/patient/list/PatientCardRenderer.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientCardRenderer.kt) and the section renderers under [`feature/patient/profile/`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/profile/) — concrete `ComponentRenderer` implementations.
-- [`data/repository/PatientRepository.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/repository/PatientRepository.kt) and [`data/datasource/PatientDataSource.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/datasource/PatientDataSource.kt) — the in-memory JSON data layer (placeholder until real sources land).
-
-## Adding a new feature
-
-To plug a new screen into the registry pattern:
-
-1. Add the view-type constants you need to [`AppViewTypes.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewTypes.kt).
-2. Author the renderer class(es) implementing `ComponentRenderer<YourData, YourConfig>`. Keep configs as small immutable data classes or objects.
-3. Create a `*Registrations.kt` next to the renderers, exposing `fun ViewRegistry.registerYourFeature() { ... }` that calls `registerComponent` / `registerLayout` for each view-type.
-4. Call `registerYourFeature()` from `buildAppViewRegistry()` in [`AppViewRegistry.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewRegistry.kt).
-5. Build the screen with `ListScaffold` or `DetailScaffold`, referencing the new view-types in the DSL builder.
-6. Wire the route into the `NavHost` in [`App.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/App.kt).
-7. Add an assertion to [`AppViewRegistryTest`](./ohs-player-reference-app/src/commonTest/kotlin/dev/ohs/player/reference/app/AppViewRegistryTest.kt) so missing registrations are caught at test time, not at screen-open time.
-
-## Build and run
-
-All commands run from the repo root. Use `./gradlew` on macOS/Linux and `.\gradlew.bat` on Windows.
-
-### Android
-
-```shell
-./gradlew :ohs-player-reference-app:assembleDebug
-```
-
-### Desktop (JVM)
-
-```shell
-./gradlew :ohs-player-reference-app:run
-```
-
-### Web
-
-For the Wasm target (faster, modern browsers only):
-
-```shell
-./gradlew :ohs-player-reference-app:wasmJsBrowserDevelopmentRun
-```
-
-For the JS target (slower, supports older browsers):
-
-```shell
-./gradlew :ohs-player-reference-app:jsBrowserDevelopmentRun
-```
-
-### iOS
-
-Open the [`iosApp/`](./iosApp) directory in Xcode and run, or use the run-configuration widget in your Kotlin Multiplatform IDE.
-
-### Tests
+## Testing
 
 Run all multiplatform tests:
 
@@ -243,11 +295,33 @@ Run JVM tests only:
 ./gradlew :ohs-player-library:jvmTest :ohs-player-reference-app:jvmTest
 ```
 
-### Local Release Signing (Android)
+## Deployment
 
-Release Android builds are signed via environment variables in CI. To test a signed
-release build locally, copy `keystore.properties.template` to `keystore.properties`
-and fill in the four values:
+### Release pipeline
+
+Releases are produced by the [`release.yml`](./.github/workflows/release.yml) GitHub Actions workflow, triggered by a semantic version tag (`vX.Y.Z` or `vX.Y.Z-suffix`). The workflow builds and signs every platform, then publishes a GitHub Release with checksummed artifacts:
+
+- Android APK (`assembleRelease`)
+- Desktop installers: Linux `.deb` and `.rpm`, Windows `.msi`, macOS `.dmg`
+- A portable Linux tarball (`createDistributable`)
+
+A `workflow_dispatch` run performs a dry run: it builds, signs, and uploads artifacts without publishing a Release. The web (Wasm) and GitHub Pages jobs are currently gated off (`if: false`) pending a larger build runner; the web preview is deployed manually in the interim.
+
+### Local installers
+
+Build a native installer or distributable locally:
+
+```shell
+./gradlew :ohs-player-reference-app:packageDmg                 # macOS .dmg
+./gradlew :ohs-player-reference-app:packageMsi                 # Windows .msi
+./gradlew :ohs-player-reference-app:packageDeb                 # Linux .deb
+./gradlew :ohs-player-reference-app:createDistributable        # portable app image
+./gradlew :ohs-player-reference-app:wasmJsBrowserDistribution  # web bundle
+```
+
+### Android release signing
+
+Release builds read signing inputs from environment variables first, then from a `keystore.properties` file as a development fallback. To produce a signed release locally:
 
 ```shell
 cp keystore.properties.template keystore.properties
@@ -255,11 +329,8 @@ cp keystore.properties.template keystore.properties
 ./gradlew :ohs-player-reference-app:bundleRelease
 ```
 
-`keystore.properties` is gitignored — never commit it. Environment variables
-(`ANDROID_KEYSTORE_PATH`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`,
-`ANDROID_STORE_PASSWORD`) take precedence over the file when both are set. If
-neither is configured, release builds are emitted unsigned.
+`keystore.properties` is gitignored and must never be committed. The environment variables `ANDROID_KEYSTORE_PATH`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, and `ANDROID_STORE_PASSWORD` take precedence over the file when both are set. If neither is configured, release builds are emitted unsigned.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html), [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform), [Kotlin/Wasm](https://kotl.in/wasm/).
+Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html), [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform), and [Kotlin/Wasm](https://kotl.in/wasm/).

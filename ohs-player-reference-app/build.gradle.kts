@@ -75,6 +75,7 @@ kotlin {
       implementation(libs.navigation.compose)
       implementation(libs.ohs.fhir.model)
       implementation(libs.ohs.fhir.path)
+      implementation(libs.fhir.data.capture)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

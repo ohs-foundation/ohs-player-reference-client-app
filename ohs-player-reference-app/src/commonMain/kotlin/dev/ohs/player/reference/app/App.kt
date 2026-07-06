@@ -27,11 +27,13 @@ import androidx.savedstate.read
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
+import dev.ohs.player.reference.app.feature.group.registration.HouseholdRegistrationScreen
 import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 
 private const val GROUP_LIST_ROUTE = "groupList"
 private const val GROUP_PROFILE_ROUTE = "groupProfile"
 private const val PATIENT_PROFILE_ROUTE = "patientProfile"
+private const val HOUSEHOLD_REGISTRATION_ROUTE = "householdRegistration"
 private const val GROUP_ID_ARG = "groupId"
 private const val PATIENT_ID_ARG = "patientId"
 
@@ -47,8 +49,13 @@ fun App() {
         // Screen 1: Household list
         composable(GROUP_LIST_ROUTE) {
           GroupListScreen(
-            onGroupClick = { id -> navController.navigate("$GROUP_PROFILE_ROUTE/$id") }
+            onGroupClick = { id -> navController.navigate("$GROUP_PROFILE_ROUTE/$id") },
+            onDataCaptureClick = { navController.navigate(HOUSEHOLD_REGISTRATION_ROUTE) },
           )
+        }
+
+        composable(HOUSEHOLD_REGISTRATION_ROUTE) {
+          HouseholdRegistrationScreen(onBack = { navController.popBackStack() })
         }
 
         // Screen 2: Household profile (head + members)

@@ -20,8 +20,9 @@ import dev.ohs.player.library.config.ConfigSource
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
 
 /**
- * Loads authored config resources from the bundled Compose resources directories. This includes
- * view state resources and other config artifacts such as questionnaires.
+ * Loads the runtime config Binaries the extractor needs (ViewJoinMap + ViewDefinition) from
+ * `composeResources/files/states`. This stands in for a backend download — swapping it for an HTTP
+ * fetch is the only change needed to go live, and other resource kinds can be added the same way.
  *
  * Compose resources cannot enumerate a directory at runtime, so the file names come from
  * [GeneratedConfigManifest] — emitted by ig-codegen from the actual files on disk — and each is
@@ -29,12 +30,10 @@ import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.
  */
 object LocalConfigSource : ConfigSource {
 
-  private val directories = listOf("states", "configs")
+  private const val DIR_NAME = "states"
 
   override suspend fun readAll(): List<String> =
-    directories.flatMap { directory ->
-      GeneratedConfigManifest.byDirectory[directory].orEmpty().map { fileName ->
-        Res.readBytes("files/$directory/$fileName").decodeToString()
-      }
+    GeneratedConfigManifest.byDirectory[DIR_NAME].orEmpty().map { fileName ->
+      Res.readBytes("files/$DIR_NAME/$fileName").decodeToString()
     }
 }

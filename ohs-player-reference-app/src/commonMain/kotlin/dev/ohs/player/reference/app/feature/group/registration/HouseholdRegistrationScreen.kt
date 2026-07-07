@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -46,13 +47,19 @@ import dev.ohs.fhir.datacapture.QuestionnaireConfig
 import dev.ohs.fhir.datacapture.QuestionnaireItemViewFactoryMatcher
 import dev.ohs.fhir.datacapture.QuestionnaireItemViewFactoryMatchersProvider
 import dev.ohs.fhir.datacapture.extraction.template.TemplateExtractionEngine
-import dev.ohs.fhir.model.r4.Questionnaire
-import dev.ohs.fhir.model.r4.Resource
-import kotlinx.coroutines.coroutineScope
+import dev.ohs.fhir.model.r4.Bundle
+import dev.ohs.fhir.model.r4.Questionnaire as QuestionnaireR4
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+private const val HOUSEHOLD_REGISTRATION_QUESTIONNAIRE_PATH =
+  "files/configs/Questionnaire-HouseholdRegistration.json"
+
+@OptIn(ExperimentalResourceApi::class)
+suspend fun householdRegistrationQuestionnaireJson(): String =
+  Res.readBytes(HOUSEHOLD_REGISTRATION_QUESTIONNAIRE_PATH).decodeToString()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,20 +68,25 @@ fun HouseholdRegistrationScreen(onBack: () -> Unit) {
     mapOf("patient" to "{\"resourceType\":\"Patient\",\"id\":\"P1\"}")
   }
   var questionnaireJson by remember { mutableStateOf<String?>(null) }
+  var extractedBundleMessage by remember { mutableStateOf<String?>(null) }
+  var submitError by remember { mutableStateOf<String?>(null) }
   val viewItemMatchersProvider = remember {
     object : QuestionnaireItemViewFactoryMatchersProvider {
       override fun get(): List<QuestionnaireItemViewFactoryMatcher> = listOf()
     }
   }
   val coroutineScope = rememberCoroutineScope()
-
-  LaunchedEffect(Unit) { questionnaireJson = loadQuestionnaire() }
-  val jsonR4 = Json {
-    prettyPrint = true
-    explicitNulls = false
-    encodeDefaults = false
-    ignoreUnknownKeys = true
+  val fhirJson = remember {
+    Json {
+      prettyPrint = true
+      explicitNulls = false
+      encodeDefaults = false
+      ignoreUnknownKeys = true
+    }
   }
+
+  LaunchedEffect(Unit) { questionnaireJson = householdRegistrationQuestionnaireJson() }
+
   Scaffold(
     topBar = {
       TopAppBar(
@@ -88,6 +100,9 @@ fun HouseholdRegistrationScreen(onBack: () -> Unit) {
             )
           }
         },
+        actions = {
+          submitError?.let { TextButton(onClick = { submitError = null }) { Text("Dismiss") } }
+        },
         colors =
           TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -97,9 +112,25 @@ fun HouseholdRegistrationScreen(onBack: () -> Unit) {
     }
   ) { padding ->
     Column(
-      modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+      modifier = Modifier.fillMaxSize().padding(padding).padding(6.dp),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+      extractedBundleMessage?.let { message ->
+        Text(
+          text = message,
+          color = MaterialTheme.colorScheme.primary,
+          style = MaterialTheme.typography.bodySmall,
+        )
+      }
+
+      submitError?.let { message ->
+        Text(
+          text = message,
+          color = MaterialTheme.colorScheme.error,
+          style = MaterialTheme.typography.bodySmall,
+        )
+      }
+
       Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
         questionnaireJson?.let { json ->
           Questionnaire(
@@ -114,16 +145,24 @@ fun HouseholdRegistrationScreen(onBack: () -> Unit) {
               ),
             onSubmit = { getResponse ->
               coroutineScope.launch {
-                val response = getResponse()
-
-                val questionnaire = jsonR4.decodeFromString<Questionnaire>(json)
-                val bundleResponse = TemplateExtractionEngine.extract(questionnaire, response)
-                bundleResponse.entry.mapIndexed { index, entry ->
-                  println("========== Resource ${index + 1} ==========")
-                  entry.resource?.let { resource ->
-                    println(jsonR4.encodeToString(Resource.serializer(), resource))
-                  } ?: println("Resource is null")
-                }
+                extractedBundleMessage = null
+                submitError = null
+                runCatching {
+                    val questionnaire =
+                      fhirJson.decodeFromString(QuestionnaireR4.serializer(), json)
+                    val bundle = TemplateExtractionEngine.extract(questionnaire, getResponse())
+                    fhirJson.encodeToString(Bundle.serializer(), bundle)
+                  }
+                  .onSuccess { bundleJson ->
+                    println("========== Extracted Bundle ==========")
+                    println(bundleJson)
+                    extractedBundleMessage = "Bundle extracted successfully. Check logs for JSON."
+                  }
+                  .onFailure { throwable ->
+                    submitError =
+                      throwable.message
+                        ?: "Bundle extraction could not be completed. Please try again."
+                  }
               }
             },
             matchersProvider = viewItemMatchersProvider,
@@ -133,9 +172,4 @@ fun HouseholdRegistrationScreen(onBack: () -> Unit) {
       }
     }
   }
-}
-
-@OptIn(ExperimentalResourceApi::class)
-suspend fun loadQuestionnaire(): String {
-  return Res.readBytes("files/configs/Questionnaire-HouseholdRegistration.json").decodeToString()
 }

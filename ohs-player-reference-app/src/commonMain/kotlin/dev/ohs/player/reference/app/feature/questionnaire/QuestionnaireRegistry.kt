@@ -23,16 +23,14 @@ import dev.ohs.fhir.model.r4.Patient
 import dev.ohs.fhir.model.r4.Questionnaire as QuestionnaireR4
 import dev.ohs.fhir.model.r4.QuestionnaireResponse
 import dev.ohs.fhir.model.r4.Reference
+import dev.ohs.fhir.model.r4.String as FhirString
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.generateId
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -80,60 +78,13 @@ object QuestionnaireRegistry {
   val householdRegistration =
     QuestionnaireDefinition(
       id = HOUSEHOLD_REGISTRATION_ID,
-      title = "Household registration",
+      title = "Household Registration",
       questionnairePath = "files/configs/Questionnaire-HouseholdRegistration.json",
       submit = {
         val questionnaire =
           fhirJson.decodeFromString(QuestionnaireR4.serializer(), questionnaireJson)
         val bundle = TemplateExtractionEngine.extract(questionnaire, response)
-        val householdName = response.findStringAnswer("household-name", fhirJson)
-        val headFamilyName = response.findStringAnswer("head-family-name", fhirJson)
-        val groupMembers = mutableListOf<Group.Member>()
-        val updatedEntries =
-          bundle.entry.map { entry ->
-            val resource = entry.resource
-            val updatedResource =
-              when (resource) {
-                is Group -> {
-                  normalizeExtractedGroup(
-                    resource = resource,
-                    groupId = generateId(),
-                    householdName = householdName,
-                    headFamilyName = headFamilyName,
-                    fhirJson = fhirJson,
-                  )
-                }
-
-                is Observation -> {
-                  resource.copy(id = generateId())
-                }
-
-                is Patient -> {
-                  normalizeExtractedPatient(resource, groupMembers)
-                }
-
-                else -> resource
-              }
-            entry.copy(resource = updatedResource)
-          }
-        val finalUpdatedEntries =
-          updatedEntries.map { entry ->
-            val resource = entry.resource
-
-            val finalResource =
-              when (resource) {
-                is Group -> {
-                  // Guarantee the Group itself has an ID, and append the accumulated members
-                  val finalGroupId = if (resource.id.isNullOrBlank()) generateId() else resource.id
-                  resource.copy(id = finalGroupId, member = groupMembers)
-                }
-
-                else -> resource
-              }
-            entry.copy(resource = finalResource)
-          }
-
-        val modifiedBundle = bundle.copy(entry = finalUpdatedEntries)
+        val modifiedBundle = normalizeBundle(bundle = bundle)
         val savedResourceCount = repository.upsert(modifiedBundle)
         QuestionnaireSubmissionResult(
           savedResourceCount = savedResourceCount,
@@ -151,7 +102,7 @@ object QuestionnaireRegistry {
   val patientClinicalData =
     QuestionnaireDefinition(
       id = PATIENT_CLINICAL_DATA_ID,
-      title = "Clinical update",
+      title = "Clinical Assessment",
       questionnairePath = "files/configs/Questionnaire-PatientClinicalData.json",
       prepareQuestionnaireJson = {
         val resolvedPatientId =
@@ -203,12 +154,14 @@ object QuestionnaireRegistry {
         val questionnaire =
           fhirJson.decodeFromString(QuestionnaireR4.serializer(), questionnaireJson)
         val extractedBundle = TemplateExtractionEngine.extract(questionnaire, response)
-        val extractedMembers = mutableListOf<Group.Member>()
         val memberEntries =
           extractedBundle.entry.mapNotNull { entry ->
             val patient = entry.resource as? Patient ?: return@mapNotNull null
-            entry.copy(resource = normalizeExtractedPatient(patient, extractedMembers))
+            entry.copy(resource = normalizeExtractedPatient(patient))
           }
+
+        val extractedMembers =
+          memberEntries.mapNotNull { it.resource as? Patient }.map(Patient::toGroupMember)
 
         if (memberEntries.isEmpty()) {
           QuestionnaireSubmissionResult(
@@ -220,6 +173,7 @@ object QuestionnaireRegistry {
         } else {
           val membersBundle = extractedBundle.copy(entry = memberEntries)
           val savedPatientsCount = repository.upsert(membersBundle)
+
           repository.upsert(existingGroup.copy(member = existingGroup.member + extractedMembers))
 
           QuestionnaireSubmissionResult(
@@ -235,20 +189,58 @@ object QuestionnaireRegistry {
   private val definitions = listOf(householdRegistration, householdMembers, patientClinicalData)
 
   fun find(id: String): QuestionnaireDefinition? = definitions.firstOrNull { it.id == id }
+
+  private fun String?.orGeneratedId(): String = takeUnless { it.isNullOrBlank() } ?: generateId()
+
+  private fun normalizeBundle(bundle: Bundle): Bundle {
+    val normalizedEntries =
+      bundle.entry.map { entry ->
+        entry.copy(
+          resource =
+            when (val resource = entry.resource) {
+              is Group ->
+                normalizeExtractedGroup(resource = resource, groupId = resource.id.orGeneratedId())
+
+              is Observation -> resource.copy(id = resource.id.orGeneratedId())
+
+              is Patient -> normalizeExtractedPatient(resource)
+
+              else -> resource
+            }
+        )
+      }
+
+    val groupMembers =
+      normalizedEntries.mapNotNull { it.resource as? Patient }.map(Patient::toGroupMember)
+
+    return bundle.copy(
+      entry =
+        normalizedEntries.map { entry ->
+          entry.copy(
+            resource =
+              when (val resource = entry.resource) {
+                is Group -> resource.copy(member = groupMembers)
+                else -> resource
+              }
+          )
+        }
+    )
+  }
+
+  private fun normalizeExtractedPatient(patient: Patient): Patient {
+    val patientId = patient.id.orGeneratedId()
+
+    return patient.copy(id = patientId)
+  }
+
+  private fun normalizeExtractedGroup(resource: Group, groupId: String): Group {
+    val householdName = resource.name?.takeIf { !it.value.isNullOrBlank() }
+    return resource.copy(id = groupId, name = householdName)
+  }
 }
 
-private fun normalizeExtractedPatient(
-  resource: Patient,
-  groupMembers: MutableList<Group.Member>,
-): Patient {
-  val finalId = if (resource.id.isNullOrBlank()) generateId() else resource.id
-  groupMembers.add(
-    Group.Member(
-      entity = Reference(reference = dev.ohs.fhir.model.r4.String(value = "Patient/$finalId"))
-    )
-  )
-  return resource.copy(id = finalId)
-}
+private fun Patient.toGroupMember(): Group.Member =
+  Group.Member(entity = Reference(reference = FhirString("Patient/$id")))
 
 private fun injectInitialStringAnswer(
   questionnaireJson: String,
@@ -287,34 +279,6 @@ private fun JsonObject.withInitialStringAnswer(
 
   return JsonObject(mutableNode) to updated
 }
-
-private fun normalizeExtractedGroup(
-  resource: Group,
-  groupId: String,
-  householdName: String?,
-  headFamilyName: String?,
-  fhirJson: Json,
-): Group {
-  val resourceJson = fhirJson.encodeToJsonElement(Group.serializer(), resource).jsonObject
-  val resolvedName =
-    householdName?.trim()?.takeIf { it.isNotBlank() }
-      ?: headFamilyName?.trim()?.takeIf { it.isNotBlank() }?.let { "$it Household" }
-
-  val patchedJson =
-    buildMap<String, JsonElement> {
-      putAll(resourceJson)
-      put("id", JsonPrimitive(groupId))
-      resolvedName?.let { put("name", JsonPrimitive(it)) }
-    }
-
-  return fhirJson.decodeFromJsonElement(Group.serializer(), JsonObject(patchedJson))
-}
-
-private fun QuestionnaireResponse.findStringAnswer(linkId: String, json: Json): String? =
-  json
-    .encodeToJsonElement(QuestionnaireResponse.serializer(), this)
-    .jsonObject
-    .findStringAnswer(linkId)
 
 private fun JsonObject.findStringAnswer(linkId: String): String? {
   if (this["linkId"]?.jsonPrimitive?.contentOrNull == linkId) {

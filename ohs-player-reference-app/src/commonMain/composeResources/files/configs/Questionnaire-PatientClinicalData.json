@@ -692,7 +692,17 @@
             {
               "linkId": "condition-onset-date",
               "text": "Onset date",
-              "type": "date"
+              "type": "date",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/entryFormat",
+                  "valueString": "d/M/y"
+                },
+                {
+                  "url": "http://ehelse.no/fhir/StructureDefinition/validationtext",
+                  "valueString": "Cannot be a date in the future"
+                }
+              ]
             }
           ]
         }

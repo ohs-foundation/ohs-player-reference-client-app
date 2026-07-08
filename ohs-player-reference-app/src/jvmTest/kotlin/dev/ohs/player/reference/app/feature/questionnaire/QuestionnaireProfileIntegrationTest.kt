@@ -253,7 +253,7 @@ class QuestionnaireProfileIntegrationTest {
     """
       {
         "resourceType": "QuestionnaireResponse",
-        "questionnaire": "https://example.org/fhir/Questionnaire/household-registration-template-extract",
+        "questionnaire": "https://example.org/fhir/Questionnaire/household-registration",
         "status": "completed",
         "item": [
           {

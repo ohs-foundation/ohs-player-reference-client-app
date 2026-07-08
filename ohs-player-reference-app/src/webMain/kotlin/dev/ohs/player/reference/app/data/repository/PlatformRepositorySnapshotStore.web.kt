@@ -20,9 +20,9 @@ import kotlinx.browser.window
 private const val SNAPSHOT_STORAGE_KEY = "ohs-player-reference-app.fhir-repository"
 
 actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
-  override suspend fun read(): String? = window.localStorage.getItem(SNAPSHOT_STORAGE_KEY)
+  actual override suspend fun read(): String? = window.localStorage.getItem(SNAPSHOT_STORAGE_KEY)
 
-  override suspend fun write(snapshot: String) {
+  actual override suspend fun write(snapshot: String) {
     window.localStorage.setItem(SNAPSHOT_STORAGE_KEY, snapshot)
   }
 }

@@ -20,10 +20,10 @@ import java.io.File
 private const val SNAPSHOT_FILE_NAME = "fhir-repository.json"
 
 actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
-  override suspend fun read(): String? =
+  actual override suspend fun read(): String? =
     snapshotFile().takeIf(File::exists)?.readText().takeUnless { it.isNullOrBlank() }
 
-  override suspend fun write(snapshot: String) {
+  actual override suspend fun write(snapshot: String) {
     val file = snapshotFile()
     file.parentFile?.mkdirs()
     file.writeText(snapshot)

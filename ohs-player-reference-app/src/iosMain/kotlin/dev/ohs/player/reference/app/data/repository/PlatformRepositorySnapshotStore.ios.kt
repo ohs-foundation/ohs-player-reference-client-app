@@ -36,7 +36,7 @@ private const val SNAPSHOT_FILE_NAME = "fhir-repository.json"
 
 @OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
 actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
-  override suspend fun read(): String? {
+  actual override suspend fun read(): String? {
     val file = fopen(snapshotPath(), "rb") ?: return null
     return try {
       fseek(file, 0, SEEK_END)
@@ -55,7 +55,7 @@ actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
     }
   }
 
-  override suspend fun write(snapshot: String) {
+  actual override suspend fun write(snapshot: String) {
     val file = fopen(snapshotPath(), "wb") ?: return
     try {
       val bytes = snapshot.encodeToByteArray()

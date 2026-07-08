@@ -33,9 +33,9 @@
           "type": "http://hl7.org/fhir/StructureDefinition/date"
         },
         {
-          "name": "relatedPersonLink",
-          "path": "link.where(type = 'seealso').other.reference.replace('RelatedPerson/', '').first()",
-          "type": "http://hl7.org/fhir/StructureDefinition/string"
+          "name": "relationshipCode",
+          "path": "contact.relationship.coding.where(system = 'https://example.org/fhir/CodeSystem/relationship-to-head').code.first()",
+          "type": "http://hl7.org/fhir/StructureDefinition/code"
         }
       ]
     }

@@ -23,6 +23,7 @@ import dev.ohs.player.reference.app.data.repository.GroupRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 data class GroupProfileUiState(
@@ -35,6 +36,8 @@ class GroupProfileViewModel(groupId: String) : ViewModel() {
   val uiState: StateFlow<GroupProfileUiState?> = _uiState.asStateFlow()
 
   init {
-    viewModelScope.launch { _uiState.value = GroupRepository.getGroupProfile(groupId) }
+    viewModelScope.launch {
+      GroupRepository.observeGroupProfile(groupId).collect { _uiState.value = it }
+    }
   }
 }

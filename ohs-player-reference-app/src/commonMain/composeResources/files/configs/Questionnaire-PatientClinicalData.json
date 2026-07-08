@@ -1,0 +1,728 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "patient-clinical-data-capture",
+  "url": "https://example.org/fhir/Questionnaire/patient-clinical-data-capture",
+  "version": "1.0.0",
+  "name": "PatientClinicalDataCapture",
+  "title": "Clinical Update",
+  "status": "draft",
+  "experimental": true,
+  "date": "2026-07-07",
+  "subjectType": [
+    "Patient"
+  ],
+  "contained": [
+    {
+      "resourceType": "AllergyIntolerance",
+      "id": "patient-allergy-template",
+      "patient": {
+        "reference": "Patient/__PATIENT_ID__"
+      },
+      "code": {
+        "coding": [
+          {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "item.where(linkId='allergy-substance').answer.value.first()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "_criticality": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "item.where(linkId='allergy-criticality').answer.value.code.first()"
+            }
+          }
+        ]
+      },
+      "clinicalStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+            "_code": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "item.where(linkId='allergy-status').answer.value.code.first()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "reaction": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "item.where(linkId='allergy-reactions')"
+              }
+            }
+          ],
+          "manifestation": [
+            {
+              "coding": [
+                {
+                  "_display": {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                        "valueExpression": {
+                          "language": "text/fhirpath",
+                          "expression": "item.where(linkId='allergy-reaction-manifestation').answer.value.first()"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "_severity": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                "valueExpression": {
+                  "language": "text/fhirpath",
+                  "expression": "item.where(linkId='allergy-reaction-severity').answer.value.code.first()"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "MedicationRequest",
+      "id": "patient-medication-template",
+      "subject": {
+        "reference": "Patient/__PATIENT_ID__"
+      },
+      "status": "active",
+      "_status": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "item.where(linkId='medication-status').answer.value.code.first()"
+            }
+          }
+        ]
+      },
+      "intent": "order",
+      "medicationCodeableConcept": {
+        "coding": [
+          {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "item.where(linkId='medication-name').answer.value.first()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "dosageInstruction": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractContext",
+              "valueExpression": {
+                "language": "text/fhirpath",
+                "expression": "item.where(linkId='medication-dosage').answer.value"
+              }
+            }
+          ],
+          "_text": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                "valueExpression": {
+                  "language": "text/fhirpath",
+                  "expression": "%context"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "Condition",
+      "id": "patient-condition-template",
+      "subject": {
+        "reference": "Patient/__PATIENT_ID__"
+      },
+      "code": {
+        "coding": [
+          {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "item.where(linkId='condition-name').answer.value.first()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "clinicalStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "_code": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "item.where(linkId='condition-status').answer.value.code.first()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "_onsetDateTime": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "item.where(linkId='condition-onset-date').answer.value.first()"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "Immunization",
+      "id": "patient-immunization-template",
+      "status": "completed",
+      "_status": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "item.where(linkId='immunization-status').answer.value.code.first()"
+            }
+          }
+        ]
+      },
+      "patient": {
+        "reference": "Patient/__PATIENT_ID__"
+      },
+      "vaccineCode": {
+        "coding": [
+          {
+            "_display": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "item.where(linkId='immunization-name').answer.value.first()"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "_occurrenceDateTime": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "item.where(linkId='immunization-occurrence-date').answer.value.first()"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "linkId": "patient-id",
+      "text": "Patient id",
+      "type": "string",
+      "readOnly": true,
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-hidden",
+          "valueBoolean": true
+        }
+      ]
+    },
+    {
+      "linkId": "page-intro",
+      "text": "Clinical Update",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "page"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "intro-text",
+          "text": "Add one or more allergies, reactions, medications, conditions, and immunizations for this household member.",
+          "type": "display"
+        }
+      ]
+    },
+    {
+      "linkId": "page-allergies",
+      "text": "Allergies",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "page"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "allergies",
+          "text": "Allergy",
+          "type": "group",
+          "repeats": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
+              "valueString": "allergyId"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtract",
+              "extension": [
+                {
+                  "url": "template",
+                  "valueReference": {
+                    "reference": "#patient-allergy-template"
+                  }
+                },
+                {
+                  "url": "fullUrl",
+                  "valueString": "'urn:uuid:' + %allergyId"
+                }
+              ]
+            }
+          ],
+          "item": [
+            {
+              "linkId": "allergy-substance",
+              "text": "Allergen / substance",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "allergy-status",
+              "text": "Clinical status",
+              "type": "choice",
+              "required": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                    "code": "active",
+                    "display": "Active"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                    "code": "inactive",
+                    "display": "Inactive"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                    "code": "resolved",
+                    "display": "Resolved"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "allergy-criticality",
+              "text": "Criticality",
+              "type": "choice",
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "low",
+                    "display": "Low"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "high",
+                    "display": "High"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "unable-to-assess",
+                    "display": "Unable to assess"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "allergy-reactions",
+              "text": "Reaction",
+              "type": "group",
+              "repeats": true,
+              "item": [
+                {
+                  "linkId": "allergy-reaction-manifestation",
+                  "text": "Reaction / manifestation",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "linkId": "allergy-reaction-severity",
+                  "text": "Reaction severity",
+                  "type": "choice",
+                  "answerOption": [
+                    {
+                      "valueCoding": {
+                        "code": "mild",
+                        "display": "Mild"
+                      }
+                    },
+                    {
+                      "valueCoding": {
+                        "code": "moderate",
+                        "display": "Moderate"
+                      }
+                    },
+                    {
+                      "valueCoding": {
+                        "code": "severe",
+                        "display": "Severe"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "page-medications",
+      "text": "Medications",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "page"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "medications",
+          "text": "Medication",
+          "type": "group",
+          "repeats": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
+              "valueString": "medicationId"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtract",
+              "extension": [
+                {
+                  "url": "template",
+                  "valueReference": {
+                    "reference": "#patient-medication-template"
+                  }
+                },
+                {
+                  "url": "fullUrl",
+                  "valueString": "'urn:uuid:' + %medicationId"
+                }
+              ]
+            }
+          ],
+          "item": [
+            {
+              "linkId": "medication-name",
+              "text": "Medication name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "medication-status",
+              "text": "Status",
+              "type": "choice",
+              "required": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "active",
+                    "display": "Active"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "on-hold",
+                    "display": "On hold"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "completed",
+                    "display": "Completed"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "stopped",
+                    "display": "Stopped"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "medication-dosage",
+              "text": "Dosage instructions",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "page-conditions",
+      "text": "Conditions",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "page"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "conditions",
+          "text": "Condition",
+          "type": "group",
+          "repeats": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
+              "valueString": "conditionId"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtract",
+              "extension": [
+                {
+                  "url": "template",
+                  "valueReference": {
+                    "reference": "#patient-condition-template"
+                  }
+                },
+                {
+                  "url": "fullUrl",
+                  "valueString": "'urn:uuid:' + %conditionId"
+                }
+              ]
+            }
+          ],
+          "item": [
+            {
+              "linkId": "condition-name",
+              "text": "Condition name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "condition-status",
+              "text": "Clinical status",
+              "type": "choice",
+              "required": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "active",
+                    "display": "Active"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "recurrence",
+                    "display": "Recurrence"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "relapse",
+                    "display": "Relapse"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    "code": "resolved",
+                    "display": "Resolved"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "condition-onset-date",
+              "text": "Onset date",
+              "type": "date"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "linkId": "page-immunizations",
+      "text": "Immunizations",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "page"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "immunizations",
+          "text": "Immunization",
+          "type": "group",
+          "repeats": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
+              "valueString": "immunizationId"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtract",
+              "extension": [
+                {
+                  "url": "template",
+                  "valueReference": {
+                    "reference": "#patient-immunization-template"
+                  }
+                },
+                {
+                  "url": "fullUrl",
+                  "valueString": "'urn:uuid:' + %immunizationId"
+                }
+              ]
+            }
+          ],
+          "item": [
+            {
+              "linkId": "immunization-name",
+              "text": "Vaccine name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "immunization-status",
+              "text": "Status",
+              "type": "choice",
+              "required": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "code": "completed",
+                    "display": "Completed"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "code": "not-done",
+                    "display": "Not done"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "immunization-occurrence-date",
+              "text": "Occurrence date",
+              "type": "date"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

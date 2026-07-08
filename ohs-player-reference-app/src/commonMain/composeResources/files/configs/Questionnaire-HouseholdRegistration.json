@@ -14,7 +14,7 @@
   ],
   "extension": [
     {
-      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-allocateId",
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
       "valueString": "householdId"
     }
   ],
@@ -196,7 +196,42 @@
             }
           }
         ]
-      }
+      },
+      "contact": [
+        {
+          "relationship": [
+            {
+              "coding": [
+                {
+                  "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                  "_code": {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                        "valueExpression": {
+                          "language": "text/fhirpath",
+                          "expression": "item.where(linkId='member-relationship-to-head').answer.value.code.first()"
+                        }
+                      }
+                    ]
+                  },
+                  "_display": {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                        "valueExpression": {
+                          "language": "text/fhirpath",
+                          "expression": "item.where(linkId='member-relationship-to-head').answer.value.display.first()"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "resourceType": "Observation",
@@ -471,7 +506,7 @@
           "required": true,
           "extension": [
             {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-allocateId",
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
               "valueString": "headPatientId"
             },
             {
@@ -547,12 +582,40 @@
             {
               "linkId": "head-birth-date",
               "text": "Date of birth",
-              "type": "date"
+              "type": "date",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/entryFormat",
+                  "valueString": "d/M/y"
+                },
+                {
+                  "url": "http://ehelse.no/fhir/StructureDefinition/validationtext",
+                  "valueString": "Cannot be a date in the future"
+                }
+              ]
             },
             {
               "linkId": "head-phone",
               "text": "Phone number",
-              "type": "string"
+              "type": "string",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/regex",
+                  "valueString": "^\\d{10,10}$"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "phone-number",
+                        "display": "Phone Number"
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
@@ -583,7 +646,7 @@
           "repeats": true,
           "extension": [
             {
-              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-allocateId",
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
               "valueString": "memberPatientId"
             },
             {
@@ -654,7 +717,17 @@
             {
               "linkId": "member-birth-date",
               "text": "Date of birth",
-              "type": "date"
+              "type": "date",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/entryFormat",
+                  "valueString": "d/M/y"
+                },
+                {
+                  "url": "http://ehelse.no/fhir/StructureDefinition/validationtext",
+                  "valueString": "Cannot be a date in the future"
+                }
+              ]
             },
             {
               "linkId": "member-relationship-to-head",

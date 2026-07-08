@@ -1,0 +1,264 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "household-members-template-extract",
+  "url": "https://example.org/fhir/Questionnaire/household-members-template-extract",
+  "version": "1.0.0",
+  "name": "HouseholdMembersTemplateExtract",
+  "title": "Household Members",
+  "status": "draft",
+  "experimental": true,
+  "date": "2026-07-08",
+  "publisher": "IntelliSOFT",
+  "subjectType": [
+    "Group"
+  ],
+  "contained": [
+    {
+      "resourceType": "Patient",
+      "id": "household-member-patient-template",
+      "active": true,
+      "name": [
+        {
+          "use": "official",
+          "_family": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                "valueExpression": {
+                  "language": "text/fhirpath",
+                  "expression": "item.where(linkId='member-family-name').answer.value.first()"
+                }
+              }
+            ]
+          },
+          "_given": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                  "valueExpression": {
+                    "language": "text/fhirpath",
+                    "expression": "item.where(linkId='member-given-name').answer.value.first()"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "_gender": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "item.where(linkId='member-gender').answer.value.code.first()"
+            }
+          }
+        ]
+      },
+      "_birthDate": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+            "valueExpression": {
+              "language": "text/fhirpath",
+              "expression": "item.where(linkId='member-birth-date').answer.value.first()"
+            }
+          }
+        ]
+      },
+      "contact": [
+        {
+          "relationship": [
+            {
+              "coding": [
+                {
+                  "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                  "_code": {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                        "valueExpression": {
+                          "language": "text/fhirpath",
+                          "expression": "item.where(linkId='member-relationship-to-head').answer.value.code.first()"
+                        }
+                      }
+                    ]
+                  },
+                  "_display": {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtractValue",
+                        "valueExpression": {
+                          "language": "text/fhirpath",
+                          "expression": "item.where(linkId='member-relationship-to-head').answer.value.display.first()"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "item": [
+    {
+      "linkId": "page-household-members",
+      "text": "Household Members",
+      "type": "group",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/questionnaire-item-control",
+                "code": "page"
+              }
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "linkId": "household-members",
+          "text": "Household Member",
+          "type": "group",
+          "repeats": true,
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
+              "valueString": "memberPatientId"
+            },
+            {
+              "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-templateExtract",
+              "extension": [
+                {
+                  "url": "template",
+                  "valueReference": {
+                    "reference": "#household-member-patient-template"
+                  }
+                },
+                {
+                  "url": "fullUrl",
+                  "valueString": "'urn:uuid:' + %memberPatientId"
+                }
+              ]
+            }
+          ],
+          "item": [
+            {
+              "linkId": "member-given-name",
+              "text": "Given name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "member-family-name",
+              "text": "Family name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "linkId": "member-gender",
+              "text": "Gender",
+              "type": "choice",
+              "required": true,
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "system": "http://hl7.org/fhir/administrative-gender",
+                    "code": "male",
+                    "display": "Male"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://hl7.org/fhir/administrative-gender",
+                    "code": "female",
+                    "display": "Female"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://hl7.org/fhir/administrative-gender",
+                    "code": "other",
+                    "display": "Other"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "http://hl7.org/fhir/administrative-gender",
+                    "code": "unknown",
+                    "display": "Unknown"
+                  }
+                }
+              ]
+            },
+            {
+              "linkId": "member-birth-date",
+              "text": "Date of birth",
+              "type": "date",
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/entryFormat",
+                  "valueString": "d/M/y"
+                },
+                {
+                  "url": "http://ehelse.no/fhir/StructureDefinition/validationtext",
+                  "valueString": "Cannot be a date in the future"
+                }
+              ]
+            },
+            {
+              "linkId": "member-relationship-to-head",
+              "text": "Relationship to household head",
+              "type": "choice",
+              "answerOption": [
+                {
+                  "valueCoding": {
+                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                    "code": "spouse",
+                    "display": "Spouse"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                    "code": "child",
+                    "display": "Child"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                    "code": "parent",
+                    "display": "Parent"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                    "code": "relative",
+                    "display": "Other relative"
+                  }
+                },
+                {
+                  "valueCoding": {
+                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                    "code": "non-relative",
+                    "display": "Non-relative"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app
+package dev.ohs.player.reference.app.data.repository
 
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import dev.ohs.player.reference.app.data.AppDependencies
-import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
-import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
+interface RepositorySnapshotStore {
+  suspend fun read(): String?
 
-fun main() = application {
-  AppDependencies.fhirRepository =
-    InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
-  Window(onCloseRequest = ::exitApplication, title = "OHS Player Reference App") { App() }
+  suspend fun write(snapshot: String)
 }
+
+expect object PlatformRepositorySnapshotStore : RepositorySnapshotStore

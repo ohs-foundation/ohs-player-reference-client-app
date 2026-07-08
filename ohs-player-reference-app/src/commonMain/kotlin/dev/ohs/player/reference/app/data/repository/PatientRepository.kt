@@ -23,12 +23,15 @@ import dev.ohs.player.generated.state.PatientImmunizationState
 import dev.ohs.player.generated.state.PatientMedicationState
 import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.generated.state.PatientTelecomState
+import dev.ohs.player.reference.app.data.AppDependencies
 import dev.ohs.player.reference.app.data.Extraction.extractor
 import dev.ohs.player.reference.app.data.datasource.allPatientIds
 import dev.ohs.player.reference.app.data.datasource.patientProfileSearchResult
 import dev.ohs.player.reference.app.data.datasource.patientSummarySearchResult
 import dev.ohs.player.reference.app.feature.patient.profile.ProfileUiState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 object PatientRepository {
@@ -38,6 +41,9 @@ object PatientRepository {
   // explicit locking.
   private val extractorDispatcher = Dispatchers.Default.limitedParallelism(1)
 
+  fun observePatients(): Flow<List<PatientSummaryState>> =
+    AppDependencies.fhirRepository.revision.map { getPatients() }
+
   suspend fun getPatients(): List<PatientSummaryState> =
     withContext(extractorDispatcher) {
       allPatientIds().mapNotNull { id ->
@@ -46,6 +52,9 @@ object PatientRepository {
         }
       }
     }
+
+  fun observePatientProfile(patientId: String): Flow<ProfileUiState> =
+    AppDependencies.fhirRepository.revision.map { getPatientProfile(patientId) }
 
   suspend fun getPatientProfile(patientId: String): ProfileUiState =
     withContext(extractorDispatcher) {

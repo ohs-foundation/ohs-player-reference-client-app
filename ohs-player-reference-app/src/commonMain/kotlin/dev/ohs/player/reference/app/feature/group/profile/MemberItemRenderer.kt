@@ -72,7 +72,7 @@ fun MemberItemRow(
     listOfNotNull(item.memberGivenName, item.memberFamilyName).joinToString(" ").ifBlank {
       "Unknown"
     }
-  val isHead = item.relationshipCode != null
+  val relationshipLabel = item.relationshipCode?.toRelationshipLabel()
 
   Row(
     modifier =
@@ -119,9 +119,9 @@ fun MemberItemRow(
         )
       }
     }
-    if (isHead && config.showRelationship != false) {
+    if (relationshipLabel != null && config.showRelationship != false) {
       Chip(
-        label = "Head",
+        label = relationshipLabel,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
       )
@@ -136,3 +136,23 @@ fun MemberItemRow(
     }
   }
 }
+
+private fun String.toRelationshipLabel(): String =
+  when (uppercase()) {
+    "SPS",
+    "SPOUSE" -> "Spouse"
+    "CHLD",
+    "CHILD" -> "Child"
+    "PRN",
+    "PARENT" -> "Parent"
+    "GUAR",
+    "GUARDIAN" -> "Guardian"
+    "RELATIVE" -> "Other relative"
+    "NON-RELATIVE" -> "Non-relative"
+    else ->
+      lowercase()
+        .split('-', '_')
+        .filter { it.isNotBlank() }
+        .joinToString(" ") { token -> token.replaceFirstChar { it.uppercaseChar() } }
+        .ifBlank { this }
+  }

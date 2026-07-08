@@ -138,7 +138,7 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-        run: ./gradlew :ohs-player-reference-app:assembleRelease
+        run: ./gradlew :androidApp:assembleRelease
 
       - name: Stage outputs
         shell: bash
@@ -154,7 +154,7 @@ jobs:
 
           # Fail loud if AGP ever produces 0 or >1 outputs (e.g. someone enables
           # ABI/density splits) — the single-name cp below would silently corrupt.
-          apks=(ohs-player-reference-app/build/outputs/apk/release/*.apk)
+          apks=(androidApp/build/outputs/apk/release/*.apk)
           if [ ${#apks[@]} -ne 1 ]; then
             echo "::error::Expected exactly one APK, got ${#apks[@]}: ${apks[*]}"
             echo "::error::If splits/flavors were enabled, update this step to rename each variant."
@@ -180,25 +180,25 @@ jobs:
         include:
           - os: ubuntu-latest
             label: Linux deb
-            task: ':ohs-player-reference-app:packageDeb'
-            glob: 'ohs-player-reference-app/build/compose/binaries/main/deb/*.deb'
+            task: ':desktopApp:packageDeb'
+            glob: 'desktopApp/build/compose/binaries/main/deb/*.deb'
             artifact: linux-deb
           - os: ubuntu-latest
             label: Linux rpm
-            task: ':ohs-player-reference-app:packageRpm'
-            glob: 'ohs-player-reference-app/build/compose/binaries/main/rpm/*.rpm'
+            task: ':desktopApp:packageRpm'
+            glob: 'desktopApp/build/compose/binaries/main/rpm/*.rpm'
             artifact: linux-rpm
           - os: windows-latest
             label: Windows msi
-            task: ':ohs-player-reference-app:packageMsi'
-            glob: 'ohs-player-reference-app/build/compose/binaries/main/msi/*.msi'
+            task: ':desktopApp:packageMsi'
+            glob: 'desktopApp/build/compose/binaries/main/msi/*.msi'
             artifact: windows-msi
           # macos-latest is Apple Silicon — the .dmg is arm64-only. Intel Macs
           # need the portable Linux tarball or a future universal build.
           - os: macos-latest
             label: macOS dmg
-            task: ':ohs-player-reference-app:packageDmg'
-            glob: 'ohs-player-reference-app/build/compose/binaries/main/dmg/*.dmg'
+            task: ':desktopApp:packageDmg'
+            glob: 'desktopApp/build/compose/binaries/main/dmg/*.dmg'
             artifact: macos-dmg
     runs-on: ${{ matrix.os }}
     permissions:
@@ -270,13 +270,13 @@ jobs:
       - name: Create distributable app image
         env:
           VERSION_NAME: ${{ needs.preflight.outputs.version_name }}
-        run: ./gradlew :ohs-player-reference-app:createDistributable
+        run: ./gradlew :desktopApp:createDistributable
 
       - name: Tar up the distributable
         shell: bash
         run: |
           shopt -s nullglob
-          APP_BASE=ohs-player-reference-app/build/compose/binaries/main/app
+          APP_BASE=desktopApp/build/compose/binaries/main/app
           app_dirs=("$APP_BASE"/*)
           if [ ${#app_dirs[@]} -ne 1 ]; then
             echo "::error::Expected exactly one app directory in $APP_BASE, got ${#app_dirs[@]}: ${app_dirs[*]}"
@@ -322,12 +322,12 @@ jobs:
       - name: Build web distribution
         env:
           VERSION_NAME: ${{ needs.preflight.outputs.version_name }}
-        run: ./gradlew :ohs-player-reference-app:wasmJsBrowserDistribution
+        run: ./gradlew :webApp:wasmJsBrowserDistribution
 
       - name: Zip distribution for the GitHub Release
         run: |
           mkdir -p out
-          DIST=ohs-player-reference-app/build/dist/wasmJs/productionExecutable
+          DIST=webApp/build/dist/wasmJs/productionExecutable
           test -d "$DIST" || { echo "::error::Web dist directory missing: $DIST"; exit 1; }
           (cd "$DIST" && zip -r "$GITHUB_WORKSPACE/out/ohs-player-web-${{ needs.preflight.outputs.version_name }}.zip" .)
 
@@ -342,7 +342,7 @@ jobs:
         if: needs.preflight.outputs.is_dry_run == 'false' && needs.preflight.outputs.is_prerelease == 'false'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ohs-player-reference-app/build/dist/wasmJs/productionExecutable
+          path: webApp/build/dist/wasmJs/productionExecutable
 
   # Disabled alongside build-web. See the comment above build-web for the
   # rationale and the steps to re-enable.

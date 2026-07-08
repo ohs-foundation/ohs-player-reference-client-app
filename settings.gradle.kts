@@ -55,3 +55,9 @@ plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 include(":ohs-player-reference-app")
 
 include(":ohs-player-library")
+
+include(":androidApp")
+
+include(":desktopApp")
+
+include(":webApp")

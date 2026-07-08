@@ -4,6 +4,7 @@
 .vscode
 .antigravity
 **/build/
+**/bin/
 xcuserdata
 !src/**/build/
 local.properties

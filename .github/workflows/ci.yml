@@ -60,7 +60,8 @@ jobs:
             label: JVM/Desktop
             tasks: >-
               :ohs-player-library:jvmTest
-              :ohs-player-reference-app:jvmTest
+              :desktopApp:jvmTest
+
             kotlinDaemonHeap: '-Xmx6g -XX:+UseG1GC'
             extraArgs: ''
           - id: android
@@ -72,7 +73,8 @@ jobs:
             # and keeps lintDebug.
             tasks: >-
               :ohs-player-library:assembleAndroidMain
-              :ohs-player-reference-app:lintDebug
+              :androidApp:lintDebug
+
             kotlinDaemonHeap: '-Xmx6g -XX:+UseG1GC'
             extraArgs: ''
           - id: js
@@ -81,14 +83,16 @@ jobs:
             # it still runs the compile prerequisites (compileKotlinJs +
             # compileTestDevelopmentExecutableKotlinJs) — which is the work
             # we want covered.
-            tasks: ':ohs-player-reference-app:jsBrowserTest'
+            tasks: ':webApp:jsBrowserTest'
+
             kotlinDaemonHeap: '-Xmx10g -XX:+UseG1GC'
             extraArgs: ''
           - id: wasm
             label: Kotlin/Wasm
             tasks: >-
               :ohs-player-library:wasmJsBrowserTest
-              :ohs-player-reference-app:wasmJsBrowserTest
+              :webApp:wasmJsBrowserTest
+
             kotlinDaemonHeap: '-Xmx10g -XX:+UseG1GC'
             # Serialize the library + reference-app wasm compiles so they
             # don't run concurrently as workers and double the daemon heap

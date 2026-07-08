@@ -21,4 +21,13 @@ interface RepositorySnapshotStore {
   suspend fun write(snapshot: String)
 }
 
-expect object PlatformRepositorySnapshotStore : RepositorySnapshotStore
+/**
+ * TODO(#58): Temporary snapshot persistence for the in-memory repository. Delete this once
+ *   FHIREngine-backed persistence is implemented; that should make these platform-specific stores
+ *   unnecessary.
+ */
+expect object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
+  override suspend fun read(): String?
+
+  override suspend fun write(snapshot: String)
+}

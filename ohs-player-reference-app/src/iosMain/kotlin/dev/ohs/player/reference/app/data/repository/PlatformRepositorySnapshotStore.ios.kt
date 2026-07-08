@@ -15,27 +15,56 @@
  */
 package dev.ohs.player.reference.app.data.repository
 
-import platform.Foundation.NSData
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
-import platform.Foundation.NSString
 import platform.Foundation.NSTemporaryDirectory
-import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDomainMask
-import platform.Foundation.dataUsingEncoding
-import platform.Foundation.writeToFile
+import kotlin.experimental.ExperimentalNativeApi
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import platform.posix.SEEK_END
+import platform.posix.fclose
+import platform.posix.fopen
+import platform.posix.fread
+import platform.posix.fseek
+import platform.posix.ftell
+import platform.posix.fwrite
+import platform.posix.rewind
 
 private const val SNAPSHOT_FILE_NAME = "fhir-repository.json"
 
+@OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
 actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
   override suspend fun read(): String? {
-    val data = NSData.dataWithContentsOfFile(snapshotPath()) ?: return null
-    return NSString.create(data = data, encoding = NSUTF8StringEncoding) as String?
+    val file = fopen(snapshotPath(), "rb") ?: return null
+    return try {
+      fseek(file, 0, SEEK_END)
+      val size = ftell(file)
+      if (size <= 0L) return null
+      rewind(file)
+
+      val bytes = ByteArray(size.toInt())
+      val bytesRead =
+        bytes.usePinned { pinned ->
+          fread(pinned.addressOf(0), 1u, bytes.size.toULong(), file).toInt()
+        }
+      bytes.decodeToString(endIndex = bytesRead).takeIf { it.isNotBlank() }
+    } finally {
+      fclose(file)
+    }
   }
 
   override suspend fun write(snapshot: String) {
-    val data = (snapshot as NSString).dataUsingEncoding(NSUTF8StringEncoding) ?: return
-    data.writeToFile(snapshotPath(), true)
+    val file = fopen(snapshotPath(), "wb") ?: return
+    try {
+      val bytes = snapshot.encodeToByteArray()
+      bytes.usePinned { pinned ->
+        fwrite(pinned.addressOf(0), 1u, bytes.size.toULong(), file)
+      }
+    } finally {
+      fclose(file)
+    }
   }
 
   private fun snapshotPath(): String {

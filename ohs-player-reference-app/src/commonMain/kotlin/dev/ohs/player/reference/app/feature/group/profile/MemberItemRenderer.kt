@@ -147,6 +147,8 @@ private fun String.toRelationshipLabel(): String =
     "PARENT" -> "Parent"
     "GUAR",
     "GUARDIAN" -> "Guardian"
+    "EXT" -> "Other relative"
+    "FRND" -> "Non-relative"
     "RELATIVE" -> "Other relative"
     "NON-RELATIVE" -> "Non-relative"
     else ->

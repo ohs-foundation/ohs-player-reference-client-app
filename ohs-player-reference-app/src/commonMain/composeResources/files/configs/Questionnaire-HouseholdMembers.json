@@ -74,7 +74,7 @@
             {
               "coding": [
                 {
-                  "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
                   "_code": {
                     "extension": [
                       {
@@ -221,36 +221,36 @@
               "answerOption": [
                 {
                   "valueCoding": {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 },
                 {
                   "valueCoding": {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 },
                 {
                   "valueCoding": {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "parent",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "PRN",
                     "display": "Parent"
                   }
                 },
                 {
                   "valueCoding": {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "relative",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "EXT",
                     "display": "Other relative"
                   }
                 },
                 {
                   "valueCoding": {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "non-relative",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "FRND",
                     "display": "Non-relative"
                   }
                 }

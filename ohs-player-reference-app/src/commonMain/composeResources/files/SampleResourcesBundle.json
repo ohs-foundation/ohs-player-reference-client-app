@@ -228,8 +228,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -278,8 +278,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -357,8 +357,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -502,8 +502,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -552,8 +552,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -672,8 +672,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -792,8 +792,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -842,8 +842,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -921,8 +921,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1000,8 +1000,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1044,8 +1044,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -1129,8 +1129,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1214,8 +1214,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1258,8 +1258,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -1337,8 +1337,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1422,8 +1422,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1501,8 +1501,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1545,8 +1545,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -1630,8 +1630,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1715,8 +1715,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1759,8 +1759,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -1838,8 +1838,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -1917,8 +1917,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -2002,8 +2002,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -2046,8 +2046,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "child",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
                     "display": "Child"
                   }
                 ]
@@ -2125,8 +2125,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]
@@ -2204,8 +2204,8 @@
               {
                 "coding": [
                   {
-                    "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                    "code": "spouse",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
                     "display": "Spouse"
                   }
                 ]

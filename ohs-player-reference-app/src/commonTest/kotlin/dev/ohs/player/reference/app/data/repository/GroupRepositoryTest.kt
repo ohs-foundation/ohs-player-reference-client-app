@@ -38,13 +38,13 @@ class GroupRepositoryTest {
               memberId = "member-1",
               memberGivenName = "Junior",
               memberFamilyName = "Doe",
-              relationshipCode = "child",
+              relationshipCode = "CHILD",
             ),
             GroupMemberState(
               memberId = "member-2",
               memberGivenName = "John",
               memberFamilyName = "Doe",
-              relationshipCode = "spouse",
+              relationshipCode = "SPS",
             ),
           ),
       )
@@ -55,7 +55,7 @@ class GroupRepositoryTest {
       listOf("head-1", "member-1", "member-2"),
       result.members.mapNotNull { it.memberId },
     )
-    assertEquals(listOf(null, "child", "spouse"), result.members.map { it.relationshipCode })
+    assertEquals(listOf(null, "CHILD", "SPS"), result.members.map { it.relationshipCode })
   }
 
   @Test
@@ -76,13 +76,13 @@ class GroupRepositoryTest {
               memberId = "member-1",
               memberGivenName = "Amina",
               memberFamilyName = "Diallo",
-              relationshipCode = "spouse",
+              relationshipCode = "SPS",
             ),
             GroupMemberState(
               memberId = "member-2",
               memberGivenName = "Yuki",
               memberFamilyName = "Diallo",
-              relationshipCode = "child",
+              relationshipCode = "CHILD",
             ),
           ),
       )
@@ -90,7 +90,7 @@ class GroupRepositoryTest {
     assertEquals("Amina", result.groupHeader?.headGivenName)
     assertEquals("Diallo", result.groupHeader?.headFamilyName)
     assertEquals(listOf("member-1", "member-2"), result.members.mapNotNull { it.memberId })
-    assertEquals(listOf("spouse", "child"), result.members.mapNotNull { it.relationshipCode })
+    assertEquals(listOf("SPS", "CHILD"), result.members.mapNotNull { it.relationshipCode })
   }
 
   @Test

@@ -108,6 +108,60 @@ class InMemoryFhirRepositoryTest {
   }
 
   @Test
+  fun groupProfileSearchResult_repairsMalformedReferenceElementIds() = runTest {
+    val repository = InMemoryFhirRepository(seedResourcesLoader = { emptyList() })
+    val patient =
+      json.decodeFromString(
+        Patient.serializer(),
+        """
+          {
+            "resourceType": "Patient",
+            "id": "patient-250",
+            "active": true,
+            "name": [
+              {
+                "family": "Njeri",
+                "given": ["Wanjiku"]
+              }
+            ]
+          }
+        """
+          .trimIndent(),
+      )
+    val group =
+      json.decodeFromString(
+        Group.serializer(),
+        """
+          {
+            "resourceType": "Group",
+            "id": "group-250",
+            "type": "person",
+            "actual": true,
+            "member": [
+              {
+                "entity": {
+                  "_reference": {
+                    "id": "Patient/patient-250"
+                  }
+                }
+              }
+            ]
+          }
+        """
+          .trimIndent(),
+      )
+
+    repository.upsert(patient)
+    repository.upsert(group)
+
+    val groupProfile = assertNotNull(groupProfileSearchResult("group-250", repository))
+    val includedPatients =
+      groupProfile.included?.get("member").orEmpty().filterIsInstance<Patient>()
+
+    assertEquals(listOf("patient-250"), includedPatients.mapNotNull(Patient::id))
+  }
+
+  @Test
   fun upsert_repairsMalformedHouseholdNameFromLinkedPatient() = runTest {
     val repository = InMemoryFhirRepository(seedResourcesLoader = { emptyList() })
     val patient =

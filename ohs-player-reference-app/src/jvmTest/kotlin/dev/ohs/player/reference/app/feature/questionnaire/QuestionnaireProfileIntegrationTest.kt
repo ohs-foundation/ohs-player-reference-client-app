@@ -76,7 +76,7 @@ class QuestionnaireProfileIntegrationTest {
         listOf("Jane", "Junior", "John"),
         profile.members.mapNotNull { it.memberGivenName },
       )
-      assertEquals(listOf("child", "spouse"), profile.members.mapNotNull { it.relationshipCode })
+      assertEquals(listOf("CHILD", "SPS"), profile.members.mapNotNull { it.relationshipCode })
     }
   }
 
@@ -160,6 +160,13 @@ class QuestionnaireProfileIntegrationTest {
 
       assertEquals(3, result.savedResourceCount)
 
+      val savedGroup = repository.get("Group", "household-1") as Group
+      assertEquals(3, savedGroup.member.size)
+      assertEquals(
+        listOf(true, true, true),
+        savedGroup.member.map { it.entity.reference?.value?.startsWith("Patient/") == true },
+      )
+
       val profile = GroupRepository.getGroupProfile("household-1")
 
       assertEquals("Banda Household", profile.groupHeader?.groupName)
@@ -169,7 +176,7 @@ class QuestionnaireProfileIntegrationTest {
         listOf("Grace", "Ivy", "Noah"),
         profile.members.mapNotNull { it.memberGivenName },
       )
-      assertEquals(listOf("child", "relative"), profile.members.mapNotNull { it.relationshipCode })
+      assertEquals(listOf("CHILD", "EXT"), profile.members.mapNotNull { it.relationshipCode })
     }
   }
 
@@ -328,8 +335,8 @@ class QuestionnaireProfileIntegrationTest {
                     "answer": [
                       {
                         "valueCoding": {
-                          "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                          "code": "child",
+                          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                          "code": "CHILD",
                           "display": "Child"
                         }
                       }
@@ -365,8 +372,8 @@ class QuestionnaireProfileIntegrationTest {
                     "answer": [
                       {
                         "valueCoding": {
-                          "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                          "code": "spouse",
+                          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                          "code": "SPS",
                           "display": "Spouse"
                         }
                       }
@@ -676,8 +683,8 @@ class QuestionnaireProfileIntegrationTest {
                     "answer": [
                       {
                         "valueCoding": {
-                          "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                          "code": "child",
+                          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                          "code": "CHILD",
                           "display": "Child"
                         }
                       }
@@ -713,8 +720,8 @@ class QuestionnaireProfileIntegrationTest {
                     "answer": [
                       {
                         "valueCoding": {
-                          "system": "https://example.org/fhir/CodeSystem/relationship-to-head",
-                          "code": "relative",
+                          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                          "code": "EXT",
                           "display": "Other relative"
                         }
                       }

@@ -34,6 +34,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
+/**
+ * TODO(#58): Temporary implementation until FHIREngine integration is in place. Delete this once
+ *   FHIREngine handles patient storage, retrieval, and related queries; that should simplify this
+ *   repository.
+ */
 object PatientRepository {
 
   // FhirPathEvaluator holds mutable state is not concurrent-safe.

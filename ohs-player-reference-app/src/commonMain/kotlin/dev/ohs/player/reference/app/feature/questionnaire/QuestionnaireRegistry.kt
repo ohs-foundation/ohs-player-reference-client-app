@@ -240,7 +240,7 @@ object QuestionnaireRegistry {
 }
 
 private fun Patient.toGroupMember(): Group.Member =
-  Group.Member(entity = Reference(reference = FhirString("Patient/$id")))
+  Group.Member(entity = Reference(reference = FhirString(value = "Patient/$id")))
 
 private fun injectInitialStringAnswer(
   questionnaireJson: String,

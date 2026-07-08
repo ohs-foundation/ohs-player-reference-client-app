@@ -18,6 +18,10 @@ package dev.ohs.player.reference.app.data
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
 
+/**
+ * TODO: Replace this service locator with a proper dependency injection setup, such as Koin. This
+ *   should go away once dependencies are wired explicitly through a DI framework.
+ */
 object AppDependencies {
   var fhirRepository: FhirRepository = InMemoryFhirRepository()
 }

@@ -31,13 +31,15 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
+/**
+ * TODO(#58): Temporary workaround until FHIREngine integration is available. Remove this once
+ *   FHIREngine owns persistence and reference handling; that should simplify this implementation.
+ */
 class InMemoryFhirRepository(
   private val seedResourcesLoader: suspend () -> List<Resource> = ::loadBundledSampleResources,
   private val snapshotStore: RepositorySnapshotStore? = null,
@@ -56,7 +58,7 @@ class InMemoryFhirRepository(
     mutex.withLock {
       val normalized = normalizeResource(resource)
       if (storeResource(normalized) != null) {
-        repairStoredGroupNames()
+        repairStoredGroups()
         persistSnapshotLocked()
         _revision.value += 1
       }
@@ -69,7 +71,7 @@ class InMemoryFhirRepository(
       val normalizedResources = normalizeBundleResources(bundle)
       normalizedResources.forEach(::storeResource)
       if (normalizedResources.isNotEmpty()) {
-        repairStoredGroupNames()
+        repairStoredGroups()
         persistSnapshotLocked()
         _revision.value += 1
       }
@@ -93,7 +95,7 @@ class InMemoryFhirRepository(
       if (initialized) return
       seedResourcesLoader().forEach(::storeResource)
       loadPersistedResources().forEach(::storeResource)
-      if (repairStoredGroupNames()) {
+      if (repairStoredGroups()) {
         persistSnapshotLocked()
       }
       initialized = true
@@ -197,6 +199,7 @@ class InMemoryFhirRepository(
       fullUrl.isNullOrBlank() -> null
       fullUrl.startsWith("urn:uuid:") -> fullUrl.substringAfterLast(':').ifBlank { null }
       fullUrl.contains('/') -> fullUrl.substringAfterLast('/').substringBefore('?').ifBlank { null }
+
       else -> null
     }
 
@@ -214,12 +217,12 @@ class InMemoryFhirRepository(
     return "${resourceType.lowercase()}-$generatedIdCounter"
   }
 
-  private fun repairStoredGroupNames(): Boolean {
+  private fun repairStoredGroups(): Boolean {
     val groupBucket = resourcesByType["Group"] ?: return false
     var repairedAny = false
 
     groupBucket.entries.toList().forEach { (groupId, resource) ->
-      val repaired = repairGroupName(resource)
+      val repaired = repairGroupResource(resource)
       if (repaired != resource) {
         groupBucket[groupId] = repaired
         repairedAny = true
@@ -229,15 +232,61 @@ class InMemoryFhirRepository(
     return repairedAny
   }
 
-  private fun repairGroupName(resource: Resource): Resource {
+  private fun repairGroupResource(resource: Resource): Resource {
     val group = resource as? Group ?: return resource
     val groupJson = fhirJson.encodeToJsonElement(Group.serializer(), group).jsonObject
-    val currentName = groupJson["name"]?.jsonPrimitive?.contentOrNull?.trim()
-    if (!currentName.isNullOrBlank() && !looksLikeModelDump(currentName)) return resource
+    val repairedMemberArray = repairMemberReferences(groupJson["member"] as? JsonArray)
+    val normalizedGroupJson =
+      if (repairedMemberArray != null) JsonObject(groupJson + ("member" to repairedMemberArray))
+      else groupJson
 
-    val repairedName = inferredHouseholdName(groupJson) ?: return resource
-    val repairedJson = JsonObject(groupJson + ("name" to JsonPrimitive(repairedName)))
+    val currentName = normalizedGroupJson["name"]?.jsonPrimitive?.contentOrNull?.trim()
+    val repairedName =
+      if (!currentName.isNullOrBlank() && !looksLikeModelDump(currentName)) {
+        currentName
+      } else {
+        inferredHouseholdName(normalizedGroupJson)
+      }
+
+    val updates =
+      buildMap<String, JsonElement> {
+        repairedMemberArray?.let { put("member", it) }
+        repairedName?.let { put("name", JsonPrimitive(it)) }
+      }
+    if (updates.isEmpty()) return resource
+
+    val repairedJson = JsonObject(normalizedGroupJson + updates)
     return fhirJson.decodeFromJsonElement(Group.serializer(), repairedJson)
+  }
+
+  private fun repairMemberReferences(memberArray: JsonArray?): JsonArray? {
+    memberArray ?: return null
+    var repairedAny = false
+
+    val repairedMembers =
+      memberArray.map { memberElement ->
+        val memberJson = memberElement as? JsonObject ?: return@map memberElement
+        val entityJson = memberJson["entity"] as? JsonObject ?: return@map memberElement
+        val existingReference = entityJson["reference"]?.jsonPrimitive?.contentOrNull
+
+        if (!existingReference.isNullOrBlank()) return@map memberElement
+
+        val malformedReferenceId =
+          (((entityJson["_reference"] as? JsonObject)?.get("id")) as? JsonPrimitive)
+            ?.contentOrNull
+            ?.trim()
+            .orEmpty()
+        if (malformedReferenceId.isBlank()) return@map memberElement
+
+        repairedAny = true
+        JsonObject(
+          memberJson +
+            ("entity" to
+              JsonObject(entityJson + ("reference" to JsonPrimitive(malformedReferenceId))))
+        )
+      }
+
+    return if (repairedAny) JsonArray(repairedMembers) else null
   }
 
   private fun inferredHouseholdName(groupJson: JsonObject): String? {

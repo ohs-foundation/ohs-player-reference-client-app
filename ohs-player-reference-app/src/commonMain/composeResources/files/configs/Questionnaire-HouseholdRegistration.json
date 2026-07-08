@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
-  "id": "household-registration-template-extract",
-  "url": "https://example.org/fhir/Questionnaire/household-registration-template-extract",
+  "id": "household-registration",
+  "url": "https://example.org/fhir/Questionnaire/household-registration",
   "version": "1.0.0",
   "name": "HouseholdRegistrationTemplateExtract",
   "title": "Household Registration",
@@ -16,6 +16,10 @@
     {
       "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extractAllocateId",
       "valueString": "householdId"
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-entryMode",
+      "valueCode": "prior-edit"
     }
   ],
   "contained": [
@@ -460,22 +464,26 @@
             {
               "linkId": "county",
               "text": "County",
-              "type": "string"
+              "type": "string",
+              "required": true
             },
             {
               "linkId": "sub-county",
               "text": "Sub-county",
-              "type": "string"
+              "type": "string",
+              "required": true
             },
             {
               "linkId": "ward",
               "text": "Ward",
-              "type": "string"
+              "type": "string",
+              "required": true
             },
             {
               "linkId": "village",
               "text": "Village / Estate",
-              "type": "string"
+              "type": "string",
+              "required": true
             }
           ]
         }
@@ -576,6 +584,24 @@
                     "code": "unknown",
                     "display": "Unknown"
                   }
+                }
+              ],
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button",
+                        "display": "Radio Button"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+                  "valueCode": "horizontal"
                 }
               ]
             },
@@ -711,6 +737,24 @@
                     "code": "unknown",
                     "display": "Unknown"
                   }
+                }
+              ],
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-itemControl",
+                  "valueCodeableConcept": {
+                    "coding": [
+                      {
+                        "system": "http://hl7.org/fhir/questionnaire-item-control",
+                        "code": "radio-button",
+                        "display": "Radio Button"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-choiceOrientation",
+                  "valueCode": "horizontal"
                 }
               ]
             },

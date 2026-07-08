@@ -15,14 +15,14 @@
  */
 package dev.ohs.player.reference.app.data.repository
 
-import platform.Foundation.NSDocumentDirectory
-import platform.Foundation.NSSearchPathForDirectoriesInDomains
-import platform.Foundation.NSTemporaryDirectory
-import platform.Foundation.NSUserDomainMask
 import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSSearchPathForDirectoriesInDomains
+import platform.Foundation.NSTemporaryDirectory
+import platform.Foundation.NSUserDomainMask
 import platform.posix.SEEK_END
 import platform.posix.fclose
 import platform.posix.fopen
@@ -59,9 +59,7 @@ actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
     val file = fopen(snapshotPath(), "wb") ?: return
     try {
       val bytes = snapshot.encodeToByteArray()
-      bytes.usePinned { pinned ->
-        fwrite(pinned.addressOf(0), 1u, bytes.size.toULong(), file)
-      }
+      bytes.usePinned { pinned -> fwrite(pinned.addressOf(0), 1u, bytes.size.toULong(), file) }
     } finally {
       fclose(file)
     }

@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
-  "id": "household-members-template-extract",
-  "url": "https://example.org/fhir/Questionnaire/household-members-template-extract",
+  "id": "household-members",
+  "url": "https://example.org/fhir/Questionnaire/household-members",
   "version": "1.0.0",
   "name": "HouseholdMembersTemplateExtract",
   "title": "Household Members",

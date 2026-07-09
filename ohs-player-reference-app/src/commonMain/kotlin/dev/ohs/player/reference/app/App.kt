@@ -29,7 +29,7 @@ import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
 import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireHostScreen
-import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireRegistry
+import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireIds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -48,9 +48,7 @@ fun App() {
             onGroupClick = { id -> navController.navigate("groupProfile/$id") },
             onDataCaptureClick = {
               navController.navigate(
-                questionnaireHostRoute(
-                  questionnaireId = QuestionnaireRegistry.HOUSEHOLD_REGISTRATION_ID
-                )
+                questionnaireHostRoute(questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION)
               )
             },
           )
@@ -98,7 +96,7 @@ fun App() {
             onAddMembers = {
               navController.navigate(
                 questionnaireHostRoute(
-                  questionnaireId = QuestionnaireRegistry.HOUSEHOLD_MEMBERS_ID,
+                  questionnaireId = QuestionnaireIds.HOUSEHOLD_MEMBERS,
                   groupId = groupId,
                 )
               )
@@ -118,7 +116,7 @@ fun App() {
             onAddClinicalData = {
               navController.navigate(
                 questionnaireHostRoute(
-                  questionnaireId = QuestionnaireRegistry.PATIENT_CLINICAL_DATA_ID,
+                  questionnaireId = QuestionnaireIds.PATIENT_CLINICAL_DATA,
                   patientId = patientId,
                 )
               )

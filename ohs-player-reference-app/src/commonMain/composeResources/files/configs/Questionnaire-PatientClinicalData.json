@@ -1,7 +1,7 @@
 {
   "resourceType": "Questionnaire",
-  "id": "patient-clinical-data-capture",
-  "url": "https://example.org/fhir/Questionnaire/patient-clinical-data-capture",
+  "id": "patient-clinical-data",
+  "url": "https://example.org/fhir/Questionnaire/patient-clinical-data",
   "version": "1.0.0",
   "name": "PatientClinicalDataCapture",
   "title": "Clinical Update",

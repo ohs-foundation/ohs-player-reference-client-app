@@ -37,16 +37,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.fhir.datacapture.Questionnaire
 import dev.ohs.fhir.datacapture.QuestionnaireConfig
 import dev.ohs.fhir.datacapture.QuestionnaireItemViewFactoryMatcher
@@ -55,13 +54,6 @@ import dev.ohs.player.reference.app.data.AppDependencies
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-
-@OptIn(ExperimentalResourceApi::class)
-private suspend fun loadQuestionnaireJson(path: String): String =
-  Res.readBytes(path).decodeToString()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,8 +63,6 @@ fun QuestionnaireHostScreen(
   groupId: String? = null,
   onBack: () -> Unit,
 ) {
-  val questionnaireDefinition =
-    remember(questionnaireId) { QuestionnaireRegistry.find(questionnaireId) }
   val launchContext =
     remember(patientId, groupId) {
       QuestionnaireLaunchContext(patientId = patientId, groupId = groupId)
@@ -82,63 +72,34 @@ fun QuestionnaireHostScreen(
       override fun get(): List<QuestionnaireItemViewFactoryMatcher> = listOf()
     }
   }
+
+  val viewModel =
+    viewModel(key = "$questionnaireId:$patientId:$groupId") {
+      QuestionnaireHostViewModel(
+        questionnaireId = questionnaireId,
+        launchContext = launchContext,
+        questionnaireService = QuestionnaireService(repository = AppDependencies.fhirRepository),
+      )
+    }
+  val uiState by viewModel.uiState.collectAsState()
   val coroutineScope = rememberCoroutineScope()
-  val fhirJson = remember {
-    Json {
-      prettyPrint = true
-      explicitNulls = false
-      encodeDefaults = false
-      ignoreUnknownKeys = true
-    }
-  }
-  var questionnaireJson by
-    remember(questionnaireId, patientId, groupId) { mutableStateOf<String?>(null) }
-  var launchContextMap by
-    remember(questionnaireId, patientId, groupId) {
-      mutableStateOf<Map<String, String>>(emptyMap())
-    }
-  var loadError by remember(questionnaireId) { mutableStateOf<String?>(null) }
-  var submitError by remember { mutableStateOf<String?>(null) }
-  var successMessage by remember { mutableStateOf<String?>(null) }
-  val latestOnBack by rememberUpdatedState(onBack)
 
-  LaunchedEffect(successMessage) {
-    if (successMessage == null) return@LaunchedEffect
+  LaunchedEffect(uiState) {
+    if (uiState !is QuestionnaireHostUiState.Submitted) return@LaunchedEffect
     delay(2_000.milliseconds)
-    successMessage = null
-    latestOnBack()
+    onBack()
   }
-
-  LaunchedEffect(questionnaireDefinition?.id, patientId, groupId) {
-    val definition =
-      questionnaireDefinition
-        ?: run {
-          loadError = "Questionnaire \"$questionnaireId\" was not found."
-          return@LaunchedEffect
-        }
-    runCatching {
-        val sourceQuestionnaireJson = loadQuestionnaireJson(definition.questionnairePath)
-        questionnaireJson =
-          definition.prepareQuestionnaireJson(
-            QuestionnairePreparationContext(
-              sourceQuestionnaireJson = sourceQuestionnaireJson,
-              launchContext = launchContext,
-              fhirJson = fhirJson,
-            )
-          )
-        launchContextMap = definition.buildLaunchContextMap(launchContext)
-      }
-      .onSuccess { loadError = null }
-      .onFailure { throwable ->
-        questionnaireJson = null
-        loadError = throwable.message ?: "The questionnaire could not be loaded."
-      }
-  }
+  val title =
+    when (val state = uiState) {
+      is QuestionnaireHostUiState.Ready -> state.title
+      is QuestionnaireHostUiState.Submitting -> state.title
+      else -> null
+    }
 
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { Text(questionnaireDefinition?.title ?: "Questionnaire") },
+        title = { Text(title ?: "Questionnaire") },
         navigationIcon = {
           IconButton(onClick = onBack) {
             Icon(
@@ -147,9 +108,6 @@ fun QuestionnaireHostScreen(
               tint = MaterialTheme.colorScheme.onPrimary,
             )
           }
-        },
-        actions = {
-          submitError?.let { TextButton(onClick = { submitError = null }) { Text("Dismiss") } }
         },
         colors =
           TopAppBarDefaults.topAppBarColors(
@@ -163,28 +121,44 @@ fun QuestionnaireHostScreen(
       modifier = Modifier.fillMaxSize().padding(padding).padding(6.dp),
       verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-      successMessage?.let { message -> SubmissionBanner(message = message, isSuccess = true) }
-      submitError?.let { message -> SubmissionBanner(message = message, isSuccess = false) }
+      when (val state = uiState) {
+        is QuestionnaireHostUiState.Submitted ->
+          SubmissionBanner(message = state.result.successMessage, isSuccess = true)
+
+        is QuestionnaireHostUiState.Error -> Unit // rendered below, inline with a dismiss action
+        else -> Unit
+      }
 
       Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-        when {
-          loadError != null -> {
-            Text(
-              text = loadError ?: "Something went wrong.",
-              color = MaterialTheme.colorScheme.error,
-              style = MaterialTheme.typography.bodyMedium,
-              modifier = Modifier.padding(16.dp),
-            )
+        when (val state = uiState) {
+          is QuestionnaireHostUiState.Loading -> CircularProgressIndicator()
+
+          is QuestionnaireHostUiState.Error -> {
+            Column(
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+              horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+              Text(
+                text = state.message,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp),
+              )
+              TextButton(onClick = viewModel::load) { Text("Retry") }
+            }
           }
 
-          questionnaireDefinition == null || questionnaireJson == null -> {
-            CircularProgressIndicator()
-          }
-
-          else -> {
+          is QuestionnaireHostUiState.Ready,
+          is QuestionnaireHostUiState.Submitting -> {
+            val questionnaireJson =
+              when (state) {
+                is QuestionnaireHostUiState.Ready -> state.questionnaireJson
+                is QuestionnaireHostUiState.Submitting -> state.questionnaireJson
+                else -> ""
+              }
             Questionnaire(
-              questionnaireJson = questionnaireJson.orEmpty(),
-              questionnaireLaunchContextMap = launchContextMap,
+              questionnaireJson = questionnaireJson,
+              questionnaireLaunchContextMap = emptyMap(),
               config =
                 QuestionnaireConfig(
                   showReviewPage = true,
@@ -193,36 +167,14 @@ fun QuestionnaireHostScreen(
                   showCancelButton = false,
                 ),
               onSubmit = { getResponse ->
-                coroutineScope.launch {
-                  submitError = null
-                  successMessage = null
-                  runCatching {
-                      questionnaireDefinition.submit(
-                        QuestionnaireSubmissionContext(
-                          questionnaireJson = questionnaireJson.orEmpty(),
-                          response = getResponse(),
-                          launchContext = launchContext,
-                          repository = AppDependencies.fhirRepository,
-                          fhirJson = fhirJson,
-                        )
-                      )
-                    }
-                    .onSuccess { result ->
-                      println("========== Extracted Bundle ==========")
-                      println(result.bundleJson)
-                      successMessage = result.successMessage
-                    }
-                    .onFailure { throwable ->
-                      submitError =
-                        throwable.message
-                          ?: "Bundle extraction could not be completed. Please try again."
-                    }
-                }
+                coroutineScope.launch { viewModel.onSubmit(getResponse()) }
               },
               matchersProvider = viewItemMatchersProvider,
-              onCancel = onBack,
+              onCancel = {},
             )
           }
+
+          is QuestionnaireHostUiState.Submitted -> Unit
         }
       }
     }

@@ -42,6 +42,15 @@ import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.Chip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_child
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_guardian
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_non_relative
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_other_relative
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_parent
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_spouse
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 class MemberItemRenderer : ComponentRenderer<GroupMemberState, MemberItemConfig> {
   @Composable
@@ -137,24 +146,28 @@ fun MemberItemRow(
   }
 }
 
-private fun String.toRelationshipLabel(): String =
+private fun String.toRelationshipLabelResource(): StringResource? =
   when (uppercase()) {
     "SPS",
-    "SPOUSE" -> "Spouse"
+    "SPOUSE" -> Res.string.relationship_spouse
     "CHLD",
-    "CHILD" -> "Child"
+    "CHILD" -> Res.string.relationship_child
     "PRN",
-    "PARENT" -> "Parent"
+    "PARENT" -> Res.string.relationship_parent
     "GUAR",
-    "GUARDIAN" -> "Guardian"
-    "EXT" -> "Other relative"
-    "FRND" -> "Non-relative"
-    "RELATIVE" -> "Other relative"
-    "NON-RELATIVE" -> "Non-relative"
-    else ->
-      lowercase()
-        .split('-', '_')
-        .filter { it.isNotBlank() }
-        .joinToString(" ") { token -> token.replaceFirstChar { it.uppercaseChar() } }
-        .ifBlank { this }
+    "GUARDIAN" -> Res.string.relationship_guardian
+    "EXT",
+    "RELATIVE" -> Res.string.relationship_other_relative
+    "FRND",
+    "NON-RELATIVE" -> Res.string.relationship_non_relative
+    else -> null
   }
+
+@Composable
+private fun String.toRelationshipLabel(): String =
+  toRelationshipLabelResource()?.let { stringResource(it) }
+    ?: lowercase()
+      .split('-', '_')
+      .filter { it.isNotBlank() }
+      .joinToString(" ") { token -> token.replaceFirstChar { it.uppercaseChar() } }
+      .ifBlank { this }

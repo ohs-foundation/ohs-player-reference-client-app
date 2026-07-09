@@ -79,6 +79,24 @@ class QuestionnaireService(private val repository: FhirRepository) {
 
   private val fhirJson = FhirJson.instance
 
+  /** Launch-context values a questionnaire can opt into prepopulating, by linkId. */
+  private val LAUNCH_CONTEXT_LINK_IDS: Map<String, (QuestionnaireLaunchContext) -> String?> =
+    mapOf(
+      "patient-id" to { context -> context.patientId },
+      "group-id" to { context -> context.groupId },
+    )
+
+  /**
+   * Raw string placeholders that extraction templates may embed directly (e.g. inside a FHIRPath
+   * reference like "Patient/__PATIENT_ID__"). These are substituted on the encoded JSON text, since
+   * they aren't tied to any particular questionnaire item/linkId.
+   */
+  private val LAUNCH_CONTEXT_PLACEHOLDERS: Map<String, (QuestionnaireLaunchContext) -> String?> =
+    mapOf(
+      "__PATIENT_ID__" to { context -> context.patientId },
+      "__GROUP_ID__" to { context -> context.groupId },
+    )
+
   /** Reads a Questionnaire from the bundled config files. */
   @OptIn(ExperimentalResourceApi::class)
   suspend fun getQuestionnaire(id: String): QuestionnaireR4 {
@@ -89,7 +107,6 @@ class QuestionnaireService(private val repository: FhirRepository) {
     return fhirJson.decodeFromString(QuestionnaireR4.serializer(), json).copy(id = id)
   }
 
-  /** Injects any matching launch-context values so the form opens pre-filled. */
   suspend fun prepareForLaunch(
     questionnaire: QuestionnaireR4,
     launchContext: QuestionnaireLaunchContext,
@@ -106,7 +123,13 @@ class QuestionnaireService(private val repository: FhirRepository) {
         current.withInitialStringAnswer(linkId, value).first
       }
 
-    return fhirJson.encodeToString(JsonObject.serializer(), prepared)
+    val preparedJson = fhirJson.encodeToString(JsonObject.serializer(), prepared)
+
+    return LAUNCH_CONTEXT_PLACEHOLDERS.entries.fold(preparedJson) { current, (placeholder, resolve)
+      ->
+      val value = resolve(launchContext) ?: return@fold current
+      current.replace(placeholder, value)
+    }
   }
 
   suspend fun submit(
@@ -154,9 +177,6 @@ class QuestionnaireService(private val repository: FhirRepository) {
   ): QuestionnaireSubmissionResult {
     val patientId =
       launchContext.patientId ?: error("A patient id is required for clinical update.")
-    require(repository.get("Patient", patientId) is Patient) {
-      "Patient $patientId was not found. Clinical data can only be added to an existing patient."
-    }
 
     val bundle = TemplateExtractionEngine.extract(questionnaire, response)
     val savedResourceCount = repository.upsert(bundle)

@@ -16,8 +16,12 @@
 package dev.ohs.player.reference.app.feature.questionnaire
 
 import dev.ohs.fhir.datacapture.extraction.template.TemplateExtractionEngine
+import dev.ohs.fhir.model.r4.AllergyIntolerance
 import dev.ohs.fhir.model.r4.Bundle
+import dev.ohs.fhir.model.r4.Condition
 import dev.ohs.fhir.model.r4.Group
+import dev.ohs.fhir.model.r4.Immunization
+import dev.ohs.fhir.model.r4.MedicationRequest
 import dev.ohs.fhir.model.r4.Observation
 import dev.ohs.fhir.model.r4.Patient
 import dev.ohs.fhir.model.r4.Questionnaire as QuestionnaireR4
@@ -177,8 +181,34 @@ class QuestionnaireService(private val repository: FhirRepository) {
   ): QuestionnaireSubmissionResult {
     val patientId =
       launchContext.patientId ?: error("A patient id is required for clinical update.")
+    val patientReference = FhirString(value = "Patient/$patientId")
+    val patientRef = Reference(reference = patientReference)
+    val extractedBundle = TemplateExtractionEngine.extract(questionnaire, response)
+    val bundle =
+      extractedBundle.copy(
+        entry =
+          extractedBundle.entry.map { entry ->
+            val updatedResource =
+              when (val resource = entry.resource) {
+                is AllergyIntolerance ->
+                  resource.copy(id = resource.id.orGeneratedId(), patient = patientRef)
 
-    val bundle = TemplateExtractionEngine.extract(questionnaire, response)
+                is MedicationRequest ->
+                  resource.copy(id = resource.id.orGeneratedId(), subject = patientRef)
+
+                is Condition ->
+                  resource.copy(id = resource.id.orGeneratedId(), subject = patientRef)
+
+                is Immunization ->
+                  resource.copy(id = resource.id.orGeneratedId(), patient = patientRef)
+
+                else -> resource
+              }
+
+            entry.copy(resource = updatedResource)
+          }
+      )
+
     val savedResourceCount = repository.upsert(bundle)
 
     return QuestionnaireSubmissionResult(

@@ -15,9 +15,6 @@
     {
       "resourceType": "AllergyIntolerance",
       "id": "patient-allergy-template",
-      "patient": {
-        "reference": "Patient/__PATIENT_ID__"
-      },
       "code": {
         "coding": [
           {
@@ -110,10 +107,7 @@
     },
     {
       "resourceType": "MedicationRequest",
-      "id": "patient-medication-template",
-      "subject": {
-        "reference": "Patient/__PATIENT_ID__"
-      },
+      "id": "patient-medication-template", 
       "status": "active",
       "_status": {
         "extension": [
@@ -171,10 +165,7 @@
     },
     {
       "resourceType": "Condition",
-      "id": "patient-condition-template",
-      "subject": {
-        "reference": "Patient/__PATIENT_ID__"
-      },
+      "id": "patient-condition-template", 
       "code": {
         "coding": [
           {
@@ -236,10 +227,7 @@
             }
           }
         ]
-      },
-      "patient": {
-        "reference": "Patient/__PATIENT_ID__"
-      },
+      }, 
       "vaccineCode": {
         "coding": [
           {

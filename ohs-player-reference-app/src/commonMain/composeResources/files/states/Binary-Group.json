@@ -21,6 +21,16 @@
           "name": "memberCount",
           "path": "member.count().toString()",
           "type": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        {
+          "name": "headGivenName",
+          "path": "name.where(false).first()",
+          "type": "http://hl7.org/fhir/StructureDefinition/string"
+        },
+        {
+          "name": "headFamilyName",
+          "path": "name.where(false).first()",
+          "type": "http://hl7.org/fhir/StructureDefinition/string"
         }
       ]
     }

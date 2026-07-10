@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app
+package dev.ohs.player.reference.app.data
 
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import dev.ohs.player.reference.app.data.AppDependencies
+import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
-import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
 
-fun main() = application {
-  AppDependencies.fhirRepository =
-    InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
-  Window(onCloseRequest = ::exitApplication, title = "OHS Player Reference App") { App() }
+/**
+ * TODO: Replace this service locator with a proper dependency injection setup, such as Koin. This
+ *   should go away once dependencies are wired explicitly through a DI framework.
+ */
+object AppDependencies {
+  var fhirRepository: FhirRepository = InMemoryFhirRepository()
 }

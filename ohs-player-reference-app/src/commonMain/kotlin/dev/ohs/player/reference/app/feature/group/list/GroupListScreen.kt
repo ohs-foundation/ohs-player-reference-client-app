@@ -17,9 +17,15 @@ package dev.ohs.player.reference.app.feature.group.list
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -36,7 +42,7 @@ import dev.ohs.player.library.scaffold.ListScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupListScreen(onGroupClick: (String) -> Unit) {
+fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Unit) {
   val viewModel: GroupListViewModel = viewModel { GroupListViewModel() }
   val groups by viewModel.groups.collectAsStateWithLifecycle()
 
@@ -47,14 +53,8 @@ fun GroupListScreen(onGroupClick: (String) -> Unit) {
     return
   }
 
-  ListScaffold<GroupListState>(
-    items = groups!!,
-    onItemClick = { onGroupClick(it.groupId ?: "") },
-    key = { it.groupId ?: it.hashCode().toString() },
-  ) {
-    component(ViewTypeCS.GroupCard)
-    layout(VerticalListRenderer.VIEW_TYPE)
-    topBar {
+  Scaffold(
+    topBar = {
       TopAppBar(
         title = { Text("Households") },
         colors =
@@ -63,7 +63,23 @@ fun GroupListScreen(onGroupClick: (String) -> Unit) {
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
           ),
       )
+    },
+    floatingActionButton = {
+      FloatingActionButton(onClick = onDataCaptureClick) {
+        Icon(Icons.Filled.Add, contentDescription = "Register household")
+      }
+    },
+  ) { padding ->
+    Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+      ListScaffold<GroupListState>(
+        items = groups!!,
+        onItemClick = { onGroupClick(it.groupId ?: "") },
+        key = { it.groupId ?: it.hashCode().toString() },
+      ) {
+        component(ViewTypeCS.GroupCard)
+        layout(VerticalListRenderer.VIEW_TYPE)
+        emptyState { Text("No households") }
+      }
     }
-    emptyState { Text("No households") }
   }
 }

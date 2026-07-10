@@ -40,14 +40,6 @@
             "value": "amina.diallo@example.com"
           }
         ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp1"
-            }
-          }
-        ],
         "contact": [
           {
             "relationship": [
@@ -137,14 +129,6 @@
           {
             "system": "email",
             "value": "kwame.mensah@example.com"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp2"
-            }
           }
         ],
         "contact": [
@@ -238,6 +222,19 @@
                 "value": "+254 700 333 444"
               }
             ]
+          },
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -273,6 +270,21 @@
           {
             "system": "email",
             "value": "chidi.diallo@example.com"
+          }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -339,6 +351,19 @@
                 "value": "+233 20 555 6666"
               }
             ]
+          },
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -378,14 +403,6 @@
           {
             "system": "email",
             "value": "adaeze.okonkwo@example.com"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp3"
-            }
           }
         ],
         "contact": [
@@ -479,6 +496,19 @@
                 "value": "+234 803 999 000"
               }
             ]
+          },
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -514,6 +544,21 @@
           {
             "system": "email",
             "value": "chiamaka.okonkwo@example.com"
+          }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -553,14 +598,6 @@
           {
             "system": "email",
             "value": "sipho.nkosi@example.com"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp4"
-            }
           }
         ],
         "contact": [
@@ -628,6 +665,21 @@
             "system": "email",
             "value": "nomvula.nkosi@example.com"
           }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     },
@@ -649,7 +701,7 @@
         ],
         "name": [
           {
-            "family": "Traor\u00e9",
+            "family": "Traoré",
             "given": [
               "Ibrahim"
             ]
@@ -668,14 +720,6 @@
             "value": "mamadou.traore@example.com"
           }
         ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp5"
-            }
-          }
-        ],
         "contact": [
           {
             "relationship": [
@@ -690,7 +734,7 @@
               }
             ],
             "name": {
-              "family": "Traor\u00e9",
+              "family": "Traoré",
               "given": [
                 "Ibrahim"
               ]
@@ -723,7 +767,7 @@
         ],
         "name": [
           {
-            "family": "Traor\u00e9",
+            "family": "Traoré",
             "given": [
               "Fatoumata"
             ]
@@ -740,6 +784,21 @@
           {
             "system": "email",
             "value": "mariam.traore@example.com"
+          }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -762,7 +821,7 @@
         ],
         "name": [
           {
-            "family": "Traor\u00e9",
+            "family": "Traoré",
             "given": [
               "Moussa"
             ]
@@ -775,6 +834,21 @@
           {
             "system": "email",
             "value": "boubacar.traore@example.com"
+          }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -811,14 +885,6 @@
             "system": "phone",
             "value": "+254 722 123 456"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp6"
-            }
-          }
         ]
       }
     },
@@ -848,7 +914,22 @@
         ],
         "gender": "female",
         "birthDate": "1985-02-28",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -883,14 +964,6 @@
             "system": "phone",
             "value": "+254 710 234 567"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp7"
-            }
-          }
         ]
       }
     },
@@ -920,7 +993,22 @@
         ],
         "gender": "female",
         "birthDate": "1992-04-03",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -949,7 +1037,22 @@
         ],
         "gender": "male",
         "birthDate": "2018-12-01",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -983,14 +1086,6 @@
           {
             "system": "phone",
             "value": "+234 805 345 6789"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp8"
-            }
           }
         ]
       }
@@ -1027,6 +1122,21 @@
             "system": "phone",
             "value": "+234 806 456 7890"
           }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     },
@@ -1061,14 +1171,6 @@
           {
             "system": "phone",
             "value": "+233 24 678 9012"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp9"
-            }
           }
         ]
       }
@@ -1105,6 +1207,21 @@
             "system": "phone",
             "value": "+233 20 789 0123"
           }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     },
@@ -1134,7 +1251,22 @@
         ],
         "gender": "male",
         "birthDate": "2002-03-29",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1169,14 +1301,6 @@
             "system": "phone",
             "value": "+265 99 123 456"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp10"
-            }
-          }
         ]
       }
     },
@@ -1206,7 +1330,22 @@
         ],
         "gender": "female",
         "birthDate": "1990-12-04",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1227,7 +1366,7 @@
         ],
         "name": [
           {
-            "family": "Tour\u00e9",
+            "family": "Touré",
             "given": [
               "Mamadou"
             ]
@@ -1240,14 +1379,6 @@
           {
             "system": "phone",
             "value": "+224 622 123 456"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp11"
-            }
           }
         ]
       }
@@ -1270,7 +1401,7 @@
         ],
         "name": [
           {
-            "family": "Tour\u00e9",
+            "family": "Touré",
             "given": [
               "Aissatou"
             ]
@@ -1283,6 +1414,21 @@
           {
             "system": "phone",
             "value": "+224 623 234 567"
+          }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -1319,14 +1465,6 @@
             "system": "phone",
             "value": "+268 7600 1234"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp12"
-            }
-          }
         ]
       }
     },
@@ -1356,7 +1494,22 @@
         ],
         "gender": "female",
         "birthDate": "1997-11-09",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1385,7 +1538,22 @@
         ],
         "gender": "female",
         "birthDate": "2022-03-15",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1419,14 +1587,6 @@
           {
             "system": "phone",
             "value": "+234 807 567 8901"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp13"
-            }
           }
         ]
       }
@@ -1463,6 +1623,21 @@
             "system": "phone",
             "value": "+234 808 678 9012"
           }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     },
@@ -1497,14 +1672,6 @@
           {
             "system": "phone",
             "value": "+233 20 901 2345"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp14"
-            }
           }
         ]
       }
@@ -1541,6 +1708,21 @@
             "system": "phone",
             "value": "+233 24 012 3456"
           }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     },
@@ -1570,7 +1752,22 @@
         ],
         "gender": "female",
         "birthDate": "2010-07-08",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1605,14 +1802,6 @@
             "system": "phone",
             "value": "+243 99 123 456"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp15"
-            }
-          }
         ]
       }
     },
@@ -1642,7 +1831,22 @@
         ],
         "gender": "female",
         "birthDate": "1973-08-19",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1677,14 +1881,6 @@
             "system": "phone",
             "value": "+221 77 345 6789"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp16"
-            }
-          }
         ]
       }
     },
@@ -1714,7 +1910,22 @@
         ],
         "gender": "female",
         "birthDate": "1988-02-11",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1748,14 +1959,6 @@
           {
             "system": "phone",
             "value": "+254 711 123 456"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp17"
-            }
           }
         ]
       }
@@ -1792,6 +1995,21 @@
             "system": "phone",
             "value": "+254 712 234 567"
           }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     },
@@ -1821,7 +2039,22 @@
         ],
         "gender": "male",
         "birthDate": "2005-09-14",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "CHILD",
+                    "display": "Child"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1856,14 +2089,6 @@
             "system": "phone",
             "value": "+233 24 234 5678"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp18"
-            }
-          }
         ]
       }
     },
@@ -1893,7 +2118,22 @@
         ],
         "gender": "female",
         "birthDate": "1970-10-18",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1928,14 +2168,6 @@
             "system": "phone",
             "value": "+234 809 789 0123"
           }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp19"
-            }
-          }
         ]
       }
     },
@@ -1965,7 +2197,22 @@
         ],
         "gender": "female",
         "birthDate": "1995-08-16",
-        "active": true
+        "active": true,
+        "contact": [
+          {
+            "relationship": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+                    "code": "SPS",
+                    "display": "Spouse"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -1999,14 +2246,6 @@
           {
             "system": "phone",
             "value": "+81 3 1234 5678"
-          }
-        ],
-        "link": [
-          {
-            "type": "seealso",
-            "other": {
-              "reference": "RelatedPerson/rp20"
-            }
           }
         ]
       }
@@ -2111,7 +2350,7 @@
         "id": "g5",
         "type": "person",
         "actual": true,
-        "name": "Traor\u00e9 Household",
+        "name": "Traoré Household",
         "member": [
           {
             "entity": {
@@ -2252,7 +2491,7 @@
         "id": "g11",
         "type": "person",
         "actual": true,
-        "name": "Tour\u00e9 Household",
+        "name": "Touré Household",
         "member": [
           {
             "entity": {
@@ -2462,546 +2701,6 @@
             "entity": {
               "reference": "Patient/p47"
             }
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp1",
-        "patient": {
-          "reference": "Patient/p1"
-        },
-        "name": [
-          {
-            "family": "Diallo",
-            "given": [
-              "Amina"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp2",
-        "patient": {
-          "reference": "Patient/p2"
-        },
-        "name": [
-          {
-            "family": "Mensah",
-            "given": [
-              "Kofi"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "GUAR"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp3",
-        "patient": {
-          "reference": "Patient/p6"
-        },
-        "name": [
-          {
-            "family": "Okonkwo",
-            "given": [
-              "Emmanuel"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "FTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp4",
-        "patient": {
-          "reference": "Patient/p9"
-        },
-        "name": [
-          {
-            "family": "Nkosi",
-            "given": [
-              "Thabo"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp5",
-        "patient": {
-          "reference": "Patient/p11"
-        },
-        "name": [
-          {
-            "family": "Traor\u00e9",
-            "given": [
-              "Ibrahim"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "FTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp6",
-        "patient": {
-          "reference": "Patient/p14"
-        },
-        "name": [
-          {
-            "family": "Kamau",
-            "given": [
-              "James"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp7",
-        "patient": {
-          "reference": "Patient/p16"
-        },
-        "name": [
-          {
-            "family": "Mwangi",
-            "given": [
-              "Peter"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "FTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp8",
-        "patient": {
-          "reference": "Patient/p19"
-        },
-        "name": [
-          {
-            "family": "Achebe",
-            "given": [
-              "Chinwe"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "MTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp9",
-        "patient": {
-          "reference": "Patient/p21"
-        },
-        "name": [
-          {
-            "family": "Osei",
-            "given": [
-              "Kwame"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp10",
-        "patient": {
-          "reference": "Patient/p24"
-        },
-        "name": [
-          {
-            "family": "Banda",
-            "given": [
-              "Moses"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp11",
-        "patient": {
-          "reference": "Patient/p26"
-        },
-        "name": [
-          {
-            "family": "Tour\u00e9",
-            "given": [
-              "Mamadou"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "FTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp12",
-        "patient": {
-          "reference": "Patient/p28"
-        },
-        "name": [
-          {
-            "family": "Dlamini",
-            "given": [
-              "Sibusiso"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp13",
-        "patient": {
-          "reference": "Patient/p31"
-        },
-        "name": [
-          {
-            "family": "Adeyemi",
-            "given": [
-              "Adewale"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "FTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp14",
-        "patient": {
-          "reference": "Patient/p33"
-        },
-        "name": [
-          {
-            "family": "Owusu",
-            "given": [
-              "Nana"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "MTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp15",
-        "patient": {
-          "reference": "Patient/p36"
-        },
-        "name": [
-          {
-            "family": "Kabila",
-            "given": [
-              "Jean-Pierre"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "FTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp16",
-        "patient": {
-          "reference": "Patient/p38"
-        },
-        "name": [
-          {
-            "family": "Ndiaye",
-            "given": [
-              "Abdoulaye"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp17",
-        "patient": {
-          "reference": "Patient/p40"
-        },
-        "name": [
-          {
-            "family": "Mutua",
-            "given": [
-              "Josephat"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "FTH"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp18",
-        "patient": {
-          "reference": "Patient/p43"
-        },
-        "name": [
-          {
-            "family": "Appiah",
-            "given": [
-              "Kofi"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp19",
-        "patient": {
-          "reference": "Patient/p45"
-        },
-        "name": [
-          {
-            "family": "Oduya",
-            "given": [
-              "Sunday"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "SPS"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "resource": {
-        "resourceType": "RelatedPerson",
-        "id": "rp20",
-        "patient": {
-          "reference": "Patient/p47"
-        },
-        "name": [
-          {
-            "family": "Nakamura",
-            "given": [
-              "Hiroshi"
-            ]
-          }
-        ],
-        "relationship": [
-          {
-            "coding": [
-              {
-                "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
-                "code": "GUAR"
-              }
-            ]
           }
         ]
       }

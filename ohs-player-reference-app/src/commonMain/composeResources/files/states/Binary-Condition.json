@@ -19,7 +19,7 @@
         },
         {
           "name": "onsetDate",
-          "path": "onset.ofType(dateTime)",
+          "path": "onsetDateTime",
           "type": "http://hl7.org/fhir/StructureDefinition/dateTime"
         },
         {

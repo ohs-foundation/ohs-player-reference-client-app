@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app
+package dev.ohs.player.reference.app.data.repository
 
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
-import dev.ohs.player.reference.app.data.AppDependencies
-import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
-import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
+import kotlinx.browser.window
 
-fun main() = application {
-  AppDependencies.fhirRepository =
-    InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
-  Window(onCloseRequest = ::exitApplication, title = "OHS Player Reference App") { App() }
+private const val SNAPSHOT_STORAGE_KEY = "ohs-player-reference-app.fhir-repository"
+
+actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
+  actual override suspend fun read(): String? = window.localStorage.getItem(SNAPSHOT_STORAGE_KEY)
+
+  actual override suspend fun write(snapshot: String) {
+    window.localStorage.setItem(SNAPSHOT_STORAGE_KEY, snapshot)
+  }
 }

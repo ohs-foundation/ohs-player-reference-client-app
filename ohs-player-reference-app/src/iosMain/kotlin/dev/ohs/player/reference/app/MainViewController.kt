@@ -16,5 +16,12 @@
 package dev.ohs.player.reference.app
 
 import androidx.compose.ui.window.ComposeUIViewController
+import dev.ohs.player.reference.app.data.AppDependencies
+import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
+import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
 
-fun MainViewController() = ComposeUIViewController { App() }
+fun MainViewController() =
+  InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore).let { repository ->
+    AppDependencies.fhirRepository = repository
+    ComposeUIViewController { App() }
+  }

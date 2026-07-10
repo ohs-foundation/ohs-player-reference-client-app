@@ -1,0 +1,39 @@
+/*
+ * Copyright 2026 Open Health Stack Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package dev.ohs.player.reference.app.data.repository
+
+import dev.ohs.fhir.model.r4.Bundle
+import dev.ohs.fhir.model.r4.Resource
+import kotlinx.coroutines.flow.StateFlow
+
+/**
+ * Minimal persistence seam for FHIR resources.
+ *
+ * The reference app keeps data in memory today so questionnaire submissions can immediately feed
+ * the demo UI. When the engine-backed database lands, the implementation behind this interface can
+ * be swapped without changing the feature layer.
+ */
+interface FhirRepository {
+  val revision: StateFlow<Long>
+
+  suspend fun upsert(resource: Resource)
+
+  suspend fun upsert(bundle: Bundle): Int
+
+  suspend fun get(resourceType: String, id: String): Resource?
+
+  suspend fun all(resourceType: String): List<Resource>
+}

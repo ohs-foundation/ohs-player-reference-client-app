@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +52,12 @@ import dev.ohs.player.library.renderer.RenderOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupProfileScreen(groupId: String, onBack: () -> Unit, onMemberClick: (String) -> Unit) {
+fun GroupProfileScreen(
+  groupId: String,
+  onBack: () -> Unit,
+  onMemberClick: (String) -> Unit,
+  onAddMembers: () -> Unit,
+) {
   val viewModel = viewModel(key = groupId) { GroupProfileViewModel(groupId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
@@ -83,7 +90,14 @@ fun GroupProfileScreen(groupId: String, onBack: () -> Unit, onMemberClick: (Stri
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
           ),
       )
-    }
+    },
+    floatingActionButton = {
+      ExtendedFloatingActionButton(
+        onClick = onAddMembers,
+        text = { Text("Add members") },
+        icon = { Icon(Icons.Filled.Add, contentDescription = "Add household members") },
+      )
+    },
   ) { padding ->
     val s = state
     if (s == null) {

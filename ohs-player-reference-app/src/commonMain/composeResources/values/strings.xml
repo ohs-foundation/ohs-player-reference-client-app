@@ -1,0 +1,9 @@
+
+<resources>
+    <string name="relationship_spouse">Spouse</string>
+    <string name="relationship_child">Child</string>
+    <string name="relationship_parent">Parent</string>
+    <string name="relationship_guardian">Guardian</string>
+    <string name="relationship_other_relative">Other relative</string>
+    <string name="relationship_non_relative">Non-relative</string>
+</resources>

@@ -17,8 +17,13 @@ package dev.ohs.player.reference.app
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
+import dev.ohs.player.reference.app.data.AppDependencies
+import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
+import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+  AppDependencies.fhirRepository =
+    InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
   ComposeViewport { App() }
 }

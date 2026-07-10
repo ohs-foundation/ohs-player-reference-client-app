@@ -42,6 +42,15 @@ import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.Chip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_child
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_guardian
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_non_relative
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_other_relative
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_parent
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_spouse
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 class MemberItemRenderer : ComponentRenderer<GroupMemberState, MemberItemConfig> {
   @Composable
@@ -72,7 +81,7 @@ fun MemberItemRow(
     listOfNotNull(item.memberGivenName, item.memberFamilyName).joinToString(" ").ifBlank {
       "Unknown"
     }
-  val isHead = item.relationshipCode != null
+  val relationshipLabel = item.relationshipCode?.toRelationshipLabel()
 
   Row(
     modifier =
@@ -119,9 +128,9 @@ fun MemberItemRow(
         )
       }
     }
-    if (isHead && config.showRelationship != false) {
+    if (relationshipLabel != null && config.showRelationship != false) {
       Chip(
-        label = "Head",
+        label = relationshipLabel,
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
       )
@@ -136,3 +145,29 @@ fun MemberItemRow(
     }
   }
 }
+
+private fun String.toRelationshipLabelResource(): StringResource? =
+  when (uppercase()) {
+    "SPS",
+    "SPOUSE" -> Res.string.relationship_spouse
+    "CHLD",
+    "CHILD" -> Res.string.relationship_child
+    "PRN",
+    "PARENT" -> Res.string.relationship_parent
+    "GUAR",
+    "GUARDIAN" -> Res.string.relationship_guardian
+    "EXT",
+    "RELATIVE" -> Res.string.relationship_other_relative
+    "FRND",
+    "NON-RELATIVE" -> Res.string.relationship_non_relative
+    else -> null
+  }
+
+@Composable
+private fun String.toRelationshipLabel(): String =
+  toRelationshipLabelResource()?.let { stringResource(it) }
+    ?: lowercase()
+      .split('-', '_')
+      .filter { it.isNotBlank() }
+      .joinToString(" ") { token -> token.replaceFirstChar { it.uppercaseChar() } }
+      .ifBlank { this }

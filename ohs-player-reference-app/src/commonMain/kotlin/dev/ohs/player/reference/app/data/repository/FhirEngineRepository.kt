@@ -28,6 +28,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 
@@ -58,7 +61,11 @@ class FhirEngineRepository(
 
   override suspend fun upsert(bundle: Bundle): Int {
     ensureSeeded()
-    return 0
+    val normalized = normalizeBundleResources(bundle)
+    if (normalized.isEmpty()) return 0
+    fhirEngine.withTransaction { normalized.forEach { upsertResource(it) } }
+    _revision.value += 1
+    return normalized.size
   }
 
   override suspend fun get(resourceType: String, id: String): Resource? {
@@ -86,11 +93,80 @@ class FhirEngineRepository(
     if (exists) fhirEngine.update(withId) else fhirEngine.create(withId)
   }
 
+  private fun normalizeBundleResources(bundle: Bundle): List<Resource> {
+    val drafts =
+      bundle.entry.mapNotNull { entry ->
+        val resource = entry.resource ?: return@mapNotNull null
+        val resolvedId =
+          resource.id
+            ?: idFromFullUrl(entry.fullUrl?.value)
+            ?: idFromRequestUrl(entry.request?.url?.value, resource.resourceType)
+            ?: generateId()
+        entry.fullUrl?.value to resource.withId(resolvedId)
+      }
+
+    val referenceMap =
+      drafts
+        .mapNotNull { (fullUrl, resource) ->
+          fullUrl?.let { it to "${resource.resourceType}/${resource.id}" }
+        }
+        .toMap()
+
+    return drafts.map { (_, resource) -> rewriteReferences(resource, referenceMap) }
+  }
+
+  private fun rewriteReferences(resource: Resource, referenceMap: Map<String, String>): Resource {
+    val rewritten =
+      rewriteReferencesInElement(
+        json.encodeToJsonElement(Resource.serializer(), resource),
+        referenceMap,
+      )
+    return json.decodeFromJsonElement(Resource.serializer(), rewritten)
+  }
+
+  private fun rewriteReferencesInElement(
+    element: JsonElement,
+    referenceMap: Map<String, String>,
+  ): JsonElement =
+    when (element) {
+      is JsonObject ->
+        JsonObject(
+          element.mapValues { (key, value) ->
+            if (key == "reference" && value is JsonPrimitive) {
+              referenceMap[value.content]?.let(::JsonPrimitive) ?: value
+            } else {
+              rewriteReferencesInElement(value, referenceMap)
+            }
+          }
+        )
+
+      is JsonArray -> JsonArray(element.map { rewriteReferencesInElement(it, referenceMap) })
+
+      else -> element
+    }
+
+  private fun idFromFullUrl(fullUrl: String?): String? =
+    when {
+      fullUrl.isNullOrBlank() -> null
+      fullUrl.startsWith("urn:uuid:") -> fullUrl.substringAfterLast(':').ifBlank { null }
+      fullUrl.contains('/') -> fullUrl.substringAfterLast('/').substringBefore('?').ifBlank { null }
+      else -> null
+    }
+
+  private fun idFromRequestUrl(url: String?, resourceType: String): String? {
+    if (url.isNullOrBlank()) return null
+    val candidate =
+      url.substringAfterLast('/').substringBefore('?').ifBlank {
+        return null
+      }
+    return candidate.takeUnless { it == resourceType }
+  }
+
   private fun Resource.withId(newId: String): Resource {
     val obj = json.encodeToJsonElement(Resource.serializer(), this).jsonObject
     return json.decodeFromJsonElement(
       Resource.serializer(),
-      kotlinx.serialization.json.JsonObject(obj + ("id" to JsonPrimitive(newId))),
+      JsonObject(obj + ("id" to JsonPrimitive(newId))),
     )
   }
 }

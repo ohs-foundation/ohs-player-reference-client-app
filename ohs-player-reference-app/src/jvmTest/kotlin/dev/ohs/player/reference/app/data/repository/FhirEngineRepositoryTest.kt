@@ -18,6 +18,8 @@ package dev.ohs.player.reference.app.data.repository
 import dev.ohs.fhir.FhirEngine
 import dev.ohs.fhir.FhirEngineConfiguration
 import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.model.r4.Bundle
+import dev.ohs.fhir.model.r4.Group
 import dev.ohs.fhir.model.r4.Patient
 import java.nio.file.Files
 import kotlin.test.BeforeTest
@@ -96,5 +98,52 @@ class FhirEngineRepositoryTest {
     val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
 
     assertNull(repository.get("Patient", "does-not-exist"))
+  }
+
+  @Test
+  fun upsertBundle_resolvesFullUrlIdsAndRewritesReferences() = runTest {
+    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
+    val bundle =
+      json.decodeFromString(
+        Bundle.serializer(),
+        """
+          {
+            "resourceType": "Bundle",
+            "type": "collection",
+            "entry": [
+              {
+                "fullUrl": "urn:uuid:patient-100",
+                "resource": {
+                  "resourceType": "Patient",
+                  "active": true,
+                  "name": [{"family": "Otieno", "given": ["Akinyi"]}]
+                }
+              },
+              {
+                "fullUrl": "urn:uuid:group-100",
+                "resource": {
+                  "resourceType": "Group",
+                  "type": "person",
+                  "actual": true,
+                  "member": [
+                    {"entity": {"reference": "urn:uuid:patient-100"}}
+                  ]
+                }
+              }
+            ]
+          }
+        """
+          .trimIndent(),
+      )
+
+    val storedCount = repository.upsert(bundle)
+
+    assertEquals(2, storedCount)
+    assertEquals(1L, repository.revision.value)
+    val patients = repository.all("Patient").filterIsInstance<Patient>()
+    assertEquals(1, patients.size)
+    val patientId = patients.first().id.orEmpty()
+    val groups = repository.all("Group").filterIsInstance<Group>()
+    assertEquals("Patient/$patientId", groups.first().member.first().entity.reference?.value)
   }
 }

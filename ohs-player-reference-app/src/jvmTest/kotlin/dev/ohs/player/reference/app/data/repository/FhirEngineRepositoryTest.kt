@@ -146,4 +146,82 @@ class FhirEngineRepositoryTest {
     val groups = repository.all("Group").filterIsInstance<Group>()
     assertEquals("Patient/$patientId", groups.first().member.first().entity.reference?.value)
   }
+
+  @Test
+  fun upsertBundle_resolvesIdsViaRequestUrlAbsoluteFullUrlAndGeneratedFallback() = runTest {
+    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
+    val bundle =
+      json.decodeFromString(
+        Bundle.serializer(),
+        """
+          {
+            "resourceType": "Bundle",
+            "type": "collection",
+            "entry": [
+              {
+                "fullUrl": "https://example.org/fhir/Patient/patient-abs-1",
+                "resource": {
+                  "resourceType": "Patient",
+                  "name": [{"family": "Abs"}]
+                }
+              },
+              {
+                "request": {"method": "PUT", "url": "Patient/patient-req-1"},
+                "resource": {
+                  "resourceType": "Patient",
+                  "name": [{"family": "Req"}]
+                }
+              },
+              {
+                "resource": {
+                  "resourceType": "Patient",
+                  "name": [{"family": "Generated"}]
+                }
+              },
+              {
+                "fullUrl": "urn:uuid:group-200",
+                "resource": {
+                  "resourceType": "Group",
+                  "type": "person",
+                  "actual": true,
+                  "member": [
+                    {"entity": {"reference": "https://example.org/fhir/Patient/patient-abs-1"}}
+                  ]
+                }
+              },
+              {
+                "fullUrl": "urn:uuid:dropped-entry"
+              }
+            ]
+          }
+        """
+          .trimIndent(),
+      )
+
+    val storedCount = repository.upsert(bundle)
+
+    // 4 stored: absolute-fullUrl patient, request-url patient, generated-id patient, and the
+    // group. The 5th entry (resource == null) is silently dropped and does not count.
+    assertEquals(4, storedCount)
+    assertEquals(1L, repository.revision.value)
+
+    val patients = repository.all("Patient").filterIsInstance<Patient>()
+    assertEquals(3, patients.size)
+    val patientIds = patients.mapNotNull { it.id }
+
+    // idFromFullUrl: absolute-URL fullUrl resolves to the last path segment.
+    assertEquals(true, patientIds.contains("patient-abs-1"))
+    // idFromRequestUrl: no fullUrl, so id comes from request.url's last path segment.
+    assertEquals(true, patientIds.contains("patient-req-1"))
+    // generateId(): neither fullUrl nor request present, so a random id is generated. It's
+    // whichever id isn't one of the two known ones above.
+    val generatedId = patientIds.first { it != "patient-abs-1" && it != "patient-req-1" }
+    assertEquals(true, generatedId.isNotBlank())
+
+    // Reference rewriting: the group's reference to the absolute-fullUrl patient is rewritten to
+    // "Patient/<resolved-id>", proving the plain-path idFromFullUrl branch feeds the referenceMap.
+    val groups = repository.all("Group").filterIsInstance<Group>()
+    assertEquals(1, groups.size)
+    assertEquals("Patient/patient-abs-1", groups.first().member.first().entity.reference?.value)
+  }
 }

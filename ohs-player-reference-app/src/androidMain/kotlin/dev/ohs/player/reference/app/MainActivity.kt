@@ -19,19 +19,21 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import dev.ohs.fhir.FhirEngineConfiguration
+import dev.ohs.fhir.FhirEngineProvider
 import dev.ohs.fhir.datacapture.DataCapture
 import dev.ohs.player.reference.app.data.AppDependencies
 import dev.ohs.player.reference.app.data.repository.AndroidAppContextHolder
-import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
-import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
+import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     AndroidAppContextHolder.applicationContext = applicationContext
+    FhirEngineProvider.init(FhirEngineConfiguration(), applicationContext)
     AppDependencies.fhirRepository =
-      InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
+      FhirEngineRepository(FhirEngineProvider.getInstance(applicationContext))
     DataCapture.initialize(applicationContext)
     setContent { App() }
   }

@@ -17,13 +17,14 @@ package dev.ohs.player.reference.app
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
+import dev.ohs.fhir.FhirEngineConfiguration
+import dev.ohs.fhir.FhirEngineProvider
 import dev.ohs.player.reference.app.data.AppDependencies
-import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
-import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
+import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-  AppDependencies.fhirRepository =
-    InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
+  FhirEngineProvider.init(FhirEngineConfiguration())
+  AppDependencies.fhirRepository = FhirEngineRepository(FhirEngineProvider.getInstance())
   ComposeViewport { App() }
 }

@@ -41,10 +41,13 @@ kotlin {
 
   jvm()
 
-  js {
-    browser()
-    binaries.executable()
-  }
+  // Temporarily disabled: fhir-engine:2.0.0-alpha01 (a commonMain dependency) does not publish a
+  // `js` artifact (only android, iosArm64/iosSimulatorArm64, jvm, and wasmJs). Re-enable once
+  // fhir-engine ships js support.
+  // js {
+  //   browser()
+  //   binaries.executable()
+  // }
 
   @OptIn(ExperimentalWasmDsl::class)
   wasmJs {

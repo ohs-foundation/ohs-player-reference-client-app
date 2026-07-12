@@ -75,15 +75,18 @@ jobs:
               :ohs-player-reference-app:lintDebug
             kotlinDaemonHeap: '-Xmx6g -XX:+UseG1GC'
             extraArgs: ''
-          - id: js
-            label: Kotlin/JS
-            # jsBrowserTest is disabled in build.gradle.kts, but requesting
-            # it still runs the compile prerequisites (compileKotlinJs +
-            # compileTestDevelopmentExecutableKotlinJs) — which is the work
-            # we want covered.
-            tasks: ':ohs-player-reference-app:jsBrowserTest'
-            kotlinDaemonHeap: '-Xmx10g -XX:+UseG1GC'
-            extraArgs: ''
+          # Temporarily disabled: fhir-engine:2.0.0-alpha01 does not publish a `js` artifact, so
+          # the js target is commented out in ohs-player-reference-app/build.gradle.kts. Re-enable
+          # this matrix entry when the js target comes back.
+          # - id: js
+          #   label: Kotlin/JS
+          #   # jsBrowserTest is disabled in build.gradle.kts, but requesting
+          #   # it still runs the compile prerequisites (compileKotlinJs +
+          #   # compileTestDevelopmentExecutableKotlinJs) — which is the work
+          #   # we want covered.
+          #   tasks: ':ohs-player-reference-app:jsBrowserTest'
+          #   kotlinDaemonHeap: '-Xmx10g -XX:+UseG1GC'
+          #   extraArgs: ''
           - id: wasm
             label: Kotlin/Wasm
             tasks: >-

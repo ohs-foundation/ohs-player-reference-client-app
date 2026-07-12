@@ -17,12 +17,16 @@ package dev.ohs.player.reference.app
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import dev.ohs.fhir.FhirEngineConfiguration
+import dev.ohs.fhir.FhirEngineProvider
 import dev.ohs.player.reference.app.data.AppDependencies
-import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
-import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
+import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
+import java.io.File
 
 fun main() = application {
-  AppDependencies.fhirRepository =
-    InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
+  val userHome = System.getProperty("user.home").orEmpty().ifBlank { "." }
+  val storageDirectory = File(userHome, ".ohs-player-reference-app").absolutePath
+  FhirEngineProvider.init(FhirEngineConfiguration(storageDirectory = storageDirectory))
+  AppDependencies.fhirRepository = FhirEngineRepository(FhirEngineProvider.getInstance())
   Window(onCloseRequest = ::exitApplication, title = "OHS Player Reference App") { App() }
 }

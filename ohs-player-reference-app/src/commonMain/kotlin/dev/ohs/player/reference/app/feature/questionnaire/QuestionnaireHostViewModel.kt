@@ -23,30 +23,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-
-/** Single shared [Json] instance/configuration for encoding and decoding FHIR resources. */
-object FhirJson {
-  val instance: Json = Json {
-    prettyPrint = true
-    explicitNulls = false
-    encodeDefaults = false
-    ignoreUnknownKeys = true
-  }
-}
-
-sealed interface QuestionnaireHostUiState {
-  data object Loading : QuestionnaireHostUiState
-
-  data class Ready(val questionnaireJson: String, val title: String?) : QuestionnaireHostUiState
-
-  data class Submitting(val questionnaireJson: String, val title: String?) :
-    QuestionnaireHostUiState
-
-  data class Submitted(val result: QuestionnaireSubmissionResult) : QuestionnaireHostUiState
-
-  data class Error(val message: String) : QuestionnaireHostUiState
-}
 
 /**
  * Screen-level state holder for hosting a single questionnaire. All FHIR work is delegated to

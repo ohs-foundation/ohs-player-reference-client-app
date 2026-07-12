@@ -33,6 +33,8 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 /**
  * [FhirRepository] backed by a real on-disk database via [FhirEngine].
@@ -83,7 +85,16 @@ class FhirEngineRepository(
 
   private suspend fun ensureSeeded() {
     if (seeded) return
-    seedMutex.withLock { seeded = true }
+    seedMutex.withLock {
+      if (seeded) return@withLock
+      if (fhirEngine.count(Search(ResourceType.Patient)) == 0L) {
+        val resources = seedResourcesLoader()
+        if (resources.isNotEmpty()) {
+          fhirEngine.withTransaction { resources.forEach { upsertResource(it) } }
+        }
+      }
+      seeded = true
+    }
   }
 
   private suspend fun upsertResource(resource: Resource) {
@@ -171,4 +182,9 @@ class FhirEngineRepository(
   }
 }
 
-private suspend fun loadBundledSampleResources(): List<Resource> = emptyList()
+@OptIn(ExperimentalResourceApi::class)
+private suspend fun loadBundledSampleResources(): List<Resource> {
+  val bundleJson = Res.readBytes("files/SampleResourcesBundle.json").decodeToString()
+  val bundle = FhirJson.instance.decodeFromString(Bundle.serializer(), bundleJson)
+  return bundle.entry.mapNotNull { it.resource }
+}

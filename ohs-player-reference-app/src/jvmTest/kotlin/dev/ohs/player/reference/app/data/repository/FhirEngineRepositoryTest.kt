@@ -224,4 +224,41 @@ class FhirEngineRepositoryTest {
     assertEquals(1, groups.size)
     assertEquals("Patient/patient-abs-1", groups.first().member.first().entity.reference?.value)
   }
+
+  @Test
+  fun firstAccess_seedsFromLoaderWhenDatabaseEmpty() = runTest {
+    val seedPatient =
+      json.decodeFromString(
+        Patient.serializer(),
+        """{"resourceType": "Patient", "id": "seed-patient-1", "active": true}""",
+      )
+    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { listOf(seedPatient) })
+
+    val patients = repository.all("Patient")
+
+    assertEquals(listOf("seed-patient-1"), patients.mapNotNull { it.id })
+  }
+
+  @Test
+  fun firstAccess_doesNotSeedWhenDatabaseAlreadyHasPatients() = runTest {
+    val existingPatient =
+      json.decodeFromString(
+        Patient.serializer(),
+        """{"resourceType": "Patient", "id": "existing-patient-1", "active": true}""",
+      )
+    fhirEngine.create(existingPatient)
+    var seedLoaderCalled = false
+    val repository =
+      FhirEngineRepository(
+        fhirEngine,
+        seedResourcesLoader = {
+          seedLoaderCalled = true
+          emptyList()
+        },
+      )
+
+    repository.all("Patient")
+
+    assertEquals(false, seedLoaderCalled)
+  }
 }

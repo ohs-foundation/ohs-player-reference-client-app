@@ -73,6 +73,7 @@ kotlin {
       implementation(libs.kotlinx.serialization.json)
       implementation(libs.kotlinx.datetime)
       implementation(libs.navigation.compose)
+      implementation(libs.ohs.fhir.engine)
       implementation(libs.ohs.fhir.model)
       implementation(libs.ohs.fhir.path)
       implementation(libs.fhir.data.capture)

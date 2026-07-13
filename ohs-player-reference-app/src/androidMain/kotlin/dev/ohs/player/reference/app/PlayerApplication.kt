@@ -15,15 +15,19 @@
  */
 package dev.ohs.player.reference.app
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import android.app.Application
+import dev.ohs.fhir.FhirEngineConfiguration
+import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.datacapture.DataCapture
+import dev.ohs.player.reference.app.data.AppDependencies
+import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 
-class MainActivity : ComponentActivity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    enableEdgeToEdge()
-    super.onCreate(savedInstanceState)
-    setContent { App() }
+class PlayerApplication : Application() {
+  override fun onCreate() {
+    super.onCreate()
+    FhirEngineProvider.init(FhirEngineConfiguration(), applicationContext)
+    AppDependencies.fhirRepository =
+      FhirEngineRepository(FhirEngineProvider.getInstance(applicationContext))
+    DataCapture.initialize(applicationContext)
   }
 }

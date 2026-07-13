@@ -41,7 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import dev.ohs.player.generated.state.GroupHeaderState
 import dev.ohs.player.generated.state.GroupMemberState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
@@ -58,7 +59,8 @@ fun GroupProfileScreen(
   onMemberClick: (String) -> Unit,
   onAddMembers: () -> Unit,
 ) {
-  val viewModel = viewModel(key = groupId) { GroupProfileViewModel(groupId) }
+  val viewModel =
+    koinViewModel<GroupProfileViewModel>(key = groupId) { parametersOf(groupId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
 

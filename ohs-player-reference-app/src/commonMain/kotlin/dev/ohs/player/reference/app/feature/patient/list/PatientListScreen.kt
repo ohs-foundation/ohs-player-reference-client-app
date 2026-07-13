@@ -28,7 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.compose.viewmodel.koinViewModel
 import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.library.layout.VerticalListRenderer
@@ -37,7 +37,7 @@ import dev.ohs.player.library.scaffold.ListScaffold
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientListScreen(onPatientClick: (String) -> Unit) {
-  val viewModel: PatientListViewModel = viewModel { PatientListViewModel() }
+  val viewModel: PatientListViewModel = koinViewModel()
   val patients by viewModel.patients.collectAsStateWithLifecycle()
 
   if (patients == null) {

@@ -24,13 +24,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class IpsPatientProfileViewModel(patientId: String) : ViewModel() {
+class IpsPatientProfileViewModel(patientId: String, patientRepository: PatientRepository) :
+  ViewModel() {
   private val _uiState = MutableStateFlow<ProfileUiState?>(null)
   val uiState: StateFlow<ProfileUiState?> = _uiState.asStateFlow()
 
   init {
     viewModelScope.launch {
-      PatientRepository.observePatientProfile(patientId).collect { _uiState.value = it }
+      patientRepository.observePatientProfile(patientId).collect { _uiState.value = it }
     }
   }
 }

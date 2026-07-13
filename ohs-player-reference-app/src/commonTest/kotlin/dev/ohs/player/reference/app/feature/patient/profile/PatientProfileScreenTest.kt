@@ -25,11 +25,19 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
+import dev.ohs.player.reference.app.data.AppDependencies
+import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class PatientProfileScreenTest {
+
+  @BeforeTest
+  fun setUp() {
+    AppDependencies.fhirRepository = InMemorySampleFhirRepository()
+  }
 
   @Test
   fun knownPatient_rendersNameAndClinicalSections() = runComposeUiTest {

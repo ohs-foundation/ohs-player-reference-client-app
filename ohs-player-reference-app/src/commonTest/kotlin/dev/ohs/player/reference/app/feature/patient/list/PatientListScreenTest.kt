@@ -24,11 +24,19 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
+import dev.ohs.player.reference.app.data.AppDependencies
+import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalTestApi::class)
 class PatientListScreenTest {
+
+  @BeforeTest
+  fun setUp() {
+    AppDependencies.fhirRepository = InMemorySampleFhirRepository()
+  }
 
   @Test
   fun tappingPatient_invokesOnPatientClickWithMatchingId() = runComposeUiTest {

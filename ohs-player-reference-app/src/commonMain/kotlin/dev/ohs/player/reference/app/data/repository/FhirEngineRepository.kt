@@ -183,7 +183,7 @@ class FhirEngineRepository(
 }
 
 @OptIn(ExperimentalResourceApi::class)
-private suspend fun loadBundledSampleResources(): List<Resource> {
+internal suspend fun loadBundledSampleResources(): List<Resource> {
   val bundleJson = Res.readBytes("files/SampleResourcesBundle.json").decodeToString()
   val bundle = FhirJson.instance.decodeFromString(Bundle.serializer(), bundleJson)
   return bundle.entry.mapNotNull { it.resource }

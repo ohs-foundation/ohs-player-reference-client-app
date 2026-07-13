@@ -23,14 +23,12 @@ import dev.ohs.fhir.FhirEngineConfiguration
 import dev.ohs.fhir.FhirEngineProvider
 import dev.ohs.fhir.datacapture.DataCapture
 import dev.ohs.player.reference.app.data.AppDependencies
-import dev.ohs.player.reference.app.data.repository.AndroidAppContextHolder
 import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
-    AndroidAppContextHolder.applicationContext = applicationContext
     FhirEngineProvider.init(FhirEngineConfiguration(), applicationContext)
     AppDependencies.fhirRepository =
       FhirEngineRepository(FhirEngineProvider.getInstance(applicationContext))

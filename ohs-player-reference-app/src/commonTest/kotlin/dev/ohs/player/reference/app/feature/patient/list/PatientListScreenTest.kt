@@ -24,22 +24,31 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
-import dev.ohs.player.reference.app.data.AppDependencies
+import dev.ohs.player.reference.app.data.di.repositoryModule
 import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
 import dev.ohs.player.reference.app.data.repository.SamplePatientFixture
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 
 @OptIn(ExperimentalTestApi::class)
 class PatientListScreenTest {
 
   @BeforeTest
   fun setUp() = runTest {
+    stopKoin()
     val repository = InMemorySampleFhirRepository()
     SamplePatientFixture.resources.forEach { repository.upsert(it) }
-    AppDependencies.fhirRepository = repository
+    startKoin {
+      modules(
+        module { single { repository } },
+        repositoryModule,
+      )
+    }
   }
 
   @Test

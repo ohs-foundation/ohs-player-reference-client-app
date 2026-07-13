@@ -31,13 +31,13 @@ data class GroupProfileUiState(
   val members: List<GroupMemberState> = emptyList(),
 )
 
-class GroupProfileViewModel(groupId: String) : ViewModel() {
+class GroupProfileViewModel(groupId: String, groupRepository: GroupRepository) : ViewModel() {
   private val _uiState = MutableStateFlow<GroupProfileUiState?>(null)
   val uiState: StateFlow<GroupProfileUiState?> = _uiState.asStateFlow()
 
   init {
     viewModelScope.launch {
-      GroupRepository.observeGroupProfile(groupId).collect { _uiState.value = it }
+      groupRepository.observeGroupProfile(groupId).collect { _uiState.value = it }
     }
   }
 }

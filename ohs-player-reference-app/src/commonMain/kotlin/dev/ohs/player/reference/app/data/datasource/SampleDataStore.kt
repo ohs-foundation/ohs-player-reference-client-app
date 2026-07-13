@@ -91,7 +91,7 @@ suspend fun patientProfileSearchResult(
  * itself — no additional includes needed.
  */
 suspend fun groupListSearchResults(
-  repository: FhirRepository = AppDependencies.fhirRepository
+  repository: FhirRepository
 ): List<SearchResult<Resource>> =
   repository.all("Group").filterIsInstance<Group>().map { group -> SearchResult(resource = group) }
 
@@ -103,7 +103,7 @@ suspend fun groupListSearchResults(
  */
 suspend fun groupProfileSearchResult(
   groupId: String,
-  repository: FhirRepository = AppDependencies.fhirRepository,
+  repository: FhirRepository,
 ): SearchResult<Resource>? {
   val group = repository.get("Group", groupId) as? Group ?: return null
   val memberPatients =

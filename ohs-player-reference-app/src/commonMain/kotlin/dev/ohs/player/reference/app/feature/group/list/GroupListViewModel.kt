@@ -25,13 +25,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class GroupListViewModel : ViewModel() {
+class GroupListViewModel(private val groupRepository: GroupRepository) : ViewModel() {
   private val _groups = MutableStateFlow<List<GroupListState>?>(null)
   val groups: StateFlow<List<GroupListState>?> = _groups.asStateFlow()
 
   init {
     viewModelScope.launch {
-      GroupRepository.observeGroups().collect { _groups.value = it.reversed() }
+      groupRepository.observeGroups().collect { _groups.value = it.reversed() }
     }
   }
 }

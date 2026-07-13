@@ -48,7 +48,7 @@ class FhirEngineRepositoryTest {
 
   @Test
   fun upsertResource_thenGet_returnsStoredResource() = runTest {
-    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
+    val repository = FhirEngineRepository(fhirEngine)
     val patient =
       json.decodeFromString(
         Patient.serializer(),
@@ -72,7 +72,7 @@ class FhirEngineRepositoryTest {
 
   @Test
   fun upsertResource_calledTwiceWithSameId_updatesInPlace() = runTest {
-    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
+    val repository = FhirEngineRepository(fhirEngine)
     val original =
       json.decodeFromString(
         Patient.serializer(),
@@ -95,14 +95,14 @@ class FhirEngineRepositoryTest {
 
   @Test
   fun get_missingResource_returnsNull() = runTest {
-    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
+    val repository = FhirEngineRepository(fhirEngine)
 
     assertNull(repository.get("Patient", "does-not-exist"))
   }
 
   @Test
   fun upsertBundle_resolvesFullUrlIdsAndRewritesReferences() = runTest {
-    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
+    val repository = FhirEngineRepository(fhirEngine)
     val bundle =
       json.decodeFromString(
         Bundle.serializer(),
@@ -149,7 +149,7 @@ class FhirEngineRepositoryTest {
 
   @Test
   fun upsertBundle_resolvesIdsViaRequestUrlAbsoluteFullUrlAndGeneratedFallback() = runTest {
-    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { emptyList() })
+    val repository = FhirEngineRepository(fhirEngine)
     val bundle =
       json.decodeFromString(
         Bundle.serializer(),
@@ -223,42 +223,5 @@ class FhirEngineRepositoryTest {
     val groups = repository.all("Group").filterIsInstance<Group>()
     assertEquals(1, groups.size)
     assertEquals("Patient/patient-abs-1", groups.first().member.first().entity.reference?.value)
-  }
-
-  @Test
-  fun firstAccess_seedsFromLoaderWhenDatabaseEmpty() = runTest {
-    val seedPatient =
-      json.decodeFromString(
-        Patient.serializer(),
-        """{"resourceType": "Patient", "id": "seed-patient-1", "active": true}""",
-      )
-    val repository = FhirEngineRepository(fhirEngine, seedResourcesLoader = { listOf(seedPatient) })
-
-    val patients = repository.all("Patient")
-
-    assertEquals(listOf("seed-patient-1"), patients.mapNotNull { it.id })
-  }
-
-  @Test
-  fun firstAccess_doesNotSeedWhenDatabaseAlreadyHasPatients() = runTest {
-    val existingPatient =
-      json.decodeFromString(
-        Patient.serializer(),
-        """{"resourceType": "Patient", "id": "existing-patient-1", "active": true}""",
-      )
-    fhirEngine.create(existingPatient)
-    var seedLoaderCalled = false
-    val repository =
-      FhirEngineRepository(
-        fhirEngine,
-        seedResourcesLoader = {
-          seedLoaderCalled = true
-          emptyList()
-        },
-      )
-
-    repository.all("Patient")
-
-    assertEquals(false, seedLoaderCalled)
   }
 }

@@ -26,43 +26,31 @@ import dev.ohs.player.reference.app.generateId
 import dev.ohs.player.reference.app.util.FhirJson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 /**
  * [FhirRepository] backed by a real on-disk database via [FhirEngine].
  *
- * On first access, seeds the bundled sample resources if the database is empty — see
- * [ensureSeeded]. Bundle submissions resolve entry ids and rewrite internal references — see
+ * Bundle submissions resolve entry ids and rewrite internal references — see
  * [normalizeBundleResources] (added in a later change).
  */
-class FhirEngineRepository(
-  private val fhirEngine: FhirEngine,
-  private val seedResourcesLoader: suspend () -> List<Resource> = ::loadBundledSampleResources,
-) : FhirRepository {
+class FhirEngineRepository(private val fhirEngine: FhirEngine) : FhirRepository {
 
   private val json = FhirJson.instance
-  private val seedMutex = Mutex()
-  private var seeded = false
   private val _revision = MutableStateFlow(0L)
 
   override val revision: StateFlow<Long> = _revision
 
   override suspend fun upsert(resource: Resource) {
-    ensureSeeded()
     upsertResource(resource)
     _revision.value += 1
   }
 
   override suspend fun upsert(bundle: Bundle): Int {
-    ensureSeeded()
     val normalized = normalizeBundleResources(bundle)
     if (normalized.isEmpty()) return 0
     fhirEngine.withTransaction { normalized.forEach { upsertResource(it) } }
@@ -71,29 +59,13 @@ class FhirEngineRepository(
   }
 
   override suspend fun get(resourceType: String, id: String): Resource? {
-    ensureSeeded()
     return runCatching { fhirEngine.get(ResourceType.valueOf(resourceType), id) }
       .getOrElse { if (it is ResourceNotFoundException) null else throw it }
   }
 
   override suspend fun all(resourceType: String): List<Resource> {
-    ensureSeeded()
     return fhirEngine.search<Resource>(Search(ResourceType.valueOf(resourceType))).map {
       it.resource
-    }
-  }
-
-  private suspend fun ensureSeeded() {
-    if (seeded) return
-    seedMutex.withLock {
-      if (seeded) return@withLock
-      if (fhirEngine.count(Search(ResourceType.Patient)) == 0L) {
-        val resources = seedResourcesLoader()
-        if (resources.isNotEmpty()) {
-          fhirEngine.withTransaction { resources.forEach { upsertResource(it) } }
-        }
-      }
-      seeded = true
     }
   }
 
@@ -180,11 +152,4 @@ class FhirEngineRepository(
       JsonObject(obj + ("id" to JsonPrimitive(newId))),
     )
   }
-}
-
-@OptIn(ExperimentalResourceApi::class)
-internal suspend fun loadBundledSampleResources(): List<Resource> {
-  val bundleJson = Res.readBytes("files/SampleResourcesBundle.json").decodeToString()
-  val bundle = FhirJson.instance.decodeFromString(Bundle.serializer(), bundleJson)
-  return bundle.entry.mapNotNull { it.resource }
 }

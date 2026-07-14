@@ -50,8 +50,7 @@ class PatientListScreenTest {
     }
   }
 
-  @AfterTest
-  fun tearDown() = stopKoin()
+  @AfterTest fun tearDown() = stopKoin()
 
   @Test
   fun tappingPatient_invokesOnPatientClickWithMatchingId() = runComposeUiTest {

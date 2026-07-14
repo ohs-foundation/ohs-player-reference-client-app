@@ -88,9 +88,7 @@ suspend fun patientProfileSearchResult(
  * Group list: root = Group only. Member count is derived from `Group.member.size` on the resource
  * itself — no additional includes needed.
  */
-suspend fun groupListSearchResults(
-  repository: FhirRepository
-): List<SearchResult<Resource>> =
+suspend fun groupListSearchResults(repository: FhirRepository): List<SearchResult<Resource>> =
   repository.all("Group").filterIsInstance<Group>().map { group -> SearchResult(resource = group) }
 
 /**

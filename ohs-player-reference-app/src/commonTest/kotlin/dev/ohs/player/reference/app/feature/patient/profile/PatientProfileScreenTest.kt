@@ -51,8 +51,7 @@ class PatientProfileScreenTest {
     }
   }
 
-  @AfterTest
-  fun tearDown() = stopKoin()
+  @AfterTest fun tearDown() = stopKoin()
 
   @Test
   fun knownPatient_rendersNameAndClinicalSections() = runComposeUiTest {

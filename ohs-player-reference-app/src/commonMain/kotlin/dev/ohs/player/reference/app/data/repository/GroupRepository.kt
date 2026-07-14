@@ -32,8 +32,7 @@ class GroupRepository(private val fhirRepository: FhirRepository) {
   // single background thread without any explicit locking.
   private val extractorDispatcher = Dispatchers.Default.limitedParallelism(1)
 
-  fun observeGroups(): Flow<List<GroupListState>> =
-    fhirRepository.revision.map { getGroups() }
+  fun observeGroups(): Flow<List<GroupListState>> = fhirRepository.revision.map { getGroups() }
 
   suspend fun getGroups(): List<GroupListState> =
     withContext(extractorDispatcher) {
@@ -46,7 +45,8 @@ class GroupRepository(private val fhirRepository: FhirRepository) {
   suspend fun getGroupProfile(groupId: String): GroupProfileUiState =
     withContext(extractorDispatcher) {
       val result =
-        groupProfileSearchResult(groupId, fhirRepository) ?: return@withContext GroupProfileUiState()
+        groupProfileSearchResult(groupId, fhirRepository)
+          ?: return@withContext GroupProfileUiState()
       buildGroupProfileUiState(
         groupHeader = extractor.extract<GroupHeaderState>(result).firstOrNull(),
         extractedMembers = extractor.extract<GroupMemberState>(result),

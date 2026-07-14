@@ -24,6 +24,12 @@ import org.koin.core.module.Module
  */
 fun initKoin(platformModule: Module) {
   startKoin {
-    modules(platformModule, fhirEngineRepositoryModule, repositoryModule, serviceModule, viewModelModule)
+    modules(
+      platformModule,
+      fhirEngineRepositoryModule,
+      repositoryModule,
+      serviceModule,
+      viewModelModule,
+    )
   }
 }

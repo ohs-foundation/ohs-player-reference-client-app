@@ -22,8 +22,8 @@ import kotlinx.coroutines.flow.StateFlow
 /** Minimal persistence seam for FHIR resources, backed by [FhirEngineRepository] in production. */
 interface FhirRepository {
   /**
-   * Incremented on every successful [upsert]. Implementers must bump this after each write so
-   * that observers (e.g. [PatientRepository], [GroupRepository]) know to re-query.
+   * Incremented on every successful [upsert]. Implementers must bump this after each write so that
+   * observers (e.g. [PatientRepository], [GroupRepository]) know to re-query.
    */
   val revision: StateFlow<Long>
 

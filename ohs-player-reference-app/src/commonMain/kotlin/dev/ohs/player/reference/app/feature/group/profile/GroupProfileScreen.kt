@@ -59,8 +59,7 @@ fun GroupProfileScreen(
   onMemberClick: (String) -> Unit,
   onAddMembers: () -> Unit,
 ) {
-  val viewModel =
-    koinViewModel<GroupProfileViewModel>(key = groupId) { parametersOf(groupId) }
+  val viewModel = koinViewModel<GroupProfileViewModel>(key = groupId) { parametersOf(groupId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
 

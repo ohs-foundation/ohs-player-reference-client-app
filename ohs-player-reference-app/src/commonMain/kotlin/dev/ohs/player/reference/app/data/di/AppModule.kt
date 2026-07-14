@@ -33,21 +33,21 @@ import org.koin.dsl.module
  * Binds the production [FhirRepository], backed by [FhirEngineRepository]. Requires a
  * [dev.ohs.fhir.FhirEngine] binding, supplied by each platform's module (see `initKoin` callers).
  */
-val fhirEngineRepositoryModule = module { single<FhirRepository> { FhirEngineRepository(get()) } }
+internal val fhirEngineRepositoryModule = module { single<FhirRepository> { FhirEngineRepository(get()) } }
 
 /**
  * Repositories that only depend on [FhirRepository] — kept separate from
  * [fhirEngineRepositoryModule] so tests can swap in a fake [FhirRepository] without redeclaring
  * these bindings.
  */
-val repositoryModule = module {
+internal val repositoryModule = module {
   single { PatientRepository(get()) }
   single { GroupRepository(get()) }
 }
 
-val serviceModule = module { factory { QuestionnaireService(get()) } }
+internal val serviceModule = module { factory { QuestionnaireService(get()) } }
 
-val viewModelModule = module {
+internal val viewModelModule = module {
   viewModel { PatientListViewModel(get()) }
   viewModel { (patientId: String) -> IpsPatientProfileViewModel(patientId, get()) }
   viewModel { GroupListViewModel(get()) }

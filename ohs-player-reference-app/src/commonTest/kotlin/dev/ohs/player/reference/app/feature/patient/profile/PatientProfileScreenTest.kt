@@ -26,8 +26,11 @@ import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
 import dev.ohs.player.reference.app.data.di.repositoryModule
+import dev.ohs.player.reference.app.data.di.viewModelModule
+import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
 import dev.ohs.player.reference.app.data.repository.SamplePatientFixture
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -41,16 +44,15 @@ class PatientProfileScreenTest {
 
   @BeforeTest
   fun setUp() = runTest {
-    stopKoin()
     val repository = InMemorySampleFhirRepository()
     SamplePatientFixture.resources.forEach { repository.upsert(it) }
     startKoin {
-      modules(
-        module { single { repository } },
-        repositoryModule,
-      )
+      modules(module { single<FhirRepository> { repository } }, repositoryModule, viewModelModule)
     }
   }
+
+  @AfterTest
+  fun tearDown() = stopKoin()
 
   @Test
   fun knownPatient_rendersNameAndClinicalSections() = runComposeUiTest {

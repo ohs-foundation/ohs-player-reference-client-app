@@ -21,16 +21,16 @@ import dev.ohs.player.reference.app.data.repository.PatientRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class IpsPatientProfileViewModel(patientId: String) : ViewModel() {
+class PatientProfileViewModel(patientId: String, patientRepository: PatientRepository) :
+  ViewModel() {
   private val _uiState = MutableStateFlow<ProfileUiState?>(null)
   val uiState: StateFlow<ProfileUiState?> = _uiState.asStateFlow()
 
   init {
     viewModelScope.launch {
-      PatientRepository.observePatientProfile(patientId).collect { _uiState.value = it }
+      patientRepository.observePatientProfile(patientId).collect { _uiState.value = it }
     }
   }
 }

@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app.data.repository
+package dev.ohs.player.reference.app.util
 
-interface RepositorySnapshotStore {
-  suspend fun read(): String?
+import kotlinx.serialization.json.Json
 
-  suspend fun write(snapshot: String)
-}
-
-/**
- * TODO(#58): Temporary snapshot persistence for the in-memory repository. Delete this once
- *   FHIREngine-backed persistence is implemented; that should make these platform-specific stores
- *   unnecessary.
- */
-expect object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
-  override suspend fun read(): String?
-
-  override suspend fun write(snapshot: String)
+/** Single shared [Json] instance/configuration for encoding and decoding FHIR resources. */
+object FhirJson {
+  val instance: Json = Json {
+    prettyPrint = true
+    explicitNulls = false
+    encodeDefaults = false
+    ignoreUnknownKeys = true
+  }
 }

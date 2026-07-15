@@ -34,16 +34,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.generated.state.GroupListState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.scaffold.ListScaffold
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Unit) {
-  val viewModel: GroupListViewModel = viewModel { GroupListViewModel() }
+  val viewModel: GroupListViewModel = koinViewModel()
   val groups by viewModel.groups.collectAsStateWithLifecycle()
 
   if (groups == null) {

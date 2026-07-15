@@ -19,14 +19,15 @@ import dev.ohs.fhir.model.r4.Bundle
 import dev.ohs.fhir.model.r4.Resource
 import kotlinx.coroutines.flow.StateFlow
 
-/**
- * Minimal persistence seam for FHIR resources.
- *
- * The reference app keeps data in memory today so questionnaire submissions can immediately feed
- * the demo UI. When the engine-backed database lands, the implementation behind this interface can
- * be swapped without changing the feature layer.
- */
+/** Minimal persistence seam for FHIR resources, backed by [FhirEngineRepository] in production. */
 interface FhirRepository {
+  /**
+   * Incremented on every successful [upsert]. Implementers must bump this after each write so that
+   * observers (e.g. [PatientRepository], [GroupRepository]) know to re-query.
+   *
+   * TODO: To be deleted, once https://github.com/ohs-foundation/kotlin-fhir-engine/issues/65 is
+   *   done
+   */
   val revision: StateFlow<Long>
 
   suspend fun upsert(resource: Resource)

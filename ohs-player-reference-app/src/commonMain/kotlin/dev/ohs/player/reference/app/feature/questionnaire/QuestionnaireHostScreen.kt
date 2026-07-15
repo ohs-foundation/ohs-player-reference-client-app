@@ -45,15 +45,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.fhir.datacapture.Questionnaire
 import dev.ohs.fhir.datacapture.QuestionnaireConfig
 import dev.ohs.fhir.datacapture.QuestionnaireItemViewFactoryMatcher
 import dev.ohs.fhir.datacapture.QuestionnaireItemViewFactoryMatchersProvider
-import dev.ohs.player.reference.app.data.AppDependencies
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,12 +74,8 @@ fun QuestionnaireHostScreen(
   }
 
   val viewModel =
-    viewModel(key = "$questionnaireId:$patientId:$groupId") {
-      QuestionnaireHostViewModel(
-        questionnaireId = questionnaireId,
-        launchContext = launchContext,
-        questionnaireService = QuestionnaireService(repository = AppDependencies.fhirRepository),
-      )
+    koinViewModel<QuestionnaireHostViewModel>(key = "$questionnaireId:$patientId:$groupId") {
+      parametersOf(questionnaireId, launchContext)
     }
   val uiState by viewModel.uiState.collectAsState()
   val coroutineScope = rememberCoroutineScope()

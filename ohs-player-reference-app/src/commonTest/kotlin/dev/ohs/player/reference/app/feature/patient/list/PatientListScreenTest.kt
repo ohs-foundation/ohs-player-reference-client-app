@@ -24,11 +24,33 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
+import dev.ohs.player.reference.app.data.di.repositoryModule
+import dev.ohs.player.reference.app.data.di.viewModelModule
+import dev.ohs.player.reference.app.data.repository.FhirRepository
+import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
+import dev.ohs.player.reference.app.data.repository.SamplePatientFixture
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.test.runTest
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 
 @OptIn(ExperimentalTestApi::class)
 class PatientListScreenTest {
+
+  @BeforeTest
+  fun setUp() = runTest {
+    val repository = InMemorySampleFhirRepository()
+    SamplePatientFixture.resources.forEach { repository.upsert(it) }
+    startKoin {
+      modules(module { single<FhirRepository> { repository } }, repositoryModule, viewModelModule)
+    }
+  }
+
+  @AfterTest fun tearDown() = stopKoin()
 
   @Test
   fun tappingPatient_invokesOnPatientClickWithMatchingId() = runComposeUiTest {

@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.generated.state.AllergyReactionState
 import dev.ohs.player.generated.state.PatientAllergyState
 import dev.ohs.player.generated.state.PatientConditionState
@@ -58,11 +57,14 @@ import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.componentRenderer
 import dev.ohs.player.library.registry.layoutRenderer
 import dev.ohs.player.library.renderer.RenderOptions
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalData: () -> Unit) {
-  val viewModel = viewModel(key = patientId) { IpsPatientProfileViewModel(patientId) }
+  val viewModel =
+    koinViewModel<PatientProfileViewModel>(key = patientId) { parametersOf(patientId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
 

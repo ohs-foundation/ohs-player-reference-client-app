@@ -19,20 +19,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import dev.ohs.fhir.datacapture.DataCapture
-import dev.ohs.player.reference.app.data.AppDependencies
-import dev.ohs.player.reference.app.data.repository.AndroidAppContextHolder
-import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
-import dev.ohs.player.reference.app.data.repository.PlatformRepositorySnapshotStore
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
-    AndroidAppContextHolder.applicationContext = applicationContext
-    AppDependencies.fhirRepository =
-      InMemoryFhirRepository(snapshotStore = PlatformRepositorySnapshotStore)
-    DataCapture.initialize(applicationContext)
     setContent { App() }
   }
 }

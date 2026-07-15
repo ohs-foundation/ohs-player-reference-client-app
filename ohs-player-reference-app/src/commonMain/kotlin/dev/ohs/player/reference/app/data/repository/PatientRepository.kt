@@ -23,7 +23,6 @@ import dev.ohs.player.generated.state.PatientImmunizationState
 import dev.ohs.player.generated.state.PatientMedicationState
 import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.generated.state.PatientTelecomState
-import dev.ohs.player.reference.app.data.AppDependencies
 import dev.ohs.player.reference.app.data.Extraction.extractor
 import dev.ohs.player.reference.app.data.datasource.allPatientIds
 import dev.ohs.player.reference.app.data.datasource.patientProfileSearchResult
@@ -34,12 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-/**
- * TODO(#58): Temporary implementation until FHIREngine integration is in place. Delete this once
- *   FHIREngine handles patient storage, retrieval, and related queries; that should simplify this
- *   repository.
- */
-object PatientRepository {
+class PatientRepository(private val fhirRepository: FhirRepository) {
 
   // FhirPathEvaluator holds mutable state is not concurrent-safe.
   // limitedParallelism(1) serializes all extraction on a single background thread without any
@@ -47,23 +41,24 @@ object PatientRepository {
   private val extractorDispatcher = Dispatchers.Default.limitedParallelism(1)
 
   fun observePatients(): Flow<List<PatientSummaryState>> =
-    AppDependencies.fhirRepository.revision.map { getPatients() }
+    fhirRepository.revision.map { getPatients() }
 
   suspend fun getPatients(): List<PatientSummaryState> =
     withContext(extractorDispatcher) {
-      allPatientIds().mapNotNull { id ->
-        patientSummarySearchResult(id)?.let {
+      allPatientIds(fhirRepository).mapNotNull { id ->
+        patientSummarySearchResult(id, fhirRepository)?.let {
           extractor.extract<PatientSummaryState>(it).firstOrNull()
         }
       }
     }
 
   fun observePatientProfile(patientId: String): Flow<ProfileUiState> =
-    AppDependencies.fhirRepository.revision.map { getPatientProfile(patientId) }
+    fhirRepository.revision.map { getPatientProfile(patientId) }
 
   suspend fun getPatientProfile(patientId: String): ProfileUiState =
     withContext(extractorDispatcher) {
-      val result = patientProfileSearchResult(patientId) ?: return@withContext ProfileUiState()
+      val result =
+        patientProfileSearchResult(patientId, fhirRepository) ?: return@withContext ProfileUiState()
       ProfileUiState(
         patient = extractor.extract<PatientSummaryState>(result).firstOrNull(),
         allergies = extractor.extract<PatientAllergyState>(result),

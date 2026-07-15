@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app.data.repository
+package dev.ohs.player.reference.app.feature.questionnaire
 
-import kotlinx.browser.window
+sealed interface QuestionnaireHostUiState {
+  data object Loading : QuestionnaireHostUiState
 
-private const val SNAPSHOT_STORAGE_KEY = "ohs-player-reference-app.fhir-repository"
+  data class Ready(val questionnaireJson: String, val title: String?) : QuestionnaireHostUiState
 
-actual object PlatformRepositorySnapshotStore : RepositorySnapshotStore {
-  actual override suspend fun read(): String? = window.localStorage.getItem(SNAPSHOT_STORAGE_KEY)
+  data class Submitting(val questionnaireJson: String, val title: String?) :
+    QuestionnaireHostUiState
 
-  actual override suspend fun write(snapshot: String) {
-    window.localStorage.setItem(SNAPSHOT_STORAGE_KEY, snapshot)
-  }
+  data class Submitted(val result: QuestionnaireSubmissionResult) : QuestionnaireHostUiState
+
+  data class Error(val message: String) : QuestionnaireHostUiState
 }

@@ -24,7 +24,7 @@ class GroupRepositoryTest {
   @Test
   fun buildGroupProfileUiState_usesRelationshipFreePatientAsHead() {
     val result =
-      GroupRepository.buildGroupProfileUiState(
+      buildGroupProfileUiState(
         groupHeader =
           GroupHeaderState(groupId = "group-1", groupName = "Doe Household", memberCount = "3"),
         extractedMembers =
@@ -61,7 +61,7 @@ class GroupRepositoryTest {
   @Test
   fun buildGroupProfileUiState_fallsBackToFirstMemberWhenEveryMemberHasRelationship() {
     val result =
-      GroupRepository.buildGroupProfileUiState(
+      buildGroupProfileUiState(
         groupHeader =
           GroupHeaderState(
             groupId = "group-1",
@@ -96,7 +96,7 @@ class GroupRepositoryTest {
   @Test
   fun buildGroupProfileUiState_keepsHeadNavigableForSingleMemberHousehold() {
     val result =
-      GroupRepository.buildGroupProfileUiState(
+      buildGroupProfileUiState(
         groupHeader =
           GroupHeaderState(groupId = "group-1", groupName = "Solo Household", memberCount = "1"),
         extractedMembers =

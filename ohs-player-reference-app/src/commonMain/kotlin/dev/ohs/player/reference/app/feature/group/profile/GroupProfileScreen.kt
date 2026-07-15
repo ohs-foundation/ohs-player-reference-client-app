@@ -41,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.generated.state.GroupHeaderState
 import dev.ohs.player.generated.state.GroupMemberState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
@@ -49,6 +48,8 @@ import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.componentRenderer
 import dev.ohs.player.library.registry.layoutRenderer
 import dev.ohs.player.library.renderer.RenderOptions
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +59,7 @@ fun GroupProfileScreen(
   onMemberClick: (String) -> Unit,
   onAddMembers: () -> Unit,
 ) {
-  val viewModel = viewModel(key = groupId) { GroupProfileViewModel(groupId) }
+  val viewModel = koinViewModel<GroupProfileViewModel>(key = groupId) { parametersOf(groupId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
 

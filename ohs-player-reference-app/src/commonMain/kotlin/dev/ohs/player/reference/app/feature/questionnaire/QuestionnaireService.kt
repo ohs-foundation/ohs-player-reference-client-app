@@ -30,6 +30,7 @@ import dev.ohs.fhir.model.r4.Reference
 import dev.ohs.fhir.model.r4.String as FhirString
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.generateId
+import dev.ohs.player.reference.app.util.FhirJson
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive

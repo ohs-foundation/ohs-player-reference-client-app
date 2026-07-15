@@ -13,15 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app.data
+package dev.ohs.player.reference.app.data.di
 
-import dev.ohs.player.reference.app.data.repository.FhirRepository
-import dev.ohs.player.reference.app.data.repository.InMemoryFhirRepository
+import org.koin.core.context.startKoin
+import org.koin.core.module.Module
 
 /**
- * TODO: Replace this service locator with a proper dependency injection setup, such as Koin. This
- *   should go away once dependencies are wired explicitly through a DI framework.
+ * Starts the single global Koin instance for the app. [platformModule] supplies the
+ * platform-specific `FhirEngine` binding that [fhirEngineRepositoryModule] depends on.
  */
-object AppDependencies {
-  var fhirRepository: FhirRepository = InMemoryFhirRepository()
+fun initKoin(platformModule: Module) {
+  startKoin {
+    modules(
+      platformModule,
+      fhirEngineRepositoryModule,
+      repositoryModule,
+      serviceModule,
+      viewModelModule,
+    )
+  }
 }

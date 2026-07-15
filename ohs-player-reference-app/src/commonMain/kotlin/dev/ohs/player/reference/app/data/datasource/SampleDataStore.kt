@@ -23,14 +23,12 @@ import dev.ohs.fhir.model.r4.MedicationRequest
 import dev.ohs.fhir.model.r4.Patient
 import dev.ohs.fhir.model.r4.Resource
 import dev.ohs.player.library.model.SearchResult
-import dev.ohs.player.reference.app.data.AppDependencies
 import dev.ohs.player.reference.app.data.patientIdFromReference
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 
 /** Returns all patient IDs — used by the patient list screen. */
-suspend fun allPatientIds(
-  repository: FhirRepository = AppDependencies.fhirRepository
-): List<String> = repository.all("Patient").mapNotNull { (it as? Patient)?.id }
+suspend fun allPatientIds(repository: FhirRepository): List<String> =
+  repository.all("Patient").mapNotNull { (it as? Patient)?.id }
 
 /**
  * Patient list: root = Patient only. No clinical resources needed — the list card shows summary
@@ -38,7 +36,7 @@ suspend fun allPatientIds(
  */
 suspend fun patientSummarySearchResult(
   patientId: String,
-  repository: FhirRepository = AppDependencies.fhirRepository,
+  repository: FhirRepository,
 ): SearchResult<Resource>? {
   val patient = repository.get("Patient", patientId) as? Patient ?: return null
   return SearchResult(resource = patient)
@@ -50,7 +48,7 @@ suspend fun patientSummarySearchResult(
  */
 suspend fun patientProfileSearchResult(
   patientId: String,
-  repository: FhirRepository = AppDependencies.fhirRepository,
+  repository: FhirRepository,
 ): SearchResult<Resource>? {
   val patient = repository.get("Patient", patientId) as? Patient ?: return null
   val revIncluded = buildMap {
@@ -90,9 +88,7 @@ suspend fun patientProfileSearchResult(
  * Group list: root = Group only. Member count is derived from `Group.member.size` on the resource
  * itself — no additional includes needed.
  */
-suspend fun groupListSearchResults(
-  repository: FhirRepository = AppDependencies.fhirRepository
-): List<SearchResult<Resource>> =
+suspend fun groupListSearchResults(repository: FhirRepository): List<SearchResult<Resource>> =
   repository.all("Group").filterIsInstance<Group>().map { group -> SearchResult(resource = group) }
 
 /**
@@ -103,7 +99,7 @@ suspend fun groupListSearchResults(
  */
 suspend fun groupProfileSearchResult(
   groupId: String,
-  repository: FhirRepository = AppDependencies.fhirRepository,
+  repository: FhirRepository,
 ): SearchResult<Resource>? {
   val group = repository.get("Group", groupId) as? Group ?: return null
   val memberPatients =

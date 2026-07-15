@@ -23,11 +23,11 @@ import dev.ohs.player.generated.state.PatientImmunizationState
 import dev.ohs.player.generated.state.PatientMedicationState
 import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
-import dev.ohs.player.library.layout.GridListRenderer
-import dev.ohs.player.library.layout.HorizontalListRenderer
-import dev.ohs.player.library.layout.VerticalListRenderer
-import dev.ohs.player.library.registry.componentRenderer
-import dev.ohs.player.library.registry.layoutRenderer
+import dev.ohs.player.reference.library.layout.GridListRenderer
+import dev.ohs.player.reference.library.layout.HorizontalListRenderer
+import dev.ohs.player.reference.library.layout.VerticalListRenderer
+import dev.ohs.player.reference.library.registry.componentRenderer
+import dev.ohs.player.reference.library.registry.layoutRenderer
 import kotlin.test.Test
 
 class AppViewRegistryTest {

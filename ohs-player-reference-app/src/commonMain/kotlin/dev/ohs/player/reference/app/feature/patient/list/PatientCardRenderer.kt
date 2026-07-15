@@ -18,8 +18,8 @@ package dev.ohs.player.reference.app.feature.patient.list
 import androidx.compose.runtime.Composable
 import dev.ohs.player.generated.config.PatientCardConfig
 import dev.ohs.player.generated.state.PatientSummaryState
-import dev.ohs.player.library.renderer.ComponentRenderer
-import dev.ohs.player.library.renderer.RenderOptions
+import dev.ohs.player.reference.library.renderer.ComponentRenderer
+import dev.ohs.player.reference.library.renderer.RenderOptions
 
 class PatientCardRenderer : ComponentRenderer<PatientSummaryState, PatientCardConfig> {
   @Composable

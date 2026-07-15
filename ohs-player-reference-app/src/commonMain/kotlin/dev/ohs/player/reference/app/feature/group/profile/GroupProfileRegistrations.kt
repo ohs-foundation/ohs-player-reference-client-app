@@ -23,10 +23,10 @@ import dev.ohs.player.generated.config.SectionCardConfig
 import dev.ohs.player.generated.state.GroupHeaderState
 import dev.ohs.player.generated.state.GroupMemberState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
-import dev.ohs.player.library.registry.ViewRegistry
-import dev.ohs.player.library.registry.registerComponent
-import dev.ohs.player.library.registry.registerLayout
 import dev.ohs.player.reference.app.feature.component.common.SectionCardLayoutRenderer
+import dev.ohs.player.reference.library.registry.ViewRegistry
+import dev.ohs.player.reference.library.registry.registerComponent
+import dev.ohs.player.reference.library.registry.registerLayout
 
 fun ViewRegistry.registerGroupProfile() {
   registerComponent<GroupHeaderState, GroupHeaderConfig>(

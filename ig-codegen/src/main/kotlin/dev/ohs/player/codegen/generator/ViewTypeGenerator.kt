@@ -34,7 +34,7 @@ class ViewTypeGenerator(
   private val outputDir: File,
 ) {
 
-  private val viewTypeClass = ClassName("dev.ohs.player.library.registry", "ViewType")
+  private val viewTypeClass = ClassName("dev.ohs.player.reference.library.registry", "ViewType")
 
   fun generate(codeSystem: CodeSystem) {
     FileSpec.builder("$basePackage.$subPackage", codeSystem.name)

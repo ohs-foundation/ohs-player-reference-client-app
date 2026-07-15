@@ -53,9 +53,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.SectionCardConfig
-import dev.ohs.player.library.renderer.ConfiguredRenderer
-import dev.ohs.player.library.renderer.LayoutRenderer
-import dev.ohs.player.library.renderer.RenderOptions
+import dev.ohs.player.reference.library.renderer.ConfiguredRenderer
+import dev.ohs.player.reference.library.renderer.LayoutRenderer
+import dev.ohs.player.reference.library.renderer.RenderOptions
 
 /**
  * Layout renderer that wraps a list of items inside a titled section card. Registered under

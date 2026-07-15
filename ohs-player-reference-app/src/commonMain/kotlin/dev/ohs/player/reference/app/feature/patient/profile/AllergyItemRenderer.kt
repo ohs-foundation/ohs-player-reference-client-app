@@ -20,10 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import dev.ohs.player.generated.config.AllergyItemConfig
 import dev.ohs.player.generated.state.PatientAllergyState
-import dev.ohs.player.library.renderer.ComponentRenderer
-import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.StatusChipData
 import dev.ohs.player.reference.app.feature.component.common.StatusRow
+import dev.ohs.player.reference.library.renderer.ComponentRenderer
+import dev.ohs.player.reference.library.renderer.RenderOptions
 
 class AllergyItemRenderer : ComponentRenderer<PatientAllergyState, AllergyItemConfig> {
   @Composable

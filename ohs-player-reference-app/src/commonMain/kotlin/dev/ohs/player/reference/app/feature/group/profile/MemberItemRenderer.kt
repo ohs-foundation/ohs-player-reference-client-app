@@ -38,10 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.MemberItemConfig
 import dev.ohs.player.generated.state.GroupMemberState
-import dev.ohs.player.library.renderer.ComponentRenderer
-import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.Chip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
+import dev.ohs.player.reference.library.renderer.ComponentRenderer
+import dev.ohs.player.reference.library.renderer.RenderOptions
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_child
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_guardian

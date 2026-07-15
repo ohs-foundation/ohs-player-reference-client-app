@@ -22,10 +22,10 @@ import dev.ohs.fhir.model.r4.Immunization
 import dev.ohs.fhir.model.r4.MedicationRequest
 import dev.ohs.fhir.model.r4.Patient
 import dev.ohs.fhir.model.r4.Resource
-import dev.ohs.player.library.model.SearchResult
 import dev.ohs.player.reference.app.data.AppDependencies
 import dev.ohs.player.reference.app.data.patientIdFromReference
 import dev.ohs.player.reference.app.data.repository.FhirRepository
+import dev.ohs.player.reference.library.model.SearchResult
 
 /** Returns all patient IDs — used by the patient list screen. */
 suspend fun allPatientIds(

@@ -15,9 +15,9 @@
  */
 package dev.ohs.player.reference.app.data
 
-import dev.ohs.player.library.config.ConfigStore
-import dev.ohs.player.library.extractor.GenericStateExtractor
 import dev.ohs.player.reference.app.data.datasource.LocalConfigSource
+import dev.ohs.player.reference.library.config.ConfigStore
+import dev.ohs.player.reference.library.extractor.GenericStateExtractor
 
 /**
  * App-wide extraction wiring: the runtime [ConfigStore] (fed by bundled config Binaries) and the

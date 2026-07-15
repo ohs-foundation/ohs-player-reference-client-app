@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.TelecomItemConfig
 import dev.ohs.player.generated.state.PatientTelecomState
-import dev.ohs.player.library.renderer.ComponentRenderer
-import dev.ohs.player.library.renderer.RenderOptions
+import dev.ohs.player.reference.library.renderer.ComponentRenderer
+import dev.ohs.player.reference.library.renderer.RenderOptions
 
 class TelecomItemRenderer : ComponentRenderer<PatientTelecomState, TelecomItemConfig> {
   @Composable

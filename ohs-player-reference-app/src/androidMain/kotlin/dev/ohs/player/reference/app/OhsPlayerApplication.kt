@@ -23,7 +23,7 @@ import dev.ohs.fhir.datacapture.DataCapture
 import dev.ohs.player.reference.app.data.di.initKoin
 import org.koin.dsl.module
 
-class PlayerApplication : Application() {
+class OhsPlayerApplication : Application() {
   override fun onCreate() {
     super.onCreate()
     FhirEngineProvider.init(FhirEngineConfiguration(), applicationContext)

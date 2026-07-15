@@ -64,7 +64,7 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalData: () -> Unit) {
   val viewModel =
-    koinViewModel<IpsPatientProfileViewModel>(key = patientId) { parametersOf(patientId) }
+    koinViewModel<PatientProfileViewModel>(key = patientId) { parametersOf(patientId) }
   val state by viewModel.uiState.collectAsStateWithLifecycle()
   val registry = LocalViewRegistry.current
 

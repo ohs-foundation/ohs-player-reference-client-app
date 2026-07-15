@@ -24,6 +24,9 @@ interface FhirRepository {
   /**
    * Incremented on every successful [upsert]. Implementers must bump this after each write so that
    * observers (e.g. [PatientRepository], [GroupRepository]) know to re-query.
+   *
+   * TODO: To be deleted, once https://github.com/ohs-foundation/kotlin-fhir-engine/issues/65 is
+   *   done
    */
   val revision: StateFlow<Long>
 

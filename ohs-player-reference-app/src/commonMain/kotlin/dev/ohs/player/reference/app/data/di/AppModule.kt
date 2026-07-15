@@ -22,7 +22,7 @@ import dev.ohs.player.reference.app.data.repository.PatientRepository
 import dev.ohs.player.reference.app.feature.group.list.GroupListViewModel
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileViewModel
 import dev.ohs.player.reference.app.feature.patient.list.PatientListViewModel
-import dev.ohs.player.reference.app.feature.patient.profile.IpsPatientProfileViewModel
+import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileViewModel
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireHostViewModel
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireLaunchContext
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireService
@@ -51,7 +51,7 @@ internal val serviceModule = module { factory { QuestionnaireService(get()) } }
 
 internal val viewModelModule = module {
   viewModel { PatientListViewModel(get()) }
-  viewModel { (patientId: String) -> IpsPatientProfileViewModel(patientId, get()) }
+  viewModel { (patientId: String) -> PatientProfileViewModel(patientId, get()) }
   viewModel { GroupListViewModel(get()) }
   viewModel { (groupId: String) -> GroupProfileViewModel(groupId, get()) }
   viewModel { (questionnaireId: String, launchContext: QuestionnaireLaunchContext) ->

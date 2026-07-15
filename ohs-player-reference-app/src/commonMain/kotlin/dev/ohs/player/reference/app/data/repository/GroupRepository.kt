@@ -72,8 +72,6 @@ internal fun buildGroupProfileUiState(
         headGivenName = head.memberGivenName,
         headFamilyName = head.memberFamilyName,
       ),
-    // Keep every Group.member navigable. In FHIR the head is still a legitimate member entity,
-    // and hiding that row leaves single-person households with no path into the patient profile.
     members = extractedMembers,
   )
 }

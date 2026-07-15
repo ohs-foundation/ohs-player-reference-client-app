@@ -17,13 +17,19 @@ package dev.ohs.player.reference.app.feature.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -40,12 +46,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Unit) {
+fun HomeScreen(
+  onGroupClick: (String) -> Unit,
+  onDataCaptureClick: () -> Unit,
+  onSyncNowClick: () -> Unit,
+  lastSyncedAt: String?,
+) {
   var selectedDestination by remember { mutableStateOf(HomeDestination.Households) }
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
@@ -53,15 +65,48 @@ fun HomeScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Unit) {
   BoxWithConstraints {
     val isExpandedWidth = isHomeDrawerExpandedWidth(maxWidth)
 
+    fun closeDrawerIfCompact() {
+      if (!isExpandedWidth) scope.launch { drawerState.close() }
+    }
+
     val drawerItems: @Composable () -> Unit = {
-      HomeDestination.entries.forEach { destination ->
+      Column(modifier = Modifier.fillMaxHeight()) {
+        Text(
+          text = "Registers",
+          style = MaterialTheme.typography.titleSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 8.dp),
+        )
+        HomeDestination.entries.forEach { destination ->
+          NavigationDrawerItem(
+            label = { Text(destination.label) },
+            icon = { Icon(destination.icon, contentDescription = null) },
+            selected = destination == selectedDestination,
+            onClick = {
+              selectedDestination = destination
+              closeDrawerIfCompact()
+            },
+          )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        HorizontalDivider()
+        if (lastSyncedAt != null) {
+          Text(
+            text = "Last synced: $lastSyncedAt",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 28.dp, top = 8.dp),
+          )
+        }
         NavigationDrawerItem(
-          label = { Text(destination.label) },
-          icon = { Icon(destination.icon, contentDescription = null) },
-          selected = destination == selectedDestination,
+          label = { Text("Sync now") },
+          icon = { Icon(Icons.Filled.Refresh, contentDescription = null) },
+          selected = false,
           onClick = {
-            selectedDestination = destination
-            if (!isExpandedWidth) scope.launch { drawerState.close() }
+            onSyncNowClick()
+            closeDrawerIfCompact()
           },
         )
       }

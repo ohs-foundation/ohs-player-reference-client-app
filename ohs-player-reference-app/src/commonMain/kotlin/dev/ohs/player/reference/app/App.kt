@@ -25,8 +25,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
 import dev.ohs.player.library.registry.LocalViewRegistry
-import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
+import dev.ohs.player.reference.app.feature.home.HomeScreen
 import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireHostScreen
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireIds
@@ -40,11 +40,11 @@ fun App() {
   CompositionLocalProvider(LocalViewRegistry provides registry) {
     OhsPlayerTheme {
       val navController = rememberNavController()
-      NavHost(navController = navController, startDestination = "groupList") {
+      NavHost(navController = navController, startDestination = "home") {
 
-        // Screen 1: Household list
-        composable("groupList") {
-          GroupListScreen(
+        // Screen 1: Home (adaptive navigation drawer shell around the household list)
+        composable("home") {
+          HomeScreen(
             onGroupClick = { id -> navController.navigate("groupProfile/$id") },
             onDataCaptureClick = {
               navController.navigate(

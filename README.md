@@ -4,36 +4,90 @@ A Kotlin Multiplatform and Compose Multiplatform reference client for [Open Heal
 
 The application renders healthcare UI from configuration rather than hand-written mapping code. FHIR resources are projected into typed view-state by declarative configuration, and that state is rendered by renderers resolved through a registry. The two halves — extraction and rendering — are described below, then joined in a single end-to-end example.
 
+This repository is a GitHub template: use it as the starting point for your own OHS-based app, or just run it to see OHS in action.
+
+## Supported platforms
+
+Android, iOS, Desktop (Windows, macOS, Linux), and Web (JS and Wasm) — all from a single Kotlin source tree. Every platform is built, tested, and released by GitHub Actions; see [Deployment](#deployment).
+
 ## Getting started
 
-### Prerequisites
+### Just want to see OHS in action?
+
+The desktop app is the fastest path — it needs only JDK 21, no Android SDK or Xcode:
+
+```shell
+git clone <repository-url>
+cd ohs-player-reference-client-app
+./gradlew :reference-app:run
+```
+
+The app ships with bundled sample FHIR data, so it works out of the box. Other platforms:
+
+| Target | Command |
+| --- | --- |
+| Android | `./gradlew :reference-app:assembleDebug` |
+| Web (Wasm) | `./gradlew :reference-app:wasmJsBrowserDevelopmentRun` |
+| Web (JS) | `./gradlew :reference-app:jsBrowserDevelopmentRun` |
+
+For iOS, open [`iosApp/`](./iosApp) in Xcode and run, or use the run-configuration widget in a Kotlin Multiplatform IDE.
+
+### Start from this template
+
+1. Click **Use this template → Create a new repository** on GitHub (or clone and re-init).
+2. Follow [Developer setup](#developer-setup-kotlin-multiplatform) below and confirm `./gradlew build` passes.
+3. Work through [Customizing the template](#customizing-the-template) to make the app yours.
+
+### Developer setup (Kotlin Multiplatform)
 
 - JDK 21
-- Android SDK (for Android builds)
+- [Android Studio](https://developer.android.com/studio) with the Kotlin Multiplatform plugin (Android builds also need the Android SDK)
 - Xcode (for iOS builds, macOS only)
+- Optional: run [`kdoctor`](https://github.com/Kotlin/kdoctor) to verify your multiplatform environment
 
 Use `./gradlew` on macOS and Linux, and `gradlew.bat` on Windows. All commands run from the repository root.
 
 ### Build
 
 ```shell
-git clone <repository-url>
-cd ohs-player-reference-client-app
 ./gradlew build
 ```
 
 Code generation is part of compilation. The `ig-codegen` Gradle plugin runs its `generateIgCode` task automatically before Kotlin compilation, so there is no separate generation step.
 
-### Run
+## Customizing the template
 
-| Target | Command |
+The starting points, in rough order:
+
+- **Application id / namespace** — `applicationId` and `namespace` in [`reference-app/build.gradle.kts`](./reference-app/build.gradle.kts), the iOS bundle id in [`iosApp/Configuration/Config.xcconfig`](./iosApp/Configuration/Config.xcconfig), and the Kotlin package `dev.ohs.player.reference.app` under `reference-app/src/*/kotlin/`.
+- **Application name** — Android: `app_name` in [`reference-app/src/androidMain/res/values/strings.xml`](./reference-app/src/androidMain/res/values/strings.xml); iOS: `PRODUCT_NAME` in `Config.xcconfig`; Desktop: `packageName` in the `compose.desktop` block of `reference-app/build.gradle.kts`; Web: `<title>` in [`reference-app/src/webMain/resources/index.html`](./reference-app/src/webMain/resources/index.html).
+- **Icons** — Android launcher icons in `reference-app/src/androidMain/res/mipmap-*/`; iOS in `iosApp/iosApp/Assets.xcassets`.
+- **Generated code package** — `packageName` in the `igCodegen` block of `reference-app/build.gradle.kts` (defaults to `dev.ohs.player.generated`).
+- **Project names** — `rootProject.name` and the module name in [`settings.gradle.kts`](./settings.gradle.kts). Note that renaming either changes the package of the generated Compose resources class (`Res`).
+- **Screens and configuration** — replace the sample `Binary-*.json` configuration under `reference-app/src/commonMain/composeResources/files/` and the feature renderers under `reference-app/src/commonMain/kotlin/.../feature/`; the rest of this README explains how those two fit together.
+
+## Bundled OHS libraries
+
+The app is assembled from the OHS Player library plus the OHS Foundational Libraries; versions are pinned in [`gradle/libs.versions.toml`](./gradle/libs.versions.toml):
+
+| Library | Purpose |
 | --- | --- |
-| Android | `./gradlew :reference-app:assembleDebug` |
-| Desktop (JVM) | `./gradlew :reference-app:run` |
-| Web (Wasm) | `./gradlew :reference-app:wasmJsBrowserDevelopmentRun` |
-| Web (JS) | `./gradlew :reference-app:jsBrowserDevelopmentRun` |
+| [`dev.ohs.player:reference-library`](https://github.com/ohs-foundation/ohs-player-reference-client-library) | Config-driven views using flattened data from FHIR resources (the player) |
+| `dev.ohs.fhir:fhir-model` | Typed Kotlin models for FHIR resources |
+| `dev.ohs.fhir:fhir-path` | FHIRPath expression evaluation |
+| `dev.ohs.fhir:fhir-data-capture` | FHIR Structured Data Capture (questionnaires) |
 
-For iOS, open [`iosApp/`](./iosApp) in Xcode and run, or use the run-configuration widget in a Kotlin Multiplatform IDE.
+### Have an existing app?
+
+If you cannot start from this template, depend on the player library directly — it is a library, not a framework, and can be adopted one screen at a time in any Kotlin Multiplatform or Android project:
+
+```kotlin
+commonMain.dependencies {
+  implementation("dev.ohs.player:reference-library:1.0.0-alpha01")
+}
+```
+
+The [library README](https://github.com/ohs-foundation/ohs-player-reference-client-library#readme) is a standalone user guide; this repository then serves as the worked example.
 
 ## From FHIR data to view state
 
@@ -296,6 +350,10 @@ Run JVM tests only:
 ```
 
 ## Deployment
+
+### Continuous integration
+
+Every pull request and push to `main` is validated by the [`ci.yml`](./.github/workflows/ci.yml) workflow: formatting (spotless), JVM tests, Android lint, JS/Wasm compilation, and iOS compile-and-link, each as a separate job.
 
 ### Release pipeline
 

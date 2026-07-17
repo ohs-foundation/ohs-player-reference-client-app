@@ -24,8 +24,6 @@ cd ohs-player-reference-client-app
 
 Code generation is part of compilation. The `ig-codegen` Gradle plugin runs its `generateIgCode` task automatically before Kotlin compilation, so there is no separate generation step.
 
-The OHS Player Reference library lives in its own repository, [`ohs-player-reference-client-library`](https://github.com/ohs-foundation/ohs-player-reference-client-library), and is consumed as the Maven artifact `dev.ohs.player:reference-library:1.0.0-alpha01`.
-
 ### Run
 
 | Target | Command |

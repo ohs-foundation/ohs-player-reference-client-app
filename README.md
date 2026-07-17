@@ -28,10 +28,10 @@ Code generation is part of compilation. The `ig-codegen` Gradle plugin runs its 
 
 | Target | Command |
 | --- | --- |
-| Android | `./gradlew :ohs-player-reference-app:assembleDebug` |
-| Desktop (JVM) | `./gradlew :ohs-player-reference-app:run` |
-| Web (Wasm) | `./gradlew :ohs-player-reference-app:wasmJsBrowserDevelopmentRun` |
-| Web (JS) | `./gradlew :ohs-player-reference-app:jsBrowserDevelopmentRun` |
+| Android | `./gradlew :reference-app:assembleDebug` |
+| Desktop (JVM) | `./gradlew :reference-app:run` |
+| Web (Wasm) | `./gradlew :reference-app:wasmJsBrowserDevelopmentRun` |
+| Web (JS) | `./gradlew :reference-app:jsBrowserDevelopmentRun` |
 
 For iOS, open [`iosApp/`](./iosApp) in Xcode and run, or use the run-configuration widget in a Kotlin Multiplatform IDE.
 
@@ -46,7 +46,7 @@ A screen never consumes a raw FHIR resource. It consumes a typed *view-state* â€
 
 ### 1. Author configuration
 
-A `ViewDefinition` declares the columns of a view as FHIRPath expressions over a FHIR resource. Each column carries a name, a path, and a FHIR type. Excerpt from [`Binary-PatientSummary.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummary.json):
+A `ViewDefinition` declares the columns of a view as FHIRPath expressions over a FHIR resource. Each column carries a name, a path, and a FHIR type. Excerpt from [`Binary-PatientSummary.json`](./reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummary.json):
 
 ```json
 {
@@ -67,7 +67,7 @@ A `ViewDefinition` declares the columns of a view as FHIRPath expressions over a
 }
 ```
 
-A `ViewJoinMap` names the view-state and binds it to a pivot `ViewDefinition` (and, where needed, joined views). [`Binary-PatientSummaryState.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummaryState.json):
+A `ViewJoinMap` names the view-state and binds it to a pivot `ViewDefinition` (and, where needed, joined views). [`Binary-PatientSummaryState.json`](./reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummaryState.json):
 
 ```json
 {
@@ -79,7 +79,7 @@ A `ViewJoinMap` names the view-state and binds it to a pivot `ViewDefinition` (a
 }
 ```
 
-A `ViewConfig` declares the configuration a renderer accepts, with defaults. [`Binary-PatientCardConfig.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/configs/Binary-PatientCardConfig.json):
+A `ViewConfig` declares the configuration a renderer accepts, with defaults. [`Binary-PatientCardConfig.json`](./reference-app/src/commonMain/composeResources/files/configs/Binary-PatientCardConfig.json):
 
 ```json
 {
@@ -93,11 +93,11 @@ A `ViewConfig` declares the configuration a renderer accepts, with defaults. [`B
 }
 ```
 
-A single `CodeSystem` Binary enumerates the view-types the app renders; see [`CodeSystem-ViewTypes.json`](./ohs-player-reference-app/src/commonMain/composeResources/files/viewtypes/CodeSystem-ViewTypes.json).
+A single `CodeSystem` Binary enumerates the view-types the app renders; see [`CodeSystem-ViewTypes.json`](./reference-app/src/commonMain/composeResources/files/viewtypes/CodeSystem-ViewTypes.json).
 
 ### 2. Generate typed Kotlin
 
-The `ig-codegen` plugin reads these Binaries and emits typed sources. It is applied and configured in [`ohs-player-reference-app/build.gradle.kts`](./ohs-player-reference-app/build.gradle.kts):
+The `ig-codegen` plugin reads these Binaries and emits typed sources. It is applied and configured in [`reference-app/build.gradle.kts`](./reference-app/build.gradle.kts):
 
 ```kotlin
 plugins {
@@ -137,7 +137,7 @@ data class PatientSummaryState(
 
 ### 3. Load configuration at runtime
 
-A `ConfigStore` holds the parsed configuration, fed by a `ConfigSource`. The reference app reads the bundled Binaries; replacing this with a network fetch is the only change required to load configuration from a backend. See [`LocalConfigSource.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/datasource/LocalConfigSource.kt):
+A `ConfigStore` holds the parsed configuration, fed by a `ConfigSource`. The reference app reads the bundled Binaries; replacing this with a network fetch is the only change required to load configuration from a backend. See [`LocalConfigSource.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/datasource/LocalConfigSource.kt):
 
 ```kotlin
 object LocalConfigSource : ConfigSource {
@@ -150,7 +150,7 @@ object LocalConfigSource : ConfigSource {
 }
 ```
 
-The store and a single extractor are wired once in [`Extraction.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/Extraction.kt):
+The store and a single extractor are wired once in [`Extraction.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/Extraction.kt):
 
 ```kotlin
 object Extraction {
@@ -163,7 +163,7 @@ object Extraction {
 
 `GenericStateExtractor.extract<T>()` selects the configuration for `T` by name, evaluates its FHIRPath columns against a `SearchResult`, and returns a list of typed `T`. A `SearchResult` carries the pivot resource plus any forward-included and reverse-included resources, mirroring a FHIR search response.
 
-From [`PatientRepository.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/repository/PatientRepository.kt):
+From [`PatientRepository.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/repository/PatientRepository.kt):
 
 ```kotlin
 suspend fun getPatients(): List<PatientSummaryState> =
@@ -208,7 +208,7 @@ class PatientCardRenderer : ComponentRenderer<PatientSummaryState, PatientCardCo
 
 ### 2. Register renderers
 
-Group a feature's registrations into an extension on `ViewRegistry`. See [`PatientListRegistrations.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListRegistrations.kt):
+Group a feature's registrations into an extension on `ViewRegistry`. See [`PatientListRegistrations.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListRegistrations.kt):
 
 ```kotlin
 fun ViewRegistry.registerPatientList() {
@@ -224,7 +224,7 @@ fun ViewRegistry.registerPatientList() {
 }
 ```
 
-Assemble all feature registrations in one builder, as in [`AppViewRegistry.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewRegistry.kt):
+Assemble all feature registrations in one builder, as in [`AppViewRegistry.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewRegistry.kt):
 
 ```kotlin
 fun buildAppViewRegistry(): ViewRegistry = ViewRegistry().apply {
@@ -237,7 +237,7 @@ A registry lookup is keyed by both view-type and state type, and throws `NoSuchE
 
 ### 3. Install the registry
 
-Provide the registry at the composition root so every screen can resolve renderers. See [`App.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/App.kt):
+Provide the registry at the composition root so every screen can resolve renderers. See [`App.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/App.kt):
 
 ```kotlin
 @Composable
@@ -253,7 +253,7 @@ fun App() {
 
 ### 4. Render
 
-`ListScaffold` renders a list; `component(...)` and `layout(...)` name the view-types to resolve. An empty list short-circuits to `emptyState` without invoking the layout renderer, and omitting `layout(...)` falls back to `VerticalListRenderer`. See [`PatientListScreen.kt`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListScreen.kt):
+`ListScaffold` renders a list; `component(...)` and `layout(...)` name the view-types to resolve. An empty list short-circuits to `emptyState` without invoking the layout renderer, and omitting `layout(...)` falls back to `VerticalListRenderer`. See [`PatientListScreen.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListScreen.kt):
 
 ```kotlin
 ListScaffold<PatientSummaryState>(
@@ -286,13 +286,13 @@ Adding a field is a configuration change: add a column to the `ViewDefinition`, 
 Run all multiplatform tests:
 
 ```shell
-./gradlew :ohs-player-reference-app:allTests
+./gradlew :reference-app:allTests
 ```
 
 Run JVM tests only:
 
 ```shell
-./gradlew :ohs-player-reference-app:jvmTest
+./gradlew :reference-app:jvmTest
 ```
 
 ## Deployment
@@ -312,11 +312,11 @@ A `workflow_dispatch` run performs a dry run: it builds, signs, and uploads arti
 Build a native installer or distributable locally:
 
 ```shell
-./gradlew :ohs-player-reference-app:packageDmg                 # macOS .dmg
-./gradlew :ohs-player-reference-app:packageMsi                 # Windows .msi
-./gradlew :ohs-player-reference-app:packageDeb                 # Linux .deb
-./gradlew :ohs-player-reference-app:createDistributable        # portable app image
-./gradlew :ohs-player-reference-app:wasmJsBrowserDistribution  # web bundle
+./gradlew :reference-app:packageDmg                 # macOS .dmg
+./gradlew :reference-app:packageMsi                 # Windows .msi
+./gradlew :reference-app:packageDeb                 # Linux .deb
+./gradlew :reference-app:createDistributable        # portable app image
+./gradlew :reference-app:wasmJsBrowserDistribution  # web bundle
 ```
 
 ### Android release signing
@@ -326,7 +326,7 @@ Release builds read signing inputs from environment variables first, then from a
 ```shell
 cp keystore.properties.template keystore.properties
 # Edit keystore.properties with your keystore path, alias, and passwords, then:
-./gradlew :ohs-player-reference-app:bundleRelease
+./gradlew :reference-app:bundleRelease
 ```
 
 `keystore.properties` is gitignored and must never be committed. The environment variables `ANDROID_KEYSTORE_PATH`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, and `ANDROID_STORE_PASSWORD` take precedence over the file when both are set. If neither is configured, release builds are emitted unsigned.

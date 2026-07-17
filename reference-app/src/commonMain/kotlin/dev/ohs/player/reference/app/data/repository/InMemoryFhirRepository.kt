@@ -33,7 +33,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohs_player_reference_client_app.reference_app.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 /**

@@ -19,11 +19,16 @@ import androidx.compose.ui.window.ComposeUIViewController
 import dev.ohs.fhir.FhirEngine
 import dev.ohs.fhir.FhirEngineConfiguration
 import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.ServerConfiguration
 import dev.ohs.player.reference.app.data.di.initKoin
 import org.koin.dsl.module
 
 fun MainViewController() = run {
-  FhirEngineProvider.init(FhirEngineConfiguration())
+  FhirEngineProvider.init(
+    FhirEngineConfiguration(
+      serverConfiguration = ServerConfiguration(baseUrl = "https://hapi.fhir.org/baseR4")
+    )
+  )
   initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance() } })
   ComposeUIViewController { App() }
 }

@@ -19,6 +19,7 @@ import android.app.Application
 import dev.ohs.fhir.FhirEngine
 import dev.ohs.fhir.FhirEngineConfiguration
 import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.ServerConfiguration
 import dev.ohs.fhir.datacapture.DataCapture
 import dev.ohs.player.reference.app.data.di.initKoin
 import org.koin.dsl.module
@@ -26,7 +27,12 @@ import org.koin.dsl.module
 class OhsPlayerApplication : Application() {
   override fun onCreate() {
     super.onCreate()
-    FhirEngineProvider.init(FhirEngineConfiguration(), applicationContext)
+    FhirEngineProvider.init(
+      FhirEngineConfiguration(
+        serverConfiguration = ServerConfiguration(baseUrl = "https://hapi.fhir.org/baseR4")
+      ),
+      applicationContext,
+    )
     initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance(applicationContext) } })
     DataCapture.initialize(applicationContext)
   }

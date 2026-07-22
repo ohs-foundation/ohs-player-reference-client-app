@@ -18,33 +18,51 @@ package dev.ohs.player.reference.app.feature.home
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import dev.ohs.fhir.sync.FhirDataStore
+import dev.ohs.fhir.sync.SyncJobStatus
+import dev.ohs.fhir.sync.createDataStore
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
 import dev.ohs.player.reference.app.data.di.repositoryModule
 import dev.ohs.player.reference.app.data.di.viewModelModule
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
+import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
+import java.nio.file.Files
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
+private class FakeHomeScreenSyncNowUseCase(private val result: suspend () -> SyncJobStatus) :
+  SyncNowUseCase {
+  override suspend fun invoke(): SyncJobStatus = result()
+}
+
 @OptIn(ExperimentalTestApi::class)
 class HomeScreenTest {
 
-  @BeforeTest
-  fun setUp() {
+  private fun newFhirDataStore(): FhirDataStore {
+    val path = Files.createTempFile("home-screen-test", ".preferences_pb").toString()
+    return FhirDataStore(createDataStore { path })
+  }
+
+  private fun startTestKoin(syncNowUseCase: SyncNowUseCase) {
     startKoin {
       modules(
-        module { single<FhirRepository> { InMemorySampleFhirRepository() } },
+        module {
+          single<FhirRepository> { InMemorySampleFhirRepository() }
+          single { newFhirDataStore() }
+          single<SyncNowUseCase> { syncNowUseCase }
+        },
         repositoryModule,
         viewModelModule,
       )
@@ -55,21 +73,14 @@ class HomeScreenTest {
 
   @Test
   fun homeScreen_defaultsToHouseholdsContentWithDrawerSectionsVisible() = runComposeUiTest {
+    startTestKoin(FakeHomeScreenSyncNowUseCase { SyncJobStatus.Succeeded() })
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme {
-          HomeScreen(
-            onGroupClick = {},
-            onDataCaptureClick = {},
-            onSyncNowClick = {},
-            lastSyncedAt = null,
-          )
-        }
+        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}) }
       }
     }
 
-    // GroupListScreen's own empty state, proving it's the active content by default.
     waitUntil(timeoutMillis = 5_000L) {
       onAllNodesWithText("No households").fetchSemanticsNodes().isNotEmpty()
     }
@@ -79,19 +90,19 @@ class HomeScreenTest {
   }
 
   @Test
-  fun homeScreen_tappingSyncNow_invokesCallback() = runComposeUiTest {
+  fun tappingSyncNow_showsProgressIndicatorWhileSyncPending() = runComposeUiTest {
+    val syncStarted = CompletableDeferred<Unit>()
+    val releaseSyncResult = CompletableDeferred<SyncJobStatus>()
+    startTestKoin(
+      FakeHomeScreenSyncNowUseCase {
+        syncStarted.complete(Unit)
+        releaseSyncResult.await()
+      }
+    )
     val registry = buildAppViewRegistry()
-    var syncClicked = false
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme {
-          HomeScreen(
-            onGroupClick = {},
-            onDataCaptureClick = {},
-            onSyncNowClick = { syncClicked = true },
-            lastSyncedAt = null,
-          )
-        }
+        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}) }
       }
     }
 
@@ -99,49 +110,36 @@ class HomeScreenTest {
       onAllNodesWithText("Sync now").fetchSemanticsNodes().isNotEmpty()
     }
     onNodeWithText("Sync now").performClick()
-    assertTrue(syncClicked)
+
+    waitUntil(timeoutMillis = 5_000L) { syncStarted.isCompleted }
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithContentDescription("Sync in progress").fetchSemanticsNodes().isNotEmpty()
+    }
+
+    releaseSyncResult.complete(SyncJobStatus.Succeeded())
+
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithContentDescription("Sync in progress").fetchSemanticsNodes().isEmpty()
+    }
   }
 
   @Test
-  fun homeScreen_lastSyncedAtNull_hidesLastSyncedText() = runComposeUiTest {
+  fun tappingSyncNow_onFailure_showsSnackbarMessage() = runComposeUiTest {
+    startTestKoin(FakeHomeScreenSyncNowUseCase { SyncJobStatus.Failed() })
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme {
-          HomeScreen(
-            onGroupClick = {},
-            onDataCaptureClick = {},
-            onSyncNowClick = {},
-            lastSyncedAt = null,
-          )
-        }
+        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}) }
       }
     }
 
     waitUntil(timeoutMillis = 5_000L) {
       onAllNodesWithText("Sync now").fetchSemanticsNodes().isNotEmpty()
     }
-    assertEquals(0, onAllNodesWithText("Last synced", substring = true).fetchSemanticsNodes().size)
-  }
-
-  @Test
-  fun homeScreen_lastSyncedAtProvided_showsLastSyncedText() = runComposeUiTest {
-    val registry = buildAppViewRegistry()
-    setContent {
-      CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme {
-          HomeScreen(
-            onGroupClick = {},
-            onDataCaptureClick = {},
-            onSyncNowClick = {},
-            lastSyncedAt = "2026-07-15 10:00",
-          )
-        }
-      }
-    }
+    onNodeWithText("Sync now").performClick()
 
     waitUntil(timeoutMillis = 5_000L) {
-      onAllNodesWithText("Last synced: 2026-07-15 10:00").fetchSemanticsNodes().isNotEmpty()
+      onAllNodesWithText("Sync failed. Please try again.").fetchSemanticsNodes().isNotEmpty()
     }
   }
 }

@@ -51,8 +51,6 @@ fun App() {
                 questionnaireHostRoute(questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION)
               )
             },
-            onSyncNowClick = {},
-            lastSyncedAt = null,
           )
         }
 

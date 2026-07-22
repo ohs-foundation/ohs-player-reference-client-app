@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -36,31 +38,44 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
-  onGroupClick: (String) -> Unit,
-  onDataCaptureClick: () -> Unit,
-  onSyncNowClick: () -> Unit,
-  lastSyncedAt: String?,
-) {
+fun HomeScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Unit) {
+  val homeViewModel: HomeViewModel = koinViewModel()
+  val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+
   var selectedDestination by remember { mutableStateOf(HomeDestination.Households) }
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
+  val snackbarHostState = remember { SnackbarHostState() }
+
+  LaunchedEffect(uiState.syncError) {
+    uiState.syncError?.let { message ->
+      snackbarHostState.showSnackbar(message)
+      homeViewModel.clearSyncError()
+    }
+  }
 
   BoxWithConstraints {
     val isExpandedWidth = isHomeDrawerExpandedWidth(maxWidth)
@@ -92,7 +107,7 @@ fun HomeScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         HorizontalDivider()
-        if (lastSyncedAt != null) {
+        uiState.lastSyncedAt?.let { lastSyncedAt ->
           Text(
             text = "Last synced: $lastSyncedAt",
             style = MaterialTheme.typography.bodySmall,
@@ -103,10 +118,21 @@ fun HomeScreen(
         NavigationDrawerItem(
           label = { Text("Sync now") },
           icon = { Icon(Icons.Filled.Refresh, contentDescription = null) },
+          badge = {
+            if (uiState.isSyncing) {
+              CircularProgressIndicator(
+                modifier =
+                  Modifier.size(16.dp).semantics { contentDescription = "Sync in progress" },
+                strokeWidth = 2.dp,
+              )
+            }
+          },
           selected = false,
           onClick = {
-            onSyncNowClick()
-            closeDrawerIfCompact()
+            if (!uiState.isSyncing) {
+              homeViewModel.syncNow()
+              closeDrawerIfCompact()
+            }
           },
         )
       }
@@ -121,7 +147,9 @@ fun HomeScreen(
 
     if (isExpandedWidth) {
       PermanentNavigationDrawer(drawerContent = { PermanentDrawerSheet { drawerItems() } }) {
-        content()
+        Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
+          Box(modifier = Modifier.padding(padding)) { content() }
+        }
       }
     } else {
       ModalNavigationDrawer(
@@ -138,7 +166,8 @@ fun HomeScreen(
                 }
               },
             )
-          }
+          },
+          snackbarHost = { SnackbarHost(snackbarHostState) },
         ) { padding ->
           Box(modifier = Modifier.padding(padding)) { content() }
         }

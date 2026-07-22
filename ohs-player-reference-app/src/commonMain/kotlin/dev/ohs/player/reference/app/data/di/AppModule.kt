@@ -15,12 +15,18 @@
  */
 package dev.ohs.player.reference.app.data.di
 
+import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.sync.FhirSyncTask
 import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.GroupRepository
 import dev.ohs.player.reference.app.data.repository.PatientRepository
+import dev.ohs.player.reference.app.data.sync.AppFhirSyncTask
+import dev.ohs.player.reference.app.data.sync.RunSyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import dev.ohs.player.reference.app.feature.group.list.GroupListViewModel
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileViewModel
+import dev.ohs.player.reference.app.feature.home.HomeViewModel
 import dev.ohs.player.reference.app.feature.patient.list.PatientListViewModel
 import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileViewModel
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireHostViewModel
@@ -49,6 +55,12 @@ internal val repositoryModule = module {
 
 internal val serviceModule = module { factory { QuestionnaireService(get()) } }
 
+internal val syncModule = module {
+  single { FhirEngineProvider.getFhirDataStore() }
+  single<FhirSyncTask> { AppFhirSyncTask(get()) }
+  single<SyncNowUseCase> { RunSyncNowUseCase(get()) }
+}
+
 internal val viewModelModule = module {
   viewModel { PatientListViewModel(get()) }
   viewModel { (patientId: String) -> PatientProfileViewModel(patientId, get()) }
@@ -57,4 +69,5 @@ internal val viewModelModule = module {
   viewModel { (questionnaireId: String, launchContext: QuestionnaireLaunchContext) ->
     QuestionnaireHostViewModel(questionnaireId, launchContext, get())
   }
+  viewModel { HomeViewModel(get(), get()) }
 }

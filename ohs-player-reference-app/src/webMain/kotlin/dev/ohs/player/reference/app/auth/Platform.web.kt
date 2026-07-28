@@ -13,23 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalForeignApi::class)
-
 package dev.ohs.player.reference.app.auth
 
 import eu.anifantakis.lib.ksafe.KSafe
-import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.usePinned
-import platform.Security.SecRandomCopyBytes
-import platform.Security.kSecRandomDefault
 
 internal actual fun createKSafe(): KSafe = KSafe()
 
-internal actual fun secureRandomBytes(size: Int): ByteArray {
-  val bytes = ByteArray(size)
-  bytes.usePinned { pinned ->
-    SecRandomCopyBytes(kSecRandomDefault, size.toULong(), pinned.addressOf(0))
-  }
-  return bytes
-}
+// secureRandomBytes lives in jsMain / wasmJsMain — Web Crypto interop differs
+// between the two web targets, so it can't be shared from webMain.
+// AuthorizationLauncher is added here in a later task.

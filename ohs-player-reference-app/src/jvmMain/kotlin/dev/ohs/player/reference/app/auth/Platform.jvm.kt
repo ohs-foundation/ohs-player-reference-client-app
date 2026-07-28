@@ -15,7 +15,12 @@
  */
 package dev.ohs.player.reference.app.auth
 
+import eu.anifantakis.lib.ksafe.KSafe
+import java.io.File
 import java.security.SecureRandom
+
+internal actual fun createKSafe(): KSafe =
+  KSafe(baseDir = File(System.getProperty("user.home"), ".ohs-player-reference-app"))
 
 internal actual fun secureRandomBytes(size: Int): ByteArray =
   ByteArray(size).also { SecureRandom().nextBytes(it) }

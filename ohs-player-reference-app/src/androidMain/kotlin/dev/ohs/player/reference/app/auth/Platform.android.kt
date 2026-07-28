@@ -15,7 +15,21 @@
  */
 package dev.ohs.player.reference.app.auth
 
+import android.app.Application
+import eu.anifantakis.lib.ksafe.KSafe
 import java.security.SecureRandom
+
+/** Holds the Application context so KSafe (and others) can be created from common code. */
+internal object AndroidAppContext {
+  lateinit var application: Application
+    private set
+
+  fun init(app: Application) {
+    application = app
+  }
+}
+
+internal actual fun createKSafe(): KSafe = KSafe(AndroidAppContext.application)
 
 internal actual fun secureRandomBytes(size: Int): ByteArray =
   ByteArray(size).also { SecureRandom().nextBytes(it) }

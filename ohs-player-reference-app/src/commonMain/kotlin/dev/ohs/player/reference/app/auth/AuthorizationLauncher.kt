@@ -29,14 +29,21 @@ import androidx.compose.runtime.Composable
  * [redirectUri] is the platform-correct value and must be registered at the identity provider. It
  * is used in BOTH the authorize request and the token exchange, so the launcher owns it.
  */
-expect class AuthorizationLauncher {
+/** The subset of [AuthorizationLauncher] that [AuthService] depends on — lets tests fake it. */
+internal interface AuthorizationLauncherApi {
   val redirectUri: String
+
+  suspend fun authorize(authUrl: String): AuthResult
+}
+
+expect class AuthorizationLauncher : AuthorizationLauncherApi {
+  override val redirectUri: String
 
   /**
    * Launches the auth flow. Suspends until the callback is received ([AuthResult.Success]) on
    * platforms that can await it; returns [AuthResult.Redirecting] on web, where the page unloads.
    */
-  suspend fun authorize(authUrl: String): AuthResult
+  override suspend fun authorize(authUrl: String): AuthResult
 
   /**
    * Web only: if this page load is a redirect back from the provider, returns the callback URL

@@ -53,12 +53,12 @@ internal actual fun secureRandomBytes(size: Int): ByteArray {
  * Safari and returns the callback URL directly to the app (no AppDelegate plumbing needed).
  */
 actual class AuthorizationLauncher(
-  actual val redirectUri: String,
+  actual override val redirectUri: String,
   private val callbackScheme: String,
-) {
+) : AuthorizationLauncherApi {
   private val contextProvider = PresentationContextProvider()
 
-  actual suspend fun authorize(authUrl: String): AuthResult =
+  actual override suspend fun authorize(authUrl: String): AuthResult =
     suspendCancellableCoroutine { continuation ->
       val session =
         ASWebAuthenticationSession(

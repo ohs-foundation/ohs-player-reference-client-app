@@ -36,11 +36,11 @@ internal actual fun secureRandomBytes(size: Int): ByteArray =
  * Desktop login: open the system browser to the identity provider and capture the redirect on a
  * short-lived localhost loopback server (the OAuth 2.0 native-app recommendation, RFC 8252).
  */
-actual class AuthorizationLauncher(private val port: Int) {
+actual class AuthorizationLauncher(private val port: Int) : AuthorizationLauncherApi {
 
-  actual val redirectUri: String = "http://127.0.0.1:$port/callback"
+  actual override val redirectUri: String = "http://127.0.0.1:$port/callback"
 
-  actual suspend fun authorize(authUrl: String): AuthResult =
+  actual override suspend fun authorize(authUrl: String): AuthResult =
     suspendCancellableCoroutine { continuation ->
       val server = HttpServer.create(InetSocketAddress("127.0.0.1", port), 0)
       server.createContext("/callback") { exchange ->

@@ -60,8 +60,11 @@ internal object AuthRedirectBus {
   @Volatile var pending: CompletableDeferred<String?>? = null
 }
 
-actual class AuthorizationLauncher(private val activity: Activity, actual val redirectUri: String) {
-  actual suspend fun authorize(authUrl: String): AuthResult {
+actual class AuthorizationLauncher(
+  private val activity: Activity,
+  actual override val redirectUri: String,
+) : AuthorizationLauncherApi {
+  actual override suspend fun authorize(authUrl: String): AuthResult {
     val deferred = CompletableDeferred<String?>()
     AuthRedirectBus.pending = deferred
     val lifecycle = (activity as? LifecycleOwner)?.lifecycle

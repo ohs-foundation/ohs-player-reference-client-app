@@ -22,8 +22,8 @@ import dev.ohs.player.generated.config.ImmunizationItemConfig
 import dev.ohs.player.generated.state.PatientImmunizationState
 import dev.ohs.player.reference.app.feature.component.common.StatusChipData
 import dev.ohs.player.reference.app.feature.component.common.StatusRow
-import dev.ohs.player.reference.library.renderer.ComponentRenderer
-import dev.ohs.player.reference.library.renderer.RenderOptions
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 
 class ImmunizationItemRenderer :
   ComponentRenderer<PatientImmunizationState, ImmunizationItemConfig> {

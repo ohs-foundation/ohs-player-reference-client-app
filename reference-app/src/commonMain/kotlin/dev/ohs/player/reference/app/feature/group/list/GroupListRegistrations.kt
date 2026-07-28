@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.GroupCardConfig
 import dev.ohs.player.generated.state.GroupListState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
-import dev.ohs.player.reference.library.layout.VerticalListRenderer
-import dev.ohs.player.reference.library.registry.ViewRegistry
-import dev.ohs.player.reference.library.registry.registerComponent
-import dev.ohs.player.reference.library.registry.registerLayout
+import dev.ohs.player.client.layout.VerticalListRenderer
+import dev.ohs.player.client.registry.ViewRegistry
+import dev.ohs.player.client.registry.registerComponent
+import dev.ohs.player.client.registry.registerLayout
 
 fun ViewRegistry.registerGroupList() {
   registerComponent<GroupListState, GroupCardConfig>(

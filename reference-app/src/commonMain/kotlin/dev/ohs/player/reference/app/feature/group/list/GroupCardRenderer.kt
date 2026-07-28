@@ -18,8 +18,8 @@ package dev.ohs.player.reference.app.feature.group.list
 import androidx.compose.runtime.Composable
 import dev.ohs.player.generated.config.GroupCardConfig
 import dev.ohs.player.generated.state.GroupListState
-import dev.ohs.player.reference.library.renderer.ComponentRenderer
-import dev.ohs.player.reference.library.renderer.RenderOptions
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 
 class GroupCardRenderer : ComponentRenderer<GroupListState, GroupCardConfig> {
   @Composable

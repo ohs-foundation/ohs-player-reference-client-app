@@ -18,7 +18,7 @@ The desktop app is the fastest path. It needs only JDK 21 — no Android SDK, no
 
 ```shell
 git clone <repository-url>
-cd ohs-player-reference-client-app
+cd player-reference
 ./gradlew :reference-app:run
 ```
 
@@ -83,7 +83,7 @@ The app combines the OHS Player library with the OHS Foundational Libraries. Ver
 
 | Library | Purpose |
 | --- | --- |
-| [`dev.ohs.player:reference-library`](https://github.com/ohs-foundation/ohs-player-reference-client-library) | Config-driven views using flattened data from FHIR resources (the player) |
+| [`dev.ohs.player:client`](https://github.com/ohs-foundation/player-client) | Config-driven views using flattened data from FHIR resources (the player) |
 | `dev.ohs.fhir:fhir-model` | Typed Kotlin models for FHIR resources |
 | `dev.ohs.fhir:fhir-path` | FHIRPath expression evaluation |
 | `dev.ohs.fhir:fhir-data-capture` | FHIR Structured Data Capture (questionnaires) |
@@ -94,11 +94,11 @@ You do not need this template to use OHS Player. The player is a library, not a 
 
 ```kotlin
 commonMain.dependencies {
-  implementation("dev.ohs.player:reference-library:1.0.0-alpha01")
+  implementation("dev.ohs.player:client:1.0.0-alpha01")
 }
 ```
 
-The [library README](https://github.com/ohs-foundation/ohs-player-reference-client-library#readme) is a standalone user guide. This repository then serves as the worked example.
+The [library README](https://github.com/ohs-foundation/player-client#readme) is a standalone user guide. This repository then serves as the worked example.
 
 ## From FHIR data to view state
 

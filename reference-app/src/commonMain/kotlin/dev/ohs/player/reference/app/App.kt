@@ -29,7 +29,7 @@ import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
 import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireHostScreen
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireIds
-import dev.ohs.player.reference.library.registry.LocalViewRegistry
+import dev.ohs.player.client.registry.LocalViewRegistry
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

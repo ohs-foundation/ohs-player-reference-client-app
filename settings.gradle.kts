@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-rootProject.name = "ohs-player-reference-client-app"
+rootProject.name = "player-reference"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 

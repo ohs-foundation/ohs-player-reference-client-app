@@ -58,7 +58,7 @@ kotlin {
       implementation(libs.androidx.activity.compose)
     }
     commonMain.dependencies {
-      implementation(libs.ohs.player.reference.library)
+      implementation(libs.ohs.player.client)
       implementation(libs.compose.runtime)
       implementation(libs.compose.foundation)
       implementation(libs.compose.material)
@@ -216,7 +216,7 @@ val composePackageVersion: String =
 //   * Kotlin/JS IR backend crashes lowering the generated sealed-interface dispatch tables in
 //     dev.ohs.fhir:fhir-path (StackOverflow in KotlinLikeDumper). The main JS compile is fine; only
 //     the JS *test* executable lowering trips because the test source set exercises those types.
-//     Mirrors the same skip in the ohs-player-reference-client-library repo.
+//     Mirrors the same skip in the player-client repo.
 //
 //   * Android/JVM host unit tests need a host Android framework (NoClassDefFoundError).
 //

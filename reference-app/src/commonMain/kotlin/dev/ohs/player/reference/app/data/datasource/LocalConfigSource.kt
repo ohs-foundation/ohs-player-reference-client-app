@@ -16,8 +16,8 @@
 package dev.ohs.player.reference.app.data.datasource
 
 import dev.ohs.player.generated.GeneratedConfigManifest
-import dev.ohs.player.reference.library.config.ConfigSource
-import ohs_player_reference_client_app.reference_app.generated.resources.Res
+import dev.ohs.player.client.config.ConfigSource
+import player_reference.reference_app.generated.resources.Res
 
 /**
  * Loads the runtime config Binaries the extractor needs (ViewJoinMap + ViewDefinition) from

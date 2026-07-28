@@ -37,7 +37,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import ohs_player_reference_client_app.reference_app.generated.resources.Res
+import player_reference.reference_app.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 /** Caller-supplied identifiers describing why/for-whom a questionnaire was launched. */

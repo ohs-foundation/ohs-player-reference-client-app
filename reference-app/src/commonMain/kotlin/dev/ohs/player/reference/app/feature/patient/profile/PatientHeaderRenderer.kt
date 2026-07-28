@@ -40,8 +40,8 @@ import dev.ohs.player.generated.config.PatientHeaderConfig
 import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.reference.app.feature.component.common.StatusChip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
-import dev.ohs.player.reference.library.renderer.ComponentRenderer
-import dev.ohs.player.reference.library.renderer.RenderOptions
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 
 class PatientHeaderRenderer : ComponentRenderer<PatientSummaryState, PatientHeaderConfig> {
   @Composable

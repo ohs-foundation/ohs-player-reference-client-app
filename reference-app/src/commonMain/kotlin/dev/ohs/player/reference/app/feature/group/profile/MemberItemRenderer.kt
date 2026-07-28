@@ -40,15 +40,15 @@ import dev.ohs.player.generated.config.MemberItemConfig
 import dev.ohs.player.generated.state.GroupMemberState
 import dev.ohs.player.reference.app.feature.component.common.Chip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
-import dev.ohs.player.reference.library.renderer.ComponentRenderer
-import dev.ohs.player.reference.library.renderer.RenderOptions
-import ohs_player_reference_client_app.reference_app.generated.resources.Res
-import ohs_player_reference_client_app.reference_app.generated.resources.relationship_child
-import ohs_player_reference_client_app.reference_app.generated.resources.relationship_guardian
-import ohs_player_reference_client_app.reference_app.generated.resources.relationship_non_relative
-import ohs_player_reference_client_app.reference_app.generated.resources.relationship_other_relative
-import ohs_player_reference_client_app.reference_app.generated.resources.relationship_parent
-import ohs_player_reference_client_app.reference_app.generated.resources.relationship_spouse
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
+import player_reference.reference_app.generated.resources.Res
+import player_reference.reference_app.generated.resources.relationship_child
+import player_reference.reference_app.generated.resources.relationship_guardian
+import player_reference.reference_app.generated.resources.relationship_non_relative
+import player_reference.reference_app.generated.resources.relationship_other_relative
+import player_reference.reference_app.generated.resources.relationship_parent
+import player_reference.reference_app.generated.resources.relationship_spouse
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 

@@ -19,7 +19,7 @@ import dev.ohs.player.reference.app.feature.group.list.registerGroupList
 import dev.ohs.player.reference.app.feature.group.profile.registerGroupProfile
 import dev.ohs.player.reference.app.feature.patient.list.registerPatientList
 import dev.ohs.player.reference.app.feature.patient.profile.registerPatientProfile
-import dev.ohs.player.reference.library.registry.ViewRegistry
+import dev.ohs.player.client.registry.ViewRegistry
 
 fun buildAppViewRegistry(): ViewRegistry =
   ViewRegistry().apply {

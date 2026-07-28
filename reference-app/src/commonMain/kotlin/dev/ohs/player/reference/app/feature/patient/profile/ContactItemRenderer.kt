@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.ContactItemConfig
 import dev.ohs.player.generated.state.PatientContactState
 import dev.ohs.player.reference.app.feature.component.common.Chip
-import dev.ohs.player.reference.library.renderer.ComponentRenderer
-import dev.ohs.player.reference.library.renderer.RenderOptions
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 
 class ContactItemRenderer : ComponentRenderer<PatientContactState, ContactItemConfig> {
   @Composable

@@ -45,10 +45,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.ohs.player.generated.state.GroupHeaderState
 import dev.ohs.player.generated.state.GroupMemberState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
-import dev.ohs.player.reference.library.registry.LocalViewRegistry
-import dev.ohs.player.reference.library.registry.componentRenderer
-import dev.ohs.player.reference.library.registry.layoutRenderer
-import dev.ohs.player.reference.library.renderer.RenderOptions
+import dev.ohs.player.client.registry.LocalViewRegistry
+import dev.ohs.player.client.registry.componentRenderer
+import dev.ohs.player.client.registry.layoutRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

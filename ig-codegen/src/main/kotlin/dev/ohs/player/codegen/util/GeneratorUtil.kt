@@ -29,7 +29,7 @@ private val fhirDateClass = ClassName("dev.ohs.fhir.model.r4", "FhirDate")
 private val fhirDateTimeClass = ClassName("dev.ohs.fhir.model.r4", "FhirDateTime")
 private val bigDecimalClass = ClassName("com.ionspin.kotlin.bignum.decimal", "BigDecimal")
 
-private const val SERIALIZER_PKG = "dev.ohs.player.reference.library.config"
+private const val SERIALIZER_PKG = "dev.ohs.player.client.config"
 private val fhirDateSerializer = ClassName(SERIALIZER_PKG, "FhirDateSerializer")
 private val fhirDateTimeSerializer = ClassName(SERIALIZER_PKG, "FhirDateTimeSerializer")
 private val fhirDecimalSerializer = ClassName(SERIALIZER_PKG, "FhirDecimalSerializer")

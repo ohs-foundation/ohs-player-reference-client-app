@@ -15,8 +15,8 @@
  */
 package dev.ohs.player.reference.app.data.sync
 
+import dev.ohs.fhir.engine.sync.download.ResourceParamsBasedDownloadWorkManager
 import dev.ohs.fhir.model.r4.terminologies.ResourceType
-import dev.ohs.fhir.sync.download.ResourceParamsBasedDownloadWorkManager
 
 /**
  * In-memory implementation of [ResourceParamsBasedDownloadWorkManager.TimestampContext]. Tracks

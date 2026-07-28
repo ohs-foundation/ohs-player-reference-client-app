@@ -109,7 +109,9 @@ internal class OidcAuthApi(
 
   suspend fun fetchUserInfo(accessToken: String): UserInfo =
     httpClient
-      .get(endpoints().userInfoEndpoint) { header(HttpHeaders.Authorization, "Bearer $accessToken") }
+      .get(endpoints().userInfoEndpoint) {
+        header(HttpHeaders.Authorization, "Bearer $accessToken")
+      }
       .body()
 
   /**
@@ -156,7 +158,14 @@ internal class OidcAuthApi(
 
   companion object {
     fun defaultHttpClient(): HttpClient = HttpClient {
-      install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true; isLenient = true }) }
+      install(ContentNegotiation) {
+        json(
+          Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+          }
+        )
+      }
       install(HttpTimeout) {
         requestTimeoutMillis = 15_000
         connectTimeoutMillis = 10_000

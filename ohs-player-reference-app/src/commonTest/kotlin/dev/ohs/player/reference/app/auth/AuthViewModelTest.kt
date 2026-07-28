@@ -71,16 +71,14 @@ class AuthViewModelTest {
   private fun apiThatNeverGetsCalled(): OidcAuthApi {
     val engine = MockEngine { respond("must not be called", HttpStatusCode.InternalServerError) }
     val client =
-      HttpClient(engine) {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-      }
+      HttpClient(engine) { install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) } }
     return OidcAuthApi(OAuthConfig("https://idp.example.org", "client", "openid"), client)
   }
 
   /**
-   * [AuthService.login] always resolves discovery (to build the authorization URL) before
-   * invoking the launcher, so a login-path test needs discovery to succeed — only the launcher's
-   * own result determines the outcome under test.
+   * [AuthService.login] always resolves discovery (to build the authorization URL) before invoking
+   * the launcher, so a login-path test needs discovery to succeed — only the launcher's own result
+   * determines the outcome under test.
    */
   private fun apiWithWorkingDiscovery(): OidcAuthApi {
     val discoveryBody =
@@ -102,7 +100,14 @@ class AuthViewModelTest {
     }
     val client =
       HttpClient(engine) {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true; isLenient = true }) }
+        install(ContentNegotiation) {
+          json(
+            Json {
+              ignoreUnknownKeys = true
+              isLenient = true
+            }
+          )
+        }
       }
     return OidcAuthApi(OAuthConfig("https://idp.example.org", "client", "openid"), client)
   }

@@ -15,17 +15,17 @@
  */
 package dev.ohs.player.reference.app.data.sync
 
-import dev.ohs.fhir.FhirEngine
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.sync.AcceptLocalConflictResolver
+import dev.ohs.fhir.engine.sync.ConflictResolver
+import dev.ohs.fhir.engine.sync.DownloadWorkManager
+import dev.ohs.fhir.engine.sync.FhirSyncTask
+import dev.ohs.fhir.engine.sync.download.ResourceParamsBasedDownloadWorkManager
+import dev.ohs.fhir.engine.sync.download.ResourceSearchParams
+import dev.ohs.fhir.engine.sync.upload.HttpCreateMethod
+import dev.ohs.fhir.engine.sync.upload.HttpUpdateMethod
+import dev.ohs.fhir.engine.sync.upload.UploadStrategy
 import dev.ohs.fhir.model.r4.terminologies.ResourceType
-import dev.ohs.fhir.sync.AcceptLocalConflictResolver
-import dev.ohs.fhir.sync.ConflictResolver
-import dev.ohs.fhir.sync.DownloadWorkManager
-import dev.ohs.fhir.sync.FhirSyncTask
-import dev.ohs.fhir.sync.download.ResourceParamsBasedDownloadWorkManager
-import dev.ohs.fhir.sync.download.ResourceSearchParams
-import dev.ohs.fhir.sync.upload.HttpCreateMethod
-import dev.ohs.fhir.sync.upload.HttpUpdateMethod
-import dev.ohs.fhir.sync.upload.UploadStrategy
 
 /**
  * Resource types downloaded on every sync, with their search parameters. Empty parameters mean

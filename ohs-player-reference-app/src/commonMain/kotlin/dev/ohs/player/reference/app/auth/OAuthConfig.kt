@@ -24,7 +24,10 @@ package dev.ohs.player.reference.app.auth
  * by the [AuthorizationLauncher].
  */
 data class OAuthConfig(
-  /** OIDC issuer, e.g. a Keycloak realm `https://host/realms/ohs-player` or `https://x.zitadel.cloud`. */
+  /**
+   * OIDC issuer, e.g. a Keycloak realm `https://host/realms/ohs-player` or
+   * `https://x.zitadel.cloud`.
+   */
   val issuer: String,
   val clientId: String,
   /** Space-separated OAuth scopes, e.g. "openid profile email offline_access". */

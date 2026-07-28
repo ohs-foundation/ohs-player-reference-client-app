@@ -82,7 +82,9 @@ fun App() {
                 onGroupClick = { id -> navController.navigate("groupProfile/$id") },
                 onDataCaptureClick = {
                   navController.navigate(
-                    questionnaireHostRoute(questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION)
+                    questionnaireHostRoute(
+                      questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION
+                    )
                   )
                 },
                 onSignOut = { authViewModel.logout() },

@@ -46,8 +46,8 @@ expect class AuthorizationLauncher : AuthorizationLauncherApi {
   override suspend fun authorize(authUrl: String): AuthResult
 
   /**
-   * Web only: if this page load is a redirect back from the provider, returns the callback URL
-   * (and clears it from the address bar). Returns null otherwise and on every non-web platform.
+   * Web only: if this page load is a redirect back from the provider, returns the callback URL (and
+   * clears it from the address bar). Returns null otherwise and on every non-web platform.
    */
   fun consumeRedirectCallback(): String?
 }

@@ -147,7 +147,10 @@ private fun ExpandedLogin(signingIn: Boolean, onSignIn: () -> Unit) {
             fontWeight = FontWeight.Bold,
           )
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(Res.string.login_card_title), style = MaterialTheme.typography.headlineSmall)
+            Text(
+              stringResource(Res.string.login_card_title),
+              style = MaterialTheme.typography.headlineSmall,
+            )
             Text(
               text = stringResource(Res.string.login_redirect_hint),
               style = MaterialTheme.typography.bodyMedium,
@@ -202,7 +205,10 @@ private fun CompactLogin(signingIn: Boolean, onSignIn: () -> Unit) {
           .padding(top = 28.dp, bottom = 20.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      Text(stringResource(Res.string.login_card_title), style = MaterialTheme.typography.headlineSmall)
+      Text(
+        stringResource(Res.string.login_card_title),
+        style = MaterialTheme.typography.headlineSmall,
+      )
       Text(
         text = stringResource(Res.string.login_redirect_hint),
         style = MaterialTheme.typography.bodyMedium,
@@ -267,7 +273,9 @@ private fun LoginErrorDialog(message: String, onDismiss: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
       )
     },
-    text = { Text(text = message, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
+    text = {
+      Text(text = message, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+    },
     confirmButton = {
       TextButton(onClick = onDismiss) { Text(stringResource(Res.string.login_error_dismiss)) }
     },

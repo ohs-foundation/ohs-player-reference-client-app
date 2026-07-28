@@ -66,7 +66,9 @@ internal class AuthService(
   /** Exchanges the callback's `code` for tokens and persists the session. */
   private suspend fun completeLogin(callbackUrl: String, redirectUri: String): LoginOutcome {
     val params = Url(callbackUrl).parameters
-    params["error"]?.let { error -> return LoginOutcome.Error(params["error_description"] ?: error) }
+    params["error"]?.let { error ->
+      return LoginOutcome.Error(params["error_description"] ?: error)
+    }
     val code = params["code"] ?: return LoginOutcome.Error("Missing authorization code")
     val returnedState = params["state"]
 
@@ -88,9 +90,9 @@ internal class AuthService(
    * Returns a usable session at startup, refreshing an expired access token when possible.
    *
    * Offline-safe: the session is cleared (→ login) ONLY on a definitive provider rejection
-   * ([AuthException]). A transient/offline failure keeps the stored session. Server-side
-   * revocation while the access token is still locally valid is caught separately (and
-   * non-blockingly) by [revalidateSession].
+   * ([AuthException]). A transient/offline failure keeps the stored session. Server-side revocation
+   * while the access token is still locally valid is caught separately (and non-blockingly) by
+   * [revalidateSession].
    */
   suspend fun ensureFreshSession(): Session? {
     val session = repository.load() ?: return null
@@ -148,7 +150,11 @@ internal class AuthService(
     repository.clear()
   }
 
-  private suspend fun buildAuthorizationUrl(redirectUri: String, pkce: PkcePair, state: String): String =
+  private suspend fun buildAuthorizationUrl(
+    redirectUri: String,
+    pkce: PkcePair,
+    state: String,
+  ): String =
     URLBuilder(api.endpoints().authorizationEndpoint)
       .apply {
         parameters.append("client_id", config.clientId)

@@ -23,8 +23,7 @@ import kotlinx.coroutines.test.runTest
 
 class SessionRepositoryTest {
 
-  @AfterTest
-  fun tearDown() = runTest { SessionRepository.clear() }
+  @AfterTest fun tearDown() = runTest { SessionRepository.clear() }
 
   private fun testSession() =
     Session(

@@ -31,7 +31,8 @@ internal actual fun createKSafe(): KSafe = KSafe()
  * [PendingAuth] saved in KSafe survives the round-trip. On the next load [consumeRedirectCallback]
  * picks up the result.
  */
-actual class AuthorizationLauncher(actual override val redirectUri: String) : AuthorizationLauncherApi {
+actual class AuthorizationLauncher(actual override val redirectUri: String) :
+  AuthorizationLauncherApi {
 
   actual override suspend fun authorize(authUrl: String): AuthResult {
     window.location.href = authUrl

@@ -17,8 +17,8 @@ package dev.ohs.player.reference.app.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.ohs.fhir.sync.FhirDataStore
-import dev.ohs.fhir.sync.SyncJobStatus
+import dev.ohs.fhir.engine.sync.FhirDataStore
+import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import kotlin.time.Instant
 import kotlinx.coroutines.CancellationException

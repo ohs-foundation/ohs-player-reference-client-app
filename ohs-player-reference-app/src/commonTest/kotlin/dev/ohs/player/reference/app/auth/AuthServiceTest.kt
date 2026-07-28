@@ -39,8 +39,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 
 /**
- * Verifies the offline-safe session logic: a logout happens ONLY on a definitive provider
- * rejection (4xx), never on a network/offline failure, which must keep the local session.
+ * Verifies the offline-safe session logic: a logout happens ONLY on a definitive provider rejection
+ * (4xx), never on a network/offline failure, which must keep the local session.
  */
 class AuthServiceTest {
 
@@ -49,6 +49,7 @@ class AuthServiceTest {
     override val session: StateFlow<Session?> = _session.asStateFlow()
     var cleared = false
       private set
+
     private var pending: PendingAuth? = null
 
     override suspend fun load(): Session? = _session.value
@@ -89,7 +90,8 @@ class AuthServiceTest {
       .trimIndent()
   private val tokenBody =
     """{"access_token":"new-access","refresh_token":"new-refresh","expires_in":300,"token_type":"Bearer"}"""
-  private val invalidGrantBody = """{"error":"invalid_grant","error_description":"Token is not active"}"""
+  private val invalidGrantBody =
+    """{"error":"invalid_grant","error_description":"Token is not active"}"""
 
   private fun session(expired: Boolean, refreshToken: String? = "refresh-token") =
     Session(
@@ -112,7 +114,8 @@ class AuthServiceTest {
     val engine = MockEngine { request ->
       val path = request.url.encodedPath
       when {
-        path.endsWith("openid-configuration") -> respond(discoveryBody, HttpStatusCode.OK, jsonHeaders)
+        path.endsWith("openid-configuration") ->
+          respond(discoveryBody, HttpStatusCode.OK, jsonHeaders)
         path.endsWith("/token") -> onToken()
         path.endsWith("/userinfo") -> onUserInfo()
         else -> respond("not found", HttpStatusCode.NotFound)
@@ -120,7 +123,14 @@ class AuthServiceTest {
     }
     val client =
       HttpClient(engine) {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true; isLenient = true }) }
+        install(ContentNegotiation) {
+          json(
+            Json {
+              ignoreUnknownKeys = true
+              isLenient = true
+            }
+          )
+        }
       }
     return OidcAuthApi(OAuthConfig("https://idp.example.org", "client", "openid"), client)
   }
@@ -144,7 +154,8 @@ class AuthServiceTest {
   @Test
   fun refreshRejectedByProvider_logsOut() = runTest {
     val store = FakeSessionStore(session(expired = true))
-    val api = apiWith(onToken = { respond(invalidGrantBody, HttpStatusCode.BadRequest, jsonHeaders) })
+    val api =
+      apiWith(onToken = { respond(invalidGrantBody, HttpStatusCode.BadRequest, jsonHeaders) })
 
     val result = service(store, api).ensureFreshSession()
 

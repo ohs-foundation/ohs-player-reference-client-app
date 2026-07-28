@@ -84,9 +84,7 @@ class AppAuthGatingTest {
   private fun startTestKoin() {
     val engine = MockEngine { respond("not found", HttpStatusCode.NotFound) }
     val client =
-      HttpClient(engine) {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-      }
+      HttpClient(engine) { install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) } }
     startKoin {
       modules(
         module {

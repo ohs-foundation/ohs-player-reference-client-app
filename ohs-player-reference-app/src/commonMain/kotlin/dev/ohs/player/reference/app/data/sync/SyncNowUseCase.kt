@@ -15,9 +15,9 @@
  */
 package dev.ohs.player.reference.app.data.sync
 
-import dev.ohs.fhir.sync.FhirSyncTask
-import dev.ohs.fhir.sync.SyncJobStatus
-import dev.ohs.fhir.sync.runSync
+import dev.ohs.fhir.engine.sync.FhirSyncTask
+import dev.ohs.fhir.engine.sync.SyncJobStatus
+import dev.ohs.fhir.engine.sync.runSync
 
 /**
  * Triggers a one-time sync and returns its terminal result. A dedicated interface (rather than

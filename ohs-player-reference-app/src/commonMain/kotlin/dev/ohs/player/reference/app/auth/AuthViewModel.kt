@@ -64,10 +64,13 @@ internal class AuthViewModel(private val service: AuthService) : ViewModel() {
     }
   }
 
-  /** Test seam: same bootstrap logic, but against [AuthorizationLauncherApi] so tests can fake it. */
+  /**
+   * Test seam: same bootstrap logic, but against [AuthorizationLauncherApi] so tests can fake it.
+   */
   internal suspend fun bootstrapForTest(launcher: AuthorizationLauncherApi) {
     val session = service.ensureFreshSession()
-    _state.value = if (session != null) AuthState.Authenticated(session) else AuthState.Unauthenticated
+    _state.value =
+      if (session != null) AuthState.Authenticated(session) else AuthState.Unauthenticated
   }
 
   private fun revalidateInBackground() {

@@ -32,7 +32,12 @@ class LoginScreenTest {
     var clicked = false
     setContent {
       MaterialTheme {
-        LoginScreen(signingIn = false, error = null, onSignIn = { clicked = true }, onErrorDismiss = {})
+        LoginScreen(
+          signingIn = false,
+          error = null,
+          onSignIn = { clicked = true },
+          onErrorDismiss = {},
+        )
       }
     }
 
@@ -55,7 +60,9 @@ class LoginScreenTest {
       }
     }
 
-    assertTrue(onAllNodesWithText("Sign-in failed: invalid_grant").fetchSemanticsNodes().isNotEmpty())
+    assertTrue(
+      onAllNodesWithText("Sign-in failed: invalid_grant").fetchSemanticsNodes().isNotEmpty()
+    )
     onNodeWithText("Dismiss", ignoreCase = true).performClick()
 
     assertTrue(dismissed)

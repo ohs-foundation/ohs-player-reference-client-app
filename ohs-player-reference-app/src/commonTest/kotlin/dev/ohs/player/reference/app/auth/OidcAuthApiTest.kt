@@ -69,7 +69,14 @@ class OidcAuthApiTest {
     }
     val client =
       HttpClient(engine) {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true; isLenient = true }) }
+        install(ContentNegotiation) {
+          json(
+            Json {
+              ignoreUnknownKeys = true
+              isLenient = true
+            }
+          )
+        }
       }
     return OidcAuthApi(OAuthConfig("https://idp.example.org", "client", "openid"), client)
   }

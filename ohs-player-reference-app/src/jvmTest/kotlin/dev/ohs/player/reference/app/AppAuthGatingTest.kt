@@ -18,15 +18,29 @@ package dev.ohs.player.reference.app
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.runComposeUiTest
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.LocalChange
+import dev.ohs.fhir.engine.OffsetDateTime
+import dev.ohs.fhir.engine.SearchResult
+import dev.ohs.fhir.engine.db.LocalChangeResourceReference
+import dev.ohs.fhir.engine.search.Search
+import dev.ohs.fhir.engine.sync.ConflictResolver
 import dev.ohs.fhir.engine.sync.FhirDataStore
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.engine.sync.createDataStore
+import dev.ohs.fhir.engine.sync.upload.SyncUploadProgress
+import dev.ohs.fhir.engine.sync.upload.UploadRequestResult
+import dev.ohs.fhir.engine.sync.upload.UploadStrategy
+import dev.ohs.fhir.model.r4.Patient
+import dev.ohs.fhir.model.r4.Resource
+import dev.ohs.fhir.model.r4.terminologies.ResourceType
 import dev.ohs.player.reference.app.auth.AuthService
 import dev.ohs.player.reference.app.auth.OAuthConfig
 import dev.ohs.player.reference.app.auth.OidcAuthApi
 import dev.ohs.player.reference.app.auth.PendingAuth
 import dev.ohs.player.reference.app.auth.Session
 import dev.ohs.player.reference.app.auth.SessionStore
+import dev.ohs.player.reference.app.auth.UserInfo
 import dev.ohs.player.reference.app.data.di.repositoryModule
 import dev.ohs.player.reference.app.data.di.viewModelModule
 import dev.ohs.player.reference.app.data.repository.FhirRepository
@@ -41,17 +55,26 @@ import io.ktor.serialization.kotlinx.json.json
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
 private class FakeAppSyncNowUseCase : SyncNowUseCase {
-  override suspend fun invoke(): SyncJobStatus = SyncJobStatus.Succeeded()
+  var invocationCount = 0
+    private set
+
+  override suspend fun invoke(): SyncJobStatus {
+    invocationCount++
+    return SyncJobStatus.Succeeded()
+  }
 }
 
 private class InMemorySessionStore(initial: Session? = null) : SessionStore {
@@ -73,6 +96,49 @@ private class InMemorySessionStore(initial: Session? = null) : SessionStore {
   override suspend fun takePending(): PendingAuth? = null
 }
 
+/** Satisfies AuthViewModel's constructor; no test in this file calls logout(). */
+private class NoOpFhirEngine : FhirEngine {
+  override suspend fun create(vararg resource: Resource): List<String> = error("not used in this test")
+
+  override suspend fun get(type: ResourceType, id: String): Resource = error("not used in this test")
+
+  override suspend fun update(vararg resource: Resource) = error("not used in this test")
+
+  override suspend fun delete(type: ResourceType, id: String) = error("not used in this test")
+
+  override suspend fun <R : Resource> search(search: Search): List<SearchResult<R>> =
+    error("not used in this test")
+
+  override suspend fun syncUpload(
+    uploadStrategy: UploadStrategy,
+    upload:
+      suspend (List<LocalChange>, List<LocalChangeResourceReference>) -> Flow<UploadRequestResult>,
+  ): Flow<SyncUploadProgress> = error("not used in this test")
+
+  override suspend fun syncDownload(
+    conflictResolver: ConflictResolver,
+    download: suspend () -> Flow<List<Resource>>,
+  ) = error("not used in this test")
+
+  override suspend fun count(search: Search): Long = error("not used in this test")
+
+  override suspend fun getLastSyncTimeStamp(): OffsetDateTime? = error("not used in this test")
+
+  override suspend fun clearDatabase() = error("not used in this test")
+
+  override suspend fun getLocalChanges(type: ResourceType, id: String): List<LocalChange> =
+    error("not used in this test")
+
+  override suspend fun purge(type: ResourceType, id: String, forcePurge: Boolean) =
+    error("not used in this test")
+
+  override suspend fun purge(type: ResourceType, ids: Set<String>, forcePurge: Boolean) =
+    error("not used in this test")
+
+  override suspend fun withTransaction(block: suspend FhirEngine.() -> Unit) =
+    error("not used in this test")
+}
+
 @OptIn(ExperimentalTestApi::class)
 class AppAuthGatingTest {
 
@@ -81,20 +147,39 @@ class AppAuthGatingTest {
     return FhirDataStore(createDataStore { path })
   }
 
-  private fun startTestKoin() {
+  private fun testSession() =
+    Session(
+      accessToken = "a",
+      refreshToken = "r",
+      idToken = null,
+      expiresInSeconds = 10_000_000_000L,
+      obtainedAtEpochSeconds = 0,
+      user = UserInfo(),
+    )
+
+  private fun testPatient(): Patient =
+    Json { ignoreUnknownKeys = true }
+      .decodeFromString(Patient.serializer(), """{"resourceType": "Patient", "id": "p1"}""")
+
+  private fun startTestKoin(
+    session: Session? = null,
+    fhirRepository: FhirRepository = InMemorySampleFhirRepository(),
+    syncNowUseCase: SyncNowUseCase = FakeAppSyncNowUseCase(),
+  ) {
     val engine = MockEngine { respond("not found", HttpStatusCode.NotFound) }
     val client =
       HttpClient(engine) { install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) } }
     startKoin {
       modules(
         module {
-          single<FhirRepository> { InMemorySampleFhirRepository() }
+          single<FhirRepository> { fhirRepository }
           single { newFhirDataStore() }
-          single<SyncNowUseCase> { FakeAppSyncNowUseCase() }
+          single<SyncNowUseCase> { syncNowUseCase }
           single { OAuthConfig("https://idp.example.org", "client", "openid") }
-          single<SessionStore> { InMemorySessionStore(initial = null) }
+          single<SessionStore> { InMemorySessionStore(initial = session) }
           single { OidcAuthApi(get(), client) }
           single { AuthService(get(), get(), get()) }
+          single<FhirEngine> { NoOpFhirEngine() }
         },
         repositoryModule,
         viewModelModule,
@@ -114,5 +199,33 @@ class AppAuthGatingTest {
       onAllNodesWithText("Sign in", ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
     }
     assertTrue(onAllNodesWithText("Sign in", ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
+  }
+
+  @Test
+  fun authenticatedWithNoLocalData_runsSyncThenShowsHome() = runComposeUiTest {
+    val syncNowUseCase = FakeAppSyncNowUseCase()
+    startTestKoin(session = testSession(), syncNowUseCase = syncNowUseCase)
+
+    setContent { App() }
+
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithText("Sync now", ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
+    }
+    assertEquals(1, syncNowUseCase.invocationCount)
+  }
+
+  @Test
+  fun authenticatedWithExistingLocalData_skipsSyncAndShowsHomeImmediately() = runComposeUiTest {
+    val repository = InMemorySampleFhirRepository()
+    runBlocking { repository.upsert(testPatient()) }
+    val syncNowUseCase = FakeAppSyncNowUseCase()
+    startTestKoin(session = testSession(), fhirRepository = repository, syncNowUseCase = syncNowUseCase)
+
+    setContent { App() }
+
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithText("Sync now", ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
+    }
+    assertEquals(0, syncNowUseCase.invocationCount)
   }
 }

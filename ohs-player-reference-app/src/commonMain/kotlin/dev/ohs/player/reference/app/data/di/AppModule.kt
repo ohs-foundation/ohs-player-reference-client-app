@@ -38,6 +38,7 @@ import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileViewMo
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireHostViewModel
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireLaunchContext
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireService
+import dev.ohs.player.reference.app.feature.sync.InitialSyncViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -88,4 +89,5 @@ internal val viewModelModule = module {
   }
   viewModel { HomeViewModel(get(), get()) }
   viewModel { AuthViewModel(get(), get()) }
+  viewModel { InitialSyncViewModel(get(), get()) }
 }

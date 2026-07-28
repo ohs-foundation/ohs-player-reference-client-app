@@ -18,6 +18,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+          Captures the OAuth redirect. The scheme/host MUST match
+          OAUTH_REDIRECT_SCHEME / OAUTH_REDIRECT_HOST in local.properties
+          (defaults shown). If you change those, update this intent-filter too.
+        -->
+        <activity
+            android:name=".auth.LoginRedirectActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="dev.ohs.player.reference.app"
+                    android:host="auth" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

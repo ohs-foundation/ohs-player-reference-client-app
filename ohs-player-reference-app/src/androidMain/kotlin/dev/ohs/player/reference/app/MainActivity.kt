@@ -19,9 +19,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import dev.ohs.player.reference.app.auth.AndroidAppContext
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
+    AndroidAppContext.init(application)
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     setContent { App() }

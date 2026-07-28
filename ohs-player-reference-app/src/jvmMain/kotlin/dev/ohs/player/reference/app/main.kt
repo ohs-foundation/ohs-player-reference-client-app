@@ -17,10 +17,10 @@ package dev.ohs.player.reference.app
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.FhirEngineConfiguration
-import dev.ohs.fhir.FhirEngineProvider
-import dev.ohs.fhir.ServerConfiguration
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.FhirEngineConfiguration
+import dev.ohs.fhir.engine.FhirEngineProvider
+import dev.ohs.fhir.engine.ServerConfiguration
 import dev.ohs.player.reference.app.data.di.initKoin
 import java.io.File
 import org.koin.dsl.module

@@ -15,9 +15,9 @@
  */
 package dev.ohs.player.reference.app.data.repository
 
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.FhirEngineConfiguration
-import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.FhirEngineConfiguration
+import dev.ohs.fhir.engine.FhirEngineProvider
 import dev.ohs.fhir.model.r4.Bundle
 import dev.ohs.fhir.model.r4.Group
 import dev.ohs.fhir.model.r4.Patient

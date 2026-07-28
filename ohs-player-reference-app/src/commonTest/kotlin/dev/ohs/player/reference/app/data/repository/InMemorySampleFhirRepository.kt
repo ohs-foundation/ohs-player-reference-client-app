@@ -15,9 +15,9 @@
  */
 package dev.ohs.player.reference.app.data.repository
 
+import dev.ohs.fhir.engine.resourceType
 import dev.ohs.fhir.model.r4.Bundle
 import dev.ohs.fhir.model.r4.Resource
-import dev.ohs.fhir.resourceType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

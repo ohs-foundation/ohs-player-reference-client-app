@@ -23,9 +23,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
-import dev.ohs.fhir.sync.FhirDataStore
-import dev.ohs.fhir.sync.SyncJobStatus
-import dev.ohs.fhir.sync.createDataStore
+import dev.ohs.fhir.engine.sync.FhirDataStore
+import dev.ohs.fhir.engine.sync.SyncJobStatus
+import dev.ohs.fhir.engine.sync.createDataStore
 import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.reference.app.buildAppViewRegistry
 import dev.ohs.player.reference.app.data.di.repositoryModule

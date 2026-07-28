@@ -15,9 +15,9 @@
  */
 package dev.ohs.player.reference.app.feature.home
 
-import dev.ohs.fhir.sync.FhirDataStore
-import dev.ohs.fhir.sync.SyncJobStatus
-import dev.ohs.fhir.sync.createDataStore
+import dev.ohs.fhir.engine.sync.FhirDataStore
+import dev.ohs.fhir.engine.sync.SyncJobStatus
+import dev.ohs.fhir.engine.sync.createDataStore
 import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import java.nio.file.Files
 import kotlin.test.Test

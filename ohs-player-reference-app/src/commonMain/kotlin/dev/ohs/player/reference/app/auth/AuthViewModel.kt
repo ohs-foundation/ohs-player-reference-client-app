@@ -17,6 +17,7 @@ package dev.ohs.player.reference.app.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.ohs.fhir.engine.FhirEngine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +29,10 @@ import kotlinx.coroutines.launch
  * [AuthorizationLauncher] is platform UI, so it's passed in from the composable rather than
  * constructed here.
  */
-internal class AuthViewModel(private val service: AuthService) : ViewModel() {
+internal class AuthViewModel(
+  private val service: AuthService,
+  private val fhirEngine: FhirEngine,
+) : ViewModel() {
 
   private val _state = MutableStateFlow<AuthState>(AuthState.Loading)
   val state: StateFlow<AuthState> = _state.asStateFlow()
@@ -103,9 +107,15 @@ internal class AuthViewModel(private val service: AuthService) : ViewModel() {
   }
 
   fun logout() {
-    viewModelScope.launch {
-      service.logout()
-      _state.value = AuthState.Unauthenticated
-    }
+    viewModelScope.launch { runLogout() }
+  }
+
+  /** Test seam: same logout logic, runnable directly without `viewModelScope.launch`. */
+  internal suspend fun logoutForTest() = runLogout()
+
+  private suspend fun runLogout() {
+    service.logout()
+    fhirEngine.clearDatabase()
+    _state.value = AuthState.Unauthenticated
   }
 }

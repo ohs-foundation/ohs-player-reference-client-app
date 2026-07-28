@@ -87,5 +87,5 @@ internal val viewModelModule = module {
     QuestionnaireHostViewModel(questionnaireId, launchContext, get())
   }
   viewModel { HomeViewModel(get(), get()) }
-  viewModel { AuthViewModel(get()) }
+  viewModel { AuthViewModel(get(), get()) }
 }

@@ -15,6 +15,18 @@
  */
 package dev.ohs.player.reference.app.auth
 
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.LocalChange
+import dev.ohs.fhir.engine.OffsetDateTime
+import dev.ohs.fhir.engine.SearchResult
+import dev.ohs.fhir.engine.db.LocalChangeResourceReference
+import dev.ohs.fhir.engine.search.Search
+import dev.ohs.fhir.engine.sync.ConflictResolver
+import dev.ohs.fhir.engine.sync.upload.SyncUploadProgress
+import dev.ohs.fhir.engine.sync.upload.UploadRequestResult
+import dev.ohs.fhir.engine.sync.upload.UploadStrategy
+import dev.ohs.fhir.model.r4.Resource
+import dev.ohs.fhir.model.r4.terminologies.ResourceType
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -27,6 +39,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +77,50 @@ class AuthViewModelTest {
     private val onAuthorize: suspend (String) -> AuthResult,
   ) : AuthorizationLauncherApi {
     override suspend fun authorize(authUrl: String): AuthResult = onAuthorize(authUrl)
+  }
+
+  /** Every `AuthViewModel` in this file gets one of these — none of these tests call logout(). */
+  private class NoOpFhirEngine : FhirEngine {
+    override suspend fun create(vararg resource: Resource): List<String> =
+      error("not used in this test")
+
+    override suspend fun get(type: ResourceType, id: String): Resource = error("not used in this test")
+
+    override suspend fun update(vararg resource: Resource) = error("not used in this test")
+
+    override suspend fun delete(type: ResourceType, id: String) = error("not used in this test")
+
+    override suspend fun <R : Resource> search(search: Search): List<SearchResult<R>> =
+      error("not used in this test")
+
+    override suspend fun syncUpload(
+      uploadStrategy: UploadStrategy,
+      upload:
+        suspend (List<LocalChange>, List<LocalChangeResourceReference>) -> Flow<UploadRequestResult>,
+    ): Flow<SyncUploadProgress> = error("not used in this test")
+
+    override suspend fun syncDownload(
+      conflictResolver: ConflictResolver,
+      download: suspend () -> Flow<List<Resource>>,
+    ) = error("not used in this test")
+
+    override suspend fun count(search: Search): Long = error("not used in this test")
+
+    override suspend fun getLastSyncTimeStamp(): OffsetDateTime? = error("not used in this test")
+
+    override suspend fun clearDatabase() = error("not used in this test")
+
+    override suspend fun getLocalChanges(type: ResourceType, id: String): List<LocalChange> =
+      error("not used in this test")
+
+    override suspend fun purge(type: ResourceType, id: String, forcePurge: Boolean) =
+      error("not used in this test")
+
+    override suspend fun purge(type: ResourceType, ids: Set<String>, forcePurge: Boolean) =
+      error("not used in this test")
+
+    override suspend fun withTransaction(block: suspend FhirEngine.() -> Unit) =
+      error("not used in this test")
   }
 
   private val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
@@ -130,7 +187,7 @@ class AuthViewModelTest {
         FakeSessionStore(null),
         apiThatNeverGetsCalled(),
       )
-    val viewModel = AuthViewModel(service)
+    val viewModel = AuthViewModel(service, NoOpFhirEngine())
     val launcher = FakeLauncher("app://callback") { AuthResult.Canceled }
 
     viewModel.bootstrapForTest(launcher)
@@ -146,7 +203,7 @@ class AuthViewModelTest {
         FakeSessionStore(session()),
         apiThatNeverGetsCalled(),
       )
-    val viewModel = AuthViewModel(service)
+    val viewModel = AuthViewModel(service, NoOpFhirEngine())
     val launcher = FakeLauncher("app://callback") { AuthResult.Canceled }
 
     viewModel.bootstrapForTest(launcher)
@@ -162,7 +219,7 @@ class AuthViewModelTest {
         FakeSessionStore(null),
         apiWithWorkingDiscovery(),
       )
-    val viewModel = AuthViewModel(service)
+    val viewModel = AuthViewModel(service, NoOpFhirEngine())
     val launcher = FakeLauncher("app://callback") { AuthResult.Failure("network down") }
 
     viewModel.loginForTest(launcher)
@@ -179,7 +236,7 @@ class AuthViewModelTest {
         FakeSessionStore(null),
         apiWithWorkingDiscovery(),
       )
-    val viewModel = AuthViewModel(service)
+    val viewModel = AuthViewModel(service, NoOpFhirEngine())
     val launcher = FakeLauncher("app://callback") { AuthResult.Failure("network down") }
     viewModel.loginForTest(launcher)
 

@@ -25,11 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 import dev.ohs.player.generated.config.AllergyReactionItemConfig
 import dev.ohs.player.generated.state.AllergyReactionState
 import dev.ohs.player.reference.app.feature.component.common.Chip
-import dev.ohs.player.client.renderer.ComponentRenderer
-import dev.ohs.player.client.renderer.RenderOptions
 
 class AllergyReactionItemRenderer :
   ComponentRenderer<AllergyReactionState, AllergyReactionItemConfig> {

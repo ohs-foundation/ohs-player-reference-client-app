@@ -33,8 +33,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import player_reference.reference_app.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import player_reference.reference_app.generated.resources.Res
 
 /**
  * TODO(#58): Temporary workaround until FHIREngine integration is available. Remove this once

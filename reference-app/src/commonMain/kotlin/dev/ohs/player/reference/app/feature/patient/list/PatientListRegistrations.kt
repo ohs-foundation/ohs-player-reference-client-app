@@ -17,15 +17,15 @@ package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
-import dev.ohs.player.generated.config.PatientCardConfig
-import dev.ohs.player.generated.state.PatientSummaryState
-import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.client.layout.GridListRenderer
 import dev.ohs.player.client.layout.HorizontalListRenderer
 import dev.ohs.player.client.layout.VerticalListRenderer
 import dev.ohs.player.client.registry.ViewRegistry
 import dev.ohs.player.client.registry.registerComponent
 import dev.ohs.player.client.registry.registerLayout
+import dev.ohs.player.generated.config.PatientCardConfig
+import dev.ohs.player.generated.state.PatientSummaryState
+import dev.ohs.player.generated.viewtype.ViewTypeCS
 
 fun ViewRegistry.registerPatientList() {
   registerComponent<PatientSummaryState, PatientCardConfig>(

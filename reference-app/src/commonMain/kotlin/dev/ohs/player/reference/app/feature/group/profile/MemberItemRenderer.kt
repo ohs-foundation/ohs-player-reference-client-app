@@ -36,12 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 import dev.ohs.player.generated.config.MemberItemConfig
 import dev.ohs.player.generated.state.GroupMemberState
 import dev.ohs.player.reference.app.feature.component.common.Chip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
-import dev.ohs.player.client.renderer.ComponentRenderer
-import dev.ohs.player.client.renderer.RenderOptions
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import player_reference.reference_app.generated.resources.Res
 import player_reference.reference_app.generated.resources.relationship_child
 import player_reference.reference_app.generated.resources.relationship_guardian
@@ -49,8 +51,6 @@ import player_reference.reference_app.generated.resources.relationship_non_relat
 import player_reference.reference_app.generated.resources.relationship_other_relative
 import player_reference.reference_app.generated.resources.relationship_parent
 import player_reference.reference_app.generated.resources.relationship_spouse
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 
 class MemberItemRenderer : ComponentRenderer<GroupMemberState, MemberItemConfig> {
   @Composable

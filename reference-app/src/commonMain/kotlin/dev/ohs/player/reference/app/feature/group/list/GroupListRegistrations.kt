@@ -17,13 +17,13 @@ package dev.ohs.player.reference.app.feature.group.list
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
-import dev.ohs.player.generated.config.GroupCardConfig
-import dev.ohs.player.generated.state.GroupListState
-import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.client.layout.VerticalListRenderer
 import dev.ohs.player.client.registry.ViewRegistry
 import dev.ohs.player.client.registry.registerComponent
 import dev.ohs.player.client.registry.registerLayout
+import dev.ohs.player.generated.config.GroupCardConfig
+import dev.ohs.player.generated.state.GroupListState
+import dev.ohs.player.generated.viewtype.ViewTypeCS
 
 fun ViewRegistry.registerGroupList() {
   registerComponent<GroupListState, GroupCardConfig>(

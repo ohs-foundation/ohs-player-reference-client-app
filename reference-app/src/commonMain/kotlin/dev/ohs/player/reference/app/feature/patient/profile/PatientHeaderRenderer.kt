@@ -36,12 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 import dev.ohs.player.generated.config.PatientHeaderConfig
 import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.reference.app.feature.component.common.StatusChip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
-import dev.ohs.player.client.renderer.ComponentRenderer
-import dev.ohs.player.client.renderer.RenderOptions
 
 class PatientHeaderRenderer : ComponentRenderer<PatientSummaryState, PatientHeaderConfig> {
   @Composable

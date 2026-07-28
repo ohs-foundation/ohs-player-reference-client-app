@@ -31,11 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 import dev.ohs.player.generated.config.ContactItemConfig
 import dev.ohs.player.generated.state.PatientContactState
 import dev.ohs.player.reference.app.feature.component.common.Chip
-import dev.ohs.player.client.renderer.ComponentRenderer
-import dev.ohs.player.client.renderer.RenderOptions
 
 class ContactItemRenderer : ComponentRenderer<PatientContactState, ContactItemConfig> {
   @Composable

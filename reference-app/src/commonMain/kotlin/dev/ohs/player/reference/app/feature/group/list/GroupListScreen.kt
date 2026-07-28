@@ -35,10 +35,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.ohs.player.generated.state.GroupListState
-import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.client.layout.VerticalListRenderer
 import dev.ohs.player.client.scaffold.ListScaffold
+import dev.ohs.player.generated.state.GroupListState
+import dev.ohs.player.generated.viewtype.ViewTypeCS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

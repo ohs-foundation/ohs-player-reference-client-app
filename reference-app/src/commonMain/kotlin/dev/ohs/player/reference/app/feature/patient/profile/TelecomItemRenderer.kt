@@ -29,10 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.ohs.player.generated.config.TelecomItemConfig
-import dev.ohs.player.generated.state.PatientTelecomState
 import dev.ohs.player.client.renderer.ComponentRenderer
 import dev.ohs.player.client.renderer.RenderOptions
+import dev.ohs.player.generated.config.TelecomItemConfig
+import dev.ohs.player.generated.state.PatientTelecomState
 
 class TelecomItemRenderer : ComponentRenderer<PatientTelecomState, TelecomItemConfig> {
   @Composable

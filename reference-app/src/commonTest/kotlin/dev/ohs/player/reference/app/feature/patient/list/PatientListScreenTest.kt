@@ -22,8 +22,8 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
-import dev.ohs.player.reference.app.buildAppViewRegistry
 import dev.ohs.player.client.registry.LocalViewRegistry
+import dev.ohs.player.reference.app.buildAppViewRegistry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

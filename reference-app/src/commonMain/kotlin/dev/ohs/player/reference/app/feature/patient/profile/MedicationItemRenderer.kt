@@ -18,12 +18,12 @@ package dev.ohs.player.reference.app.feature.patient.profile
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import dev.ohs.player.client.renderer.ComponentRenderer
+import dev.ohs.player.client.renderer.RenderOptions
 import dev.ohs.player.generated.config.MedicationItemConfig
 import dev.ohs.player.generated.state.PatientMedicationState
 import dev.ohs.player.reference.app.feature.component.common.StatusChipData
 import dev.ohs.player.reference.app.feature.component.common.StatusRow
-import dev.ohs.player.client.renderer.ComponentRenderer
-import dev.ohs.player.client.renderer.RenderOptions
 
 class MedicationItemRenderer : ComponentRenderer<PatientMedicationState, MedicationItemConfig> {
   @Composable

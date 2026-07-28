@@ -37,8 +37,8 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import player_reference.reference_app.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import player_reference.reference_app.generated.resources.Res
 
 /** Caller-supplied identifiers describing why/for-whom a questionnaire was launched. */
 data class QuestionnaireLaunchContext(val patientId: String? = null, val groupId: String? = null)

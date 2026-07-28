@@ -22,6 +22,9 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Warning
+import dev.ohs.player.client.registry.ViewRegistry
+import dev.ohs.player.client.registry.registerComponent
+import dev.ohs.player.client.registry.registerLayout
 import dev.ohs.player.generated.config.AllergyItemConfig
 import dev.ohs.player.generated.config.AllergyReactionItemConfig
 import dev.ohs.player.generated.config.ConditionItemConfig
@@ -41,9 +44,6 @@ import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.generated.state.PatientTelecomState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.reference.app.feature.component.common.SectionCardLayoutRenderer
-import dev.ohs.player.client.registry.ViewRegistry
-import dev.ohs.player.client.registry.registerComponent
-import dev.ohs.player.client.registry.registerLayout
 
 fun ViewRegistry.registerPatientProfile() {
   registerComponent<PatientSummaryState, PatientHeaderConfig>(

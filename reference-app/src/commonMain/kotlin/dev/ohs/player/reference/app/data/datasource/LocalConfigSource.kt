@@ -15,8 +15,8 @@
  */
 package dev.ohs.player.reference.app.data.datasource
 
-import dev.ohs.player.generated.GeneratedConfigManifest
 import dev.ohs.player.client.config.ConfigSource
+import dev.ohs.player.generated.GeneratedConfigManifest
 import player_reference.reference_app.generated.resources.Res
 
 /**

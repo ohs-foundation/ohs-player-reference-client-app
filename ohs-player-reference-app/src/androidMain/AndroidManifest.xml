@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Required for FHIR sync and the OIDC auth flow (discovery, token exchange, userinfo). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".OhsPlayerApplication"
         android:allowBackup="true"

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,7 +62,11 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Unit) {
+fun HomeScreen(
+  onGroupClick: (String) -> Unit,
+  onDataCaptureClick: () -> Unit,
+  onSignOut: () -> Unit,
+) {
   val homeViewModel: HomeViewModel = koinViewModel()
   val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -133,6 +138,15 @@ fun HomeScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Unit) {
               homeViewModel.syncNow()
               closeDrawerIfCompact()
             }
+          },
+        )
+        NavigationDrawerItem(
+          label = { Text("Sign out") },
+          icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
+          selected = false,
+          onClick = {
+            onSignOut()
+            closeDrawerIfCompact()
           },
         )
       }

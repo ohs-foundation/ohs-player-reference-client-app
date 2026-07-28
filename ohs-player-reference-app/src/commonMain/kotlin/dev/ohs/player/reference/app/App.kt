@@ -85,6 +85,7 @@ fun App() {
                     questionnaireHostRoute(questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION)
                   )
                 },
+                onSignOut = { authViewModel.logout() },
               )
             }
 

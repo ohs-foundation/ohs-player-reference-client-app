@@ -77,7 +77,7 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}) }
+        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
       }
     }
 
@@ -102,7 +102,7 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}) }
+        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
       }
     }
 
@@ -129,7 +129,7 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}) }
+        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
       }
     }
 

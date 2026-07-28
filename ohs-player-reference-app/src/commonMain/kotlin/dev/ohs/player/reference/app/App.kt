@@ -15,9 +15,17 @@
  */
 package dev.ohs.player.reference.app
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,13 +33,18 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.savedstate.read
 import dev.ohs.player.library.registry.LocalViewRegistry
+import dev.ohs.player.reference.app.auth.AuthState
+import dev.ohs.player.reference.app.auth.AuthViewModel
+import dev.ohs.player.reference.app.auth.rememberAuthorizationLauncher
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
 import dev.ohs.player.reference.app.feature.home.HomeScreen
+import dev.ohs.player.reference.app.feature.login.LoginScreen
 import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireHostScreen
 import dev.ohs.player.reference.app.feature.questionnaire.QuestionnaireIds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App() {
@@ -39,89 +52,112 @@ fun App() {
 
   CompositionLocalProvider(LocalViewRegistry provides registry) {
     OhsPlayerTheme {
-      val navController = rememberNavController()
-      NavHost(navController = navController, startDestination = "home") {
+      val authViewModel: AuthViewModel = koinViewModel()
+      val launcher = rememberAuthorizationLauncher()
+      val authState by authViewModel.state.collectAsStateWithLifecycle()
+      val signingIn by authViewModel.signingIn.collectAsStateWithLifecycle()
+      val authError by authViewModel.error.collectAsStateWithLifecycle()
 
-        // Screen 1: Home (adaptive navigation drawer shell around the household list)
-        composable("home") {
-          HomeScreen(
-            onGroupClick = { id -> navController.navigate("groupProfile/$id") },
-            onDataCaptureClick = {
-              navController.navigate(
-                questionnaireHostRoute(questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION)
+      LaunchedEffect(launcher) { authViewModel.bootstrap(launcher) }
+
+      when (authState) {
+        is AuthState.Loading ->
+          Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+          }
+        is AuthState.Unauthenticated ->
+          LoginScreen(
+            signingIn = signingIn,
+            error = authError,
+            onSignIn = { authViewModel.login(launcher) },
+            onErrorDismiss = { authViewModel.clearError() },
+          )
+        is AuthState.Authenticated -> {
+          val navController = rememberNavController()
+          NavHost(navController = navController, startDestination = "home") {
+
+            // Screen 1: Home (adaptive navigation drawer shell around the household list)
+            composable("home") {
+              HomeScreen(
+                onGroupClick = { id -> navController.navigate("groupProfile/$id") },
+                onDataCaptureClick = {
+                  navController.navigate(
+                    questionnaireHostRoute(questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION)
+                  )
+                },
               )
-            },
-          )
-        }
+            }
 
-        composable(
-          route = "questionnaireHost/{questionnaireId}?patientId={patientId}&groupId={groupId}",
-          arguments =
-            listOf(
-              navArgument("questionnaireId") { type = NavType.StringType },
-              navArgument("patientId") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-              },
-              navArgument("groupId") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-              },
-            ),
-        ) { back ->
-          val questionnaireId =
-            back.arguments?.read { getStringOrNull("questionnaireId") }.orEmpty()
-          val patientId = back.arguments?.read { getStringOrNull("patientId") }
-          val groupId = back.arguments?.read { getStringOrNull("groupId") }
-          QuestionnaireHostScreen(
-            questionnaireId = questionnaireId,
-            patientId = patientId,
-            groupId = groupId,
-            onBack = { navController.popBackStack() },
-          )
-        }
-
-        // Screen 2: Household profile (head + members)
-        composable(
-          route = "groupProfile/{groupId}",
-          arguments = listOf(navArgument("groupId") { type = NavType.StringType }),
-        ) { back ->
-          val groupId = back.arguments?.read { getStringOrNull("groupId") }.orEmpty()
-          GroupProfileScreen(
-            groupId = groupId,
-            onBack = { navController.popBackStack() },
-            onMemberClick = { id -> navController.navigate("patientProfile/$id") },
-            onAddMembers = {
-              navController.navigate(
-                questionnaireHostRoute(
-                  questionnaireId = QuestionnaireIds.HOUSEHOLD_MEMBERS,
-                  groupId = groupId,
-                )
+            composable(
+              route = "questionnaireHost/{questionnaireId}?patientId={patientId}&groupId={groupId}",
+              arguments =
+                listOf(
+                  navArgument("questionnaireId") { type = NavType.StringType },
+                  navArgument("patientId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                  },
+                  navArgument("groupId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                  },
+                ),
+            ) { back ->
+              val questionnaireId =
+                back.arguments?.read { getStringOrNull("questionnaireId") }.orEmpty()
+              val patientId = back.arguments?.read { getStringOrNull("patientId") }
+              val groupId = back.arguments?.read { getStringOrNull("groupId") }
+              QuestionnaireHostScreen(
+                questionnaireId = questionnaireId,
+                patientId = patientId,
+                groupId = groupId,
+                onBack = { navController.popBackStack() },
               )
-            },
-          )
-        }
+            }
 
-        // Screen 3: Patient IPS summary
-        composable(
-          route = "patientProfile/{patientId}",
-          arguments = listOf(navArgument("patientId") { type = NavType.StringType }),
-        ) { back ->
-          val patientId = back.arguments?.read { getStringOrNull("patientId") }.orEmpty()
-          PatientProfileScreen(
-            patientId = patientId,
-            onBack = { navController.popBackStack() },
-            onAddClinicalData = {
-              navController.navigate(
-                questionnaireHostRoute(
-                  questionnaireId = QuestionnaireIds.PATIENT_CLINICAL_DATA,
-                  patientId = patientId,
-                )
+            // Screen 2: Household profile (head + members)
+            composable(
+              route = "groupProfile/{groupId}",
+              arguments = listOf(navArgument("groupId") { type = NavType.StringType }),
+            ) { back ->
+              val groupId = back.arguments?.read { getStringOrNull("groupId") }.orEmpty()
+              GroupProfileScreen(
+                groupId = groupId,
+                onBack = { navController.popBackStack() },
+                onMemberClick = { id -> navController.navigate("patientProfile/$id") },
+                onAddMembers = {
+                  navController.navigate(
+                    questionnaireHostRoute(
+                      questionnaireId = QuestionnaireIds.HOUSEHOLD_MEMBERS,
+                      groupId = groupId,
+                    )
+                  )
+                },
               )
-            },
-          )
+            }
+
+            // Screen 3: Patient IPS summary
+            composable(
+              route = "patientProfile/{patientId}",
+              arguments = listOf(navArgument("patientId") { type = NavType.StringType }),
+            ) { back ->
+              val patientId = back.arguments?.read { getStringOrNull("patientId") }.orEmpty()
+              PatientProfileScreen(
+                patientId = patientId,
+                onBack = { navController.popBackStack() },
+                onAddClinicalData = {
+                  navController.navigate(
+                    questionnaireHostRoute(
+                      questionnaireId = QuestionnaireIds.PATIENT_CLINICAL_DATA,
+                      patientId = patientId,
+                    )
+                  )
+                },
+              )
+            }
+          }
         }
       }
     }

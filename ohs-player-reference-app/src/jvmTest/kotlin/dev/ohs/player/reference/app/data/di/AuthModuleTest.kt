@@ -15,23 +15,26 @@
  */
 package dev.ohs.player.reference.app.data.di
 
+import dev.ohs.player.reference.app.auth.AuthService
+import dev.ohs.player.reference.app.auth.AuthViewModel
+import kotlin.test.AfterTest
+import kotlin.test.Test
 import org.koin.core.context.startKoin
-import org.koin.core.module.Module
+import org.koin.core.context.stopKoin
+import org.koin.test.KoinTest
+import org.koin.test.inject
 
-/**
- * Starts the single global Koin instance for the app. [platformModule] supplies the
- * platform-specific `FhirEngine` binding that [fhirEngineRepositoryModule] depends on.
- */
-fun initKoin(platformModule: Module) {
-  startKoin {
-    modules(
-      platformModule,
-      fhirEngineRepositoryModule,
-      repositoryModule,
-      serviceModule,
-      syncModule,
-      authModule,
-      viewModelModule,
-    )
+class AuthModuleTest : KoinTest {
+
+  private val authService by inject<AuthService>()
+
+  @AfterTest fun tearDown() = stopKoin()
+
+  @Test
+  fun authModule_resolvesAuthServiceAndAuthViewModel() {
+    startKoin { modules(authModule, viewModelModule) }
+
+    authService // resolves without throwing
+    getKoin().get<AuthViewModel>()
   }
 }

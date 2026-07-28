@@ -41,6 +41,7 @@ ionspin-bignum = "0.3.10"
 fhir-data-capture = { module = "dev.ohs.fhir:fhir-data-capture", version.ref = "fhirDataCapture" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBom" }
+koin-test = { module = "io.insert-koin:koin-test" }
 koin-core = { module = "io.insert-koin:koin-core" }
 koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-composeViewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }

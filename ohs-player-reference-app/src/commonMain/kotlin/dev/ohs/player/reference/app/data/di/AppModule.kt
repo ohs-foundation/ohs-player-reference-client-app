@@ -15,8 +15,14 @@
  */
 package dev.ohs.player.reference.app.data.di
 
-import dev.ohs.fhir.FhirEngineProvider
-import dev.ohs.fhir.sync.FhirSyncTask
+import dev.ohs.fhir.engine.FhirEngineProvider
+import dev.ohs.fhir.engine.sync.FhirSyncTask
+import dev.ohs.player.reference.app.auth.AuthService
+import dev.ohs.player.reference.app.auth.AuthViewModel
+import dev.ohs.player.reference.app.auth.OAuthConfig
+import dev.ohs.player.reference.app.auth.OidcAuthApi
+import dev.ohs.player.reference.app.auth.SessionRepository
+import dev.ohs.player.reference.app.auth.SessionStore
 import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.GroupRepository
@@ -61,6 +67,17 @@ internal val syncModule = module {
   single<SyncNowUseCase> { RunSyncNowUseCase(get()) }
 }
 
+/**
+ * `SessionStore`/`SessionRepository`/`AuthService` — everything downstream of the plain
+ * `SessionRepository` object (kept outside Koin; see its kdoc) is Koin-injected here.
+ */
+internal val authModule = module {
+  single { OAuthConfig.Default }
+  single<SessionStore> { SessionRepository }
+  single { OidcAuthApi(get()) }
+  single { AuthService(get(), get(), get()) }
+}
+
 internal val viewModelModule = module {
   viewModel { PatientListViewModel(get()) }
   viewModel { (patientId: String) -> PatientProfileViewModel(patientId, get()) }
@@ -70,4 +87,5 @@ internal val viewModelModule = module {
     QuestionnaireHostViewModel(questionnaireId, launchContext, get())
   }
   viewModel { HomeViewModel(get(), get()) }
+  viewModel { AuthViewModel(get()) }
 }

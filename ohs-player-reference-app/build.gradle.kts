@@ -123,7 +123,10 @@ kotlin {
       implementation(libs.kotlinx.coroutinesSwing)
       implementation(libs.ktor.client.cio)
     }
-    jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+    jvmTest.dependencies {
+      implementation(compose.desktop.currentOs)
+      implementation(libs.koin.test)
+    }
   }
 }
 

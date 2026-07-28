@@ -17,10 +17,12 @@ package dev.ohs.player.reference.app
 
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.FhirEngineConfiguration
-import dev.ohs.fhir.FhirEngineProvider
-import dev.ohs.fhir.ServerConfiguration
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.FhirEngineConfiguration
+import dev.ohs.fhir.engine.FhirEngineProvider
+import dev.ohs.fhir.engine.ServerConfiguration
+import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
+import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
 import org.koin.dsl.module
 
@@ -28,7 +30,11 @@ import org.koin.dsl.module
 fun main() {
   FhirEngineProvider.init(
     FhirEngineConfiguration(
-      serverConfiguration = ServerConfiguration(baseUrl = "https://hapi.fhir.org/baseR4")
+      serverConfiguration =
+        ServerConfiguration(
+          baseUrl = GeneratedAuthConfig.FHIR_BASE_URL,
+          authenticator = FhirBearerAuthenticator,
+        )
     )
   )
   initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance() } })

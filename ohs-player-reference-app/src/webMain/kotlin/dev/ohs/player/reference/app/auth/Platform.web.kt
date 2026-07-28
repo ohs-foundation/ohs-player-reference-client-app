@@ -15,10 +15,40 @@
  */
 package dev.ohs.player.reference.app.auth
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import eu.anifantakis.lib.ksafe.KSafe
+import kotlinx.browser.window
 
 internal actual fun createKSafe(): KSafe = KSafe()
 
 // secureRandomBytes lives in jsMain / wasmJsMain — Web Crypto interop differs
 // between the two web targets, so it can't be shared from webMain.
-// AuthorizationLauncher is added here in a later task.
+
+/**
+ * Web login uses a full-page redirect to the identity provider (the recommended SPA flow).
+ * [authorize] navigates away and the page unloads, so it returns [AuthResult.Redirecting]; the
+ * [PendingAuth] saved in KSafe survives the round-trip. On the next load [consumeRedirectCallback]
+ * picks up the result.
+ */
+actual class AuthorizationLauncher(actual val redirectUri: String) {
+
+  actual suspend fun authorize(authUrl: String): AuthResult {
+    window.location.href = authUrl
+    return AuthResult.Redirecting
+  }
+
+  actual fun consumeRedirectCallback(): String? {
+    val search = window.location.search
+    if (!search.contains("code=") && !search.contains("error=")) return null
+    val href = window.location.href
+    // Strip the query so a refresh doesn't replay the (single-use) code.
+    window.history.replaceState(null, "", window.location.pathname)
+    return href
+  }
+}
+
+@Composable
+actual fun rememberAuthorizationLauncher(): AuthorizationLauncher = remember {
+  AuthorizationLauncher(GeneratedAuthConfig.WEB_REDIRECT_URL)
+}

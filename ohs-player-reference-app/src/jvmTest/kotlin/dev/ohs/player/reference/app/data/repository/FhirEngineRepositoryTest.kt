@@ -224,4 +224,25 @@ class FhirEngineRepositoryTest {
     assertEquals(1, groups.size)
     assertEquals("Patient/patient-abs-1", groups.first().member.first().entity.reference?.value)
   }
+
+  @Test
+  fun hasAnyData_onEmptyDatabase_isFalse() = runTest {
+    val repository = FhirEngineRepository(fhirEngine)
+
+    assertEquals(false, repository.hasAnyData())
+  }
+
+  @Test
+  fun hasAnyData_afterUpsertingPatient_isTrue() = runTest {
+    val repository = FhirEngineRepository(fhirEngine)
+    val patient =
+      json.decodeFromString(
+        Patient.serializer(),
+        """{"resourceType": "Patient", "id": "patient-has-data"}""",
+      )
+
+    repository.upsert(patient)
+
+    assertEquals(true, repository.hasAnyData())
+  }
 }

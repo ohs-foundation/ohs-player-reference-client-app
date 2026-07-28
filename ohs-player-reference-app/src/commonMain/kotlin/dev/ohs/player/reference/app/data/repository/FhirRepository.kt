@@ -37,4 +37,7 @@ interface FhirRepository {
   suspend fun get(resourceType: String, id: String): Resource?
 
   suspend fun all(resourceType: String): List<Resource>
+
+  /** True once any `Patient` or `Group` has been persisted locally. Drives the initial sync gate. */
+  suspend fun hasAnyData(): Boolean
 }

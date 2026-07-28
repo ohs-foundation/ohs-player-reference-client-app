@@ -48,6 +48,8 @@ class InMemorySampleFhirRepository : FhirRepository {
     return resourcesByType[resourceType]?.values?.toList().orEmpty()
   }
 
+  override suspend fun hasAnyData(): Boolean = resourcesByType.values.any { it.isNotEmpty() }
+
   private fun store(resource: Resource) {
     val id = resource.id ?: return
     resourcesByType.getOrPut(resource.resourceType) { mutableMapOf() }[id] = resource

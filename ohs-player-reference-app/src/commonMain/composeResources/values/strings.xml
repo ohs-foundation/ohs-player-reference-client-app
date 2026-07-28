@@ -6,4 +6,14 @@
     <string name="relationship_guardian">Guardian</string>
     <string name="relationship_other_relative">Other relative</string>
     <string name="relationship_non_relative">Non-relative</string>
+
+    <!-- Login screen -->
+    <string name="login_brand">OHS Player</string>
+    <string name="login_tagline">Care coordination, offline-first</string>
+    <string name="login_subtitle">Sign in to sync households and patient records with your organization\'s FHIR server.</string>
+    <string name="login_card_title">Sign in to OHS Player</string>
+    <string name="login_redirect_hint">You\'ll be securely redirected to your organization\'s sign-in page to continue.</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_error_title">Sign-in failed</string>
+    <string name="login_error_dismiss">Dismiss</string>
 </resources>

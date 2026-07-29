@@ -125,6 +125,7 @@ kotlin {
       implementation(libs.ktor.client.mock)
     }
     iosMain.dependencies { implementation(libs.ktor.client.darwin) }
+    getByName("foregroundSyncWebMain").dependencies { implementation(libs.kotlinx.browser) }
     webMain.dependencies {
       // :engine's WebWorkerSQLiteDriver worker (androidx.sqlite:sqlite-web) is loaded via
       // `new Worker(new URL("sqlite-wasm-worker/worker.js", import.meta.url), { type: "module" })`

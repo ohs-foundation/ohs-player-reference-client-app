@@ -30,6 +30,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -41,17 +42,20 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 
+/** Supplies each platform's best-effort "is the device online" check for [Sync.periodicSync]. */
+internal expect fun isNetworkConnected(): Boolean
+
 /**
- * Foreground-only one-time sync scheduler shared by Desktop (JVM) and web (js, wasmJs) — neither
- * platform has a native OS background scheduler (no WorkManager, no BGTaskScheduler), so sync only
- * runs while the host process (JVM process / browser tab) stays alive. Mirrors
- * kotlin-fhir-engine's engine-app `Sync` object, trimmed to the one-time-sync surface this app
- * uses (no periodic sync).
+ * Foreground-only sync scheduler shared by Desktop (JVM) and web (js, wasmJs) — neither platform
+ * has a native OS background scheduler (no WorkManager, no BGTaskScheduler), so sync only runs
+ * while the host process (JVM process / browser tab) stays alive. Mirrors kotlin-fhir-engine's
+ * engine-app `Sync` object.
  */
 internal object Sync {
   private val scope = CoroutineScope(SupervisorJob() + syncDispatcher)
   private val mutex = Mutex()
   private val activeSyncs = mutableMapOf<String, SyncHandle>()
+  private val activePeriodicJobs = mutableMapOf<String, Job>()
   private val fhirDataStore: FhirDataStore by lazy { FhirEngineProvider.getFhirDataStore() }
 
   /**
@@ -80,6 +84,33 @@ internal object Sync {
     cancelSync("${T::class.simpleName}-oneTimeSync")
   }
 
+  /**
+   * Schedules a recurring foreground sync using [FhirSyncTask] instances created by [taskFactory].
+   * Safe to call repeatedly — a cycle already running for [T] is left alone, never duplicated.
+   * Skips (not fails/retries) any cycle where [isNetworkConnected] returns false.
+   *
+   * @param repeatInterval Delay between the end of one cycle and the start of the next.
+   * @param retryConfiguration Retry policy applied within each cycle, or null to disable retries.
+   */
+  suspend inline fun <reified T : FhirSyncTask> periodicSync(
+    noinline taskFactory: () -> T,
+    repeatInterval: Duration = 15.minutes,
+    retryConfiguration: RetryConfiguration? = defaultRetryConfiguration,
+  ) {
+    runPeriodicSync(
+      "${T::class.simpleName}-periodicSync",
+      taskFactory,
+      repeatInterval,
+      retryConfiguration,
+    )
+  }
+
+  /** Cancels the recurring periodic sync for [T]. No-op if none is active. */
+  suspend inline fun <reified T : FhirSyncTask> cancelPeriodicSync() {
+    val job = mutex.withLock { activePeriodicJobs.remove("${T::class.simpleName}-periodicSync") }
+    job?.cancel()
+  }
+
   suspend fun runOneTimeSync(
     uniqueWorkName: String,
     taskFactory: () -> FhirSyncTask,
@@ -100,30 +131,10 @@ internal object Sync {
 
     val job =
       scope.launch {
-        val maxRetries = retryConfiguration?.maxRetries ?: 0
-        var attempt = 0
-        var lastResult: SyncJobStatus = SyncJobStatus.Failed()
-
-        while (attempt <= maxRetries) {
-          if (attempt > 0) {
-            delay(computeBackoffDelayMillis(retryConfiguration!!, attempt - 1).milliseconds)
+        val lastResult =
+          runAttemptsWithRetry(taskFactory, uniqueWorkName, retryConfiguration, syncTimeout) {
+            statusFlow.emit(it)
           }
-          statusFlow.emit(CurrentSyncJobStatus.Running(SyncJobStatus.Started()))
-          lastResult =
-            try {
-              runSyncWithTimeout(taskFactory(), uniqueWorkName, syncTimeout) { syncJobStatus ->
-                statusFlow.emit(CurrentSyncJobStatus.Running(syncJobStatus))
-              }
-            } catch (e: CancellationException) {
-              throw e
-            } catch (e: Exception) {
-              Logger.e(e) { "One-time sync failed: ${e.message}" }
-              SyncJobStatus.Failed()
-            }
-          if (lastResult is SyncJobStatus.Succeeded) break
-          attempt++
-        }
-
         when (lastResult) {
           is SyncJobStatus.Succeeded ->
             statusFlow.emit(CurrentSyncJobStatus.Succeeded(lastResult.timestamp))
@@ -142,6 +153,28 @@ internal object Sync {
     return statusFlow
   }
 
+  suspend fun runPeriodicSync(
+    uniqueWorkName: String,
+    taskFactory: () -> FhirSyncTask,
+    repeatInterval: Duration,
+    retryConfiguration: RetryConfiguration?,
+  ) {
+    mutex.withLock { activePeriodicJobs[uniqueWorkName] }?.takeIf { it.isActive }?.let { return }
+
+    val job =
+      scope.launch {
+        while (true) {
+          if (isNetworkConnected()) {
+            runAttemptsWithRetry(taskFactory, uniqueWorkName, retryConfiguration, syncTimeout = null) {}
+          } else {
+            Logger.d { "Periodic sync cycle skipped for $uniqueWorkName — offline" }
+          }
+          delay(repeatInterval)
+        }
+      }
+    mutex.withLock { activePeriodicJobs[uniqueWorkName] = job }
+  }
+
   suspend fun cancelSync(uniqueWorkName: String) {
     val handle = mutex.withLock { activeSyncs[uniqueWorkName] }
     if (handle == null || !handle.job.isActive) {
@@ -152,6 +185,40 @@ internal object Sync {
     handle.job.cancel()
     mutex.withLock { activeSyncs.remove(uniqueWorkName) }
     removeUniqueWorkNameInDataStore(fhirDataStore, uniqueWorkName)
+  }
+
+  /** Runs [taskFactory]'s sync with retry, reporting each intermediate status via [onStatus]. */
+  private suspend fun runAttemptsWithRetry(
+    taskFactory: () -> FhirSyncTask,
+    uniqueWorkName: String,
+    retryConfiguration: RetryConfiguration?,
+    syncTimeout: Duration?,
+    onStatus: suspend (CurrentSyncJobStatus) -> Unit,
+  ): SyncJobStatus {
+    val maxRetries = retryConfiguration?.maxRetries ?: 0
+    var attempt = 0
+    var lastResult: SyncJobStatus = SyncJobStatus.Failed()
+
+    while (attempt <= maxRetries) {
+      if (attempt > 0) {
+        delay(computeBackoffDelayMillis(retryConfiguration!!, attempt - 1).milliseconds)
+      }
+      onStatus(CurrentSyncJobStatus.Running(SyncJobStatus.Started()))
+      lastResult =
+        try {
+          runSyncWithTimeout(taskFactory(), uniqueWorkName, syncTimeout) { syncJobStatus ->
+            onStatus(CurrentSyncJobStatus.Running(syncJobStatus))
+          }
+        } catch (e: CancellationException) {
+          throw e
+        } catch (e: Exception) {
+          Logger.e(e) { "Sync failed: ${e.message}" }
+          SyncJobStatus.Failed()
+        }
+      if (lastResult is SyncJobStatus.Succeeded) break
+      attempt++
+    }
+    return lastResult
   }
 
   private suspend fun runSyncWithTimeout(

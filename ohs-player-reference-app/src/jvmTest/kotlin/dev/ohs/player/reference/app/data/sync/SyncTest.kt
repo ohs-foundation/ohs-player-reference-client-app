@@ -32,8 +32,10 @@ import dev.ohs.fhir.model.r4.terminologies.ResourceType
 import java.nio.file.Files
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -107,5 +109,50 @@ class SyncTest {
   fun cancelOneTimeSync_withNoActiveSync_doesNotThrow() = runTest {
     Sync.cancelOneTimeSync<TestFhirSyncTask>()
     assertTrue(true) // reaching here means no-op didn't throw
+  }
+
+  @Test
+  fun periodicSync_start_runsFirstCycleImmediately() = runTest {
+    val firstAttempt = CompletableDeferred<Unit>()
+
+    Sync.periodicSync(
+      taskFactory = {
+        firstAttempt.complete(Unit)
+        TestFhirSyncTask()
+      },
+      // Long enough that only one cycle should fire during this test's lifetime.
+      repeatInterval = 1.minutes,
+    )
+
+    // No withTimeout wrapper here on purpose: withTimeout schedules its cancellation on the
+    // *test* dispatcher's virtual-time scheduler, which auto-advances past it near-instantly
+    // once this coroutine looks "idle" (runTest doesn't know about the real work happening on
+    // Sync's separate syncDispatcher) — a virtual/real time mismatch that made this test flake.
+    // A plain await() is a real suspension resolved only when the background coroutine actually
+    // completes it; runTest's own real-time dispatch timeout is the safety net if it never does.
+    firstAttempt.await()
+
+    Sync.cancelPeriodicSync<TestFhirSyncTask>()
+  }
+
+  @Test
+  fun periodicSync_calledTwice_doesNotStartASecondCompetingLoop() = runTest {
+    var startCount = 0
+    val firstAttemptStarted = CompletableDeferred<Unit>()
+    val factory: () -> TestFhirSyncTask = {
+      startCount++
+      firstAttemptStarted.complete(Unit)
+      TestFhirSyncTask()
+    }
+
+    Sync.periodicSync(taskFactory = factory, repeatInterval = 1.minutes)
+    firstAttemptStarted.await()
+    // The first cycle's loop is now sleeping the 1-minute interval, so it's still "active" —
+    // this second call must see that and no-op rather than starting a competing loop.
+    Sync.periodicSync(taskFactory = factory, repeatInterval = 1.minutes)
+
+    assertEquals(1, startCount)
+
+    Sync.cancelPeriodicSync<TestFhirSyncTask>()
   }
 }

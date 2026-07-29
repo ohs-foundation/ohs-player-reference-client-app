@@ -19,14 +19,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -170,16 +167,7 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalDat
       contentPadding = PaddingValues(16.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      item(key = "patient_header") {
-        Card(
-          modifier = Modifier.fillMaxWidth(),
-          elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-        ) {
-          Box(modifier = Modifier.padding(20.dp)) {
-            headerRenderer.Render(s.patient, RenderOptions())
-          }
-        }
-      }
+      item(key = "patient_header") { headerRenderer.Render(s.patient, RenderOptions()) }
 
       if (s.allergies.isNotEmpty()) {
         item(key = "allergies") {

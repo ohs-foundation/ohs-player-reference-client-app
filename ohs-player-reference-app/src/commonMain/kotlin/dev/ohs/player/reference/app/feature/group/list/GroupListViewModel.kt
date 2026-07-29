@@ -30,8 +30,6 @@ class GroupListViewModel(private val groupRepository: GroupRepository) : ViewMod
   val groups: StateFlow<List<GroupListState>?> = _groups.asStateFlow()
 
   init {
-    viewModelScope.launch {
-      groupRepository.observeGroups().collect { _groups.value = it.reversed() }
-    }
+    viewModelScope.launch { groupRepository.observeGroups().collect { _groups.value = it } }
   }
 }

@@ -39,4 +39,8 @@ class WorkManagerSyncNowUseCase(private val context: Context) : SyncNowUseCase {
       else -> SyncJobStatus.Failed()
     }
   }
+
+  override suspend fun cancel() {
+    Sync.cancelOneTimeSync<AppFhirSyncWorker>(context)
+  }
 }

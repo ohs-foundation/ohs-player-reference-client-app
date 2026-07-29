@@ -44,7 +44,14 @@ import org.koin.dsl.module
 
 private class FakeHomeScreenSyncNowUseCase(private val result: suspend () -> SyncJobStatus) :
   SyncNowUseCase {
+  var cancelCalled = false
+    private set
+
   override suspend fun invoke(): SyncJobStatus = result()
+
+  override suspend fun cancel() {
+    cancelCalled = true
+  }
 }
 
 @OptIn(ExperimentalTestApi::class)

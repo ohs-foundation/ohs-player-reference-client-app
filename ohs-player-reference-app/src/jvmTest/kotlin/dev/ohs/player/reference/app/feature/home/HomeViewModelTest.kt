@@ -32,6 +32,8 @@ private class FakeSyncNowUseCase(
 ) : SyncNowUseCase {
   var invocationCount = 0
     private set
+  var cancelCount = 0
+    private set
 
   override suspend fun invoke(): SyncJobStatus {
     invocationCount++
@@ -40,6 +42,10 @@ private class FakeSyncNowUseCase(
     // outcome, so the ViewModel's re-read-after-sync behavior is exercised realistically.
     fhirDataStore.writeLastSyncTimestamp(status.timestamp)
     return status
+  }
+
+  override suspend fun cancel() {
+    cancelCount++
   }
 }
 

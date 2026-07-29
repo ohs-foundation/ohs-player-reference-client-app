@@ -27,6 +27,9 @@ import dev.ohs.fhir.engine.sync.runSync
  * `AppFhirSyncWorker`/`WorkManagerSyncNowUseCase` (Android), `ForegroundSyncNowUseCase` (JVM/web),
  * and `IosSyncNowUseCase` (iOS).
  */
-fun interface SyncNowUseCase {
+interface SyncNowUseCase {
   suspend fun invoke(): SyncJobStatus
+
+  /** Cancels an in-flight [invoke] call. No-op if no sync is currently running. */
+  suspend fun cancel()
 }

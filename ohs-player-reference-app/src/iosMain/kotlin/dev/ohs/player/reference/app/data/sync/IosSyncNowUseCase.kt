@@ -81,6 +81,12 @@ class IosSyncNowUseCase : SyncNowUseCase {
     return statusFlow.first { it is SyncJobStatus.Succeeded || it is SyncJobStatus.Failed }
   }
 
+  override suspend fun cancel() {
+    syncWasRunning = false
+    currentJob?.cancel()
+    currentStatusFlow?.emit(SyncJobStatus.Failed())
+  }
+
   private fun launchSyncJob() {
     val statusFlow = currentStatusFlow ?: return
     currentJob?.cancel()

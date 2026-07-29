@@ -35,6 +35,8 @@ class InitialSyncViewModelTest {
       invocationCount++
       return result()
     }
+
+    override suspend fun cancel() {}
   }
 
   private val json = Json { ignoreUnknownKeys = true }

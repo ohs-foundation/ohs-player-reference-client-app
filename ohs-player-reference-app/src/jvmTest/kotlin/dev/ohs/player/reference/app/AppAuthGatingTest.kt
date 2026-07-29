@@ -75,6 +75,8 @@ private class FakeAppSyncNowUseCase : SyncNowUseCase {
     invocationCount++
     return SyncJobStatus.Succeeded()
   }
+
+  override suspend fun cancel() {}
 }
 
 private class InMemorySessionStore(initial: Session? = null) : SessionStore {

@@ -28,11 +28,17 @@ class ForegroundSyncNowUseCase : SyncNowUseCase {
   override suspend fun invoke(): SyncJobStatus {
     val terminalStatus =
       Sync.oneTimeSync(taskFactory = { AppFhirSyncTask(FhirEngineProvider.getInstance()) }).first {
-        it is CurrentSyncJobStatus.Succeeded || it is CurrentSyncJobStatus.Failed
+        it is CurrentSyncJobStatus.Succeeded ||
+          it is CurrentSyncJobStatus.Failed ||
+          it is CurrentSyncJobStatus.Cancelled
       }
     return when (terminalStatus) {
       is CurrentSyncJobStatus.Succeeded -> SyncJobStatus.Succeeded()
       else -> SyncJobStatus.Failed()
     }
+  }
+
+  override suspend fun cancel() {
+    Sync.cancelOneTimeSync<AppFhirSyncTask>()
   }
 }

@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 class CardDslScope {
@@ -51,20 +53,17 @@ fun CardView(
   builder: CardDslScope.() -> Unit,
 ) {
   val scope = CardDslScope().apply(builder)
-  val cardModifier =
-    if (onClick != null) {
-      Modifier.fillMaxWidth().clickable(onClick = onClick)
-    } else {
-      Modifier.fillMaxWidth()
-    }
-  OutlinedCard(modifier = cardModifier) {
-    Column(
-      modifier = Modifier.padding(contentPaddingDp.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
+  val rowModifier =
+    Modifier.fillMaxWidth()
+      .clip(RoundedCornerShape(12.dp))
+      .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+      .padding(contentPaddingDp.dp)
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = rowModifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
       scope.headerContent?.invoke()
       scope.bodyContent?.invoke()
       scope.footerContent?.invoke()
     }
+    HorizontalDivider()
   }
 }

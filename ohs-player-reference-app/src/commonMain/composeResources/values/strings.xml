@@ -60,5 +60,6 @@
     <!-- Questionnaire screen -->
     <string name="questionnaire_title">Questionnaire</string>
     <string name="questionnaire_close">Close</string>
+    <string name="questionnaire_back">Back</string>
     <string name="questionnaire_retry">Retry</string>
 </resources>

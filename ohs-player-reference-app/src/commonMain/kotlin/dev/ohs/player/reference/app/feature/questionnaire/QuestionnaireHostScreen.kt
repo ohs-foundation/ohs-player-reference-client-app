@@ -18,15 +18,18 @@ package dev.ohs.player.reference.app.feature.questionnaire
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,8 +37,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ohs.fhir.datacapture.Questionnaire
 import dev.ohs.fhir.datacapture.QuestionnaireConfig
@@ -54,6 +56,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_back
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_close
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_retry
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_title
@@ -61,7 +64,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionnaireHostScreen(
   questionnaireId: String,
@@ -100,23 +102,42 @@ fun QuestionnaireHostScreen(
 
   Scaffold(
     topBar = {
-      TopAppBar(
-        title = { Text(title ?: stringResource(Res.string.questionnaire_title)) },
-        navigationIcon = {
-          IconButton(onClick = onBack) {
-            Icon(
-              imageVector = Icons.Filled.Close,
-              contentDescription = stringResource(Res.string.questionnaire_close),
-              tint = MaterialTheme.colorScheme.onPrimary,
+      Surface(
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+      ) {
+        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
+          Row(
+            modifier =
+              Modifier.align(Alignment.Center)
+                .widthIn(max = 720.dp)
+                .fillMaxWidth()
+                .height(64.dp)
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            IconButton(onClick = onBack) {
+              Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.questionnaire_back),
+              )
+            }
+            Text(
+              text = title ?: stringResource(Res.string.questionnaire_title),
+              style = MaterialTheme.typography.titleLarge,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
             )
+            IconButton(onClick = onBack) {
+              Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = stringResource(Res.string.questionnaire_close),
+              )
+            }
           }
-        },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-          ),
-      )
+        }
+      }
     }
   ) { padding ->
     Box(

@@ -16,6 +16,7 @@
 package dev.ohs.player.reference.app.feature.group.list
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -55,13 +56,14 @@ fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Un
   }
 
   Scaffold(
+    contentWindowInsets = WindowInsets(0, 0, 0, 0),
     floatingActionButton = {
       ExtendedFloatingActionButton(
         onClick = onDataCaptureClick,
         icon = { Icon(Icons.Filled.Add, contentDescription = null) },
         text = { Text(stringResource(Res.string.group_list_register_household)) },
       )
-    }
+    },
   ) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
       ListScaffold<GroupListState>(

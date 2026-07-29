@@ -15,6 +15,8 @@
  */
 package dev.ohs.player.reference.app.feature.home
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Close
@@ -39,8 +42,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -61,8 +66,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -78,6 +86,7 @@ import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_registers
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_select_household
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sign_out
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_signed_in
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_cancelled
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_failed
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_in_progress
@@ -88,6 +97,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun HomeScreen(
+  userName: String,
   onGroupClick: (String) -> Unit,
   onDataCaptureClick: () -> Unit,
   onAddMembers: (String) -> Unit,
@@ -129,20 +139,54 @@ fun HomeScreen(
       if (!isExpandedWidth) scope.launch { drawerState.close() }
     }
 
+    val onDrawer = MaterialTheme.colorScheme.onPrimary
+    val drawerItemColors =
+      NavigationDrawerItemDefaults.colors(
+        selectedContainerColor = onDrawer.copy(alpha = 0.20f),
+        unselectedContainerColor = Color.Transparent,
+        selectedTextColor = onDrawer,
+        unselectedTextColor = onDrawer,
+        selectedIconColor = onDrawer,
+        unselectedIconColor = onDrawer,
+      )
     val drawerItems: @Composable () -> Unit = {
       val syncInProgressDescription = stringResource(Res.string.home_sync_in_progress)
-      Column(modifier = Modifier.fillMaxHeight()) {
+      Column(modifier = Modifier.fillMaxHeight().padding(horizontal = 12.dp)) {
+        Row(
+          modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 20.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Box(
+            modifier =
+              Modifier.size(40.dp).clip(CircleShape).background(onDrawer.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = userName.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?",
+              style = MaterialTheme.typography.titleMedium,
+              color = onDrawer,
+            )
+          }
+          Text(
+            text = userName.ifBlank { stringResource(Res.string.home_signed_in) },
+            style = MaterialTheme.typography.titleMedium,
+            color = onDrawer,
+            fontWeight = FontWeight.SemiBold,
+          )
+        }
         Text(
           text = stringResource(Res.string.home_registers),
           style = MaterialTheme.typography.titleSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 8.dp),
+          color = onDrawer.copy(alpha = 0.7f),
+          modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
         )
         HomeDestination.entries.forEach { destination ->
           NavigationDrawerItem(
             label = { Text(stringResource(destination.label)) },
             icon = { Icon(destination.icon, contentDescription = null) },
             selected = destination == selectedDestination,
+            colors = drawerItemColors,
             onClick = {
               selectedDestination = destination
               closeDrawerIfCompact()
@@ -152,16 +196,17 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        HorizontalDivider()
+        HorizontalDivider(color = onDrawer.copy(alpha = 0.2f))
         uiState.lastSyncedAt?.let { lastSyncedAt ->
           Text(
             text = stringResource(Res.string.home_last_synced, lastSyncedAt),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 28.dp, top = 8.dp),
+            color = onDrawer.copy(alpha = 0.7f),
+            modifier = Modifier.padding(start = 16.dp, top = 8.dp),
           )
         }
         NavigationDrawerItem(
+          colors = drawerItemColors,
           label = {
             Text(
               stringResource(
@@ -181,6 +226,7 @@ fun HomeScreen(
                 modifier =
                   Modifier.size(16.dp).semantics { contentDescription = syncInProgressDescription },
                 strokeWidth = 2.dp,
+                color = onDrawer,
               )
             }
           },
@@ -195,6 +241,7 @@ fun HomeScreen(
           },
         )
         NavigationDrawerItem(
+          colors = drawerItemColors,
           label = { Text(stringResource(Res.string.home_sign_out)) },
           icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
           selected = false,
@@ -248,8 +295,8 @@ fun HomeScreen(
     if (isExpandedWidth) {
       Row(modifier = Modifier.fillMaxSize()) {
         Surface(
-          modifier = Modifier.width(280.dp).fillMaxHeight(),
-          color = MaterialTheme.colorScheme.surfaceContainerHigh,
+          modifier = Modifier.width(260.dp).fillMaxHeight(),
+          color = MaterialTheme.colorScheme.primary,
         ) {
           drawerItems()
         }
@@ -260,12 +307,21 @@ fun HomeScreen(
       }
     } else if (isMediumWidth) {
       Row(modifier = Modifier.fillMaxSize()) {
-        NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        val railItemColors =
+          NavigationRailItemDefaults.colors(
+            indicatorColor = onDrawer.copy(alpha = 0.20f),
+            selectedIconColor = onDrawer,
+            unselectedIconColor = onDrawer,
+            selectedTextColor = onDrawer,
+            unselectedTextColor = onDrawer,
+          )
+        NavigationRail(containerColor = MaterialTheme.colorScheme.primary) {
           val syncInProgressDescription = stringResource(Res.string.home_sync_in_progress)
           HomeDestination.entries.forEach { destination ->
             NavigationRailItem(
               selected = destination == selectedDestination,
               onClick = { selectedDestination = destination },
+              colors = railItemColors,
               icon = { Icon(destination.icon, contentDescription = null) },
               label = { Text(stringResource(destination.label)) },
             )
@@ -273,6 +329,7 @@ fun HomeScreen(
           Spacer(modifier = Modifier.weight(1f))
           NavigationRailItem(
             selected = false,
+            colors = railItemColors,
             onClick = {
               if (uiState.isSyncing) homeViewModel.cancelSync() else homeViewModel.syncNow()
             },
@@ -297,6 +354,7 @@ fun HomeScreen(
           )
           NavigationRailItem(
             selected = false,
+            colors = railItemColors,
             onClick = onSignOut,
             icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
             label = { Text(stringResource(Res.string.home_sign_out)) },
@@ -312,8 +370,8 @@ fun HomeScreen(
         drawerState = drawerState,
         drawerContent = {
           ModalDrawerSheet(
-            modifier = Modifier.width(300.dp),
-            drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier.width(280.dp),
+            drawerContainerColor = MaterialTheme.colorScheme.primary,
           ) {
             drawerItems()
           }

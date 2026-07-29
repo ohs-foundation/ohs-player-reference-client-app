@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -60,8 +59,6 @@ import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_error_title
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_redirect_hint
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_sign_in
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_subtitle
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_tagline
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -101,26 +98,9 @@ private fun ExpandedLogin(signingIn: Boolean, onSignIn: () -> Unit) {
     Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.primary)) {
       Column(
         modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(48.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.Center,
       ) {
         Wordmark(MaterialTheme.colorScheme.onPrimary)
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-          Text(
-            text = stringResource(Res.string.login_tagline),
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onPrimary,
-          )
-          Box(
-            Modifier.width(56.dp)
-              .height(4.dp)
-              .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(2.dp))
-          )
-          Text(
-            text = stringResource(Res.string.login_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-          )
-        }
       }
     }
 
@@ -191,18 +171,6 @@ private fun CompactLogin(signingIn: Boolean, onSignIn: () -> Unit) {
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       Wordmark(MaterialTheme.colorScheme.onPrimary)
-      Text(
-        text = stringResource(Res.string.login_tagline),
-        style = MaterialTheme.typography.headlineSmall,
-        color = MaterialTheme.colorScheme.onPrimary,
-        textAlign = TextAlign.Center,
-      )
-      Text(
-        text = stringResource(Res.string.login_subtitle),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-        textAlign = TextAlign.Center,
-      )
     }
 
     Column(

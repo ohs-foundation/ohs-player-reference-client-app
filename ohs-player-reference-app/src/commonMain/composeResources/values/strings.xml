@@ -9,8 +9,6 @@
 
     <!-- Login screen -->
     <string name="login_brand">Player Reference</string>
-    <string name="login_tagline">Care coordination, offline-first</string>
-    <string name="login_subtitle">Sign in to sync households and patient records with your organization's FHIR server.</string>
     <string name="login_card_title">Sign in to Player Reference</string>
     <string name="login_redirect_hint">You'll be securely redirected to your organization's sign-in page to continue.</string>
     <string name="login_sign_in">Sign in</string>
@@ -20,6 +18,7 @@
     <!-- Home screen -->
     <string name="home_destination_households">Households</string>
     <string name="home_registers">Registers</string>
+    <string name="home_signed_in">Signed in</string>
     <string name="home_last_synced">Last synced: %1$s</string>
     <string name="home_sync_now">Sync now</string>
     <string name="home_cancel_sync">Cancel sync</string>
@@ -60,7 +59,6 @@
 
     <!-- Questionnaire screen -->
     <string name="questionnaire_title">Questionnaire</string>
-    <string name="questionnaire_back">Back</string>
     <string name="questionnaire_close">Close</string>
     <string name="questionnaire_retry">Retry</string>
 </resources>

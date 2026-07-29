@@ -20,8 +20,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -58,10 +57,7 @@ fun CardView(
     } else {
       Modifier.fillMaxWidth()
     }
-  ElevatedCard(
-    modifier = cardModifier,
-    elevation = CardDefaults.elevatedCardElevation(defaultElevation = elevationDp.dp),
-  ) {
+  OutlinedCard(modifier = cardModifier) {
     Column(
       modifier = Modifier.padding(contentPaddingDp.dp),
       verticalArrangement = Arrangement.spacedBy(6.dp),

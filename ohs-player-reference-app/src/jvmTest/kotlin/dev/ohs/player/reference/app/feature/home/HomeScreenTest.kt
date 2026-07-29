@@ -75,6 +75,7 @@ class HomeScreenTest {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
         MaterialTheme {
           HomeScreen(
+            userName = "Test User",
             onGroupClick = {},
             onDataCaptureClick = {},
             onAddMembers = {},
@@ -108,6 +109,7 @@ class HomeScreenTest {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
         MaterialTheme {
           HomeScreen(
+            userName = "Test User",
             onGroupClick = {},
             onDataCaptureClick = {},
             onAddMembers = {},
@@ -149,6 +151,7 @@ class HomeScreenTest {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
         MaterialTheme {
           HomeScreen(
+            userName = "Test User",
             onGroupClick = {},
             onDataCaptureClick = {},
             onAddMembers = {},
@@ -185,6 +188,7 @@ class HomeScreenTest {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
         MaterialTheme {
           HomeScreen(
+            userName = "Test User",
             onGroupClick = {},
             onDataCaptureClick = {},
             onAddMembers = {},

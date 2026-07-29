@@ -26,8 +26,10 @@ import dev.ohs.fhir.engine.sync.remote.HttpLogger
 import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
 import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
+import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
 import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.WorkManagerPeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.WorkManagerSyncNowUseCase
 import org.koin.dsl.module
 
@@ -54,6 +56,7 @@ class OhsPlayerApplication : Application() {
       module {
         single<FhirEngine> { FhirEngineProvider.getInstance(applicationContext) }
         single<SyncNowUseCase> { WorkManagerSyncNowUseCase(applicationContext) }
+        single<PeriodicSyncUseCase> { WorkManagerPeriodicSyncUseCase(applicationContext) }
       }
     )
     DataCapture.initialize(applicationContext)

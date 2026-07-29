@@ -16,16 +16,16 @@
 package dev.ohs.player.reference.app.feature.patient.list
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.PatientCardConfig
 import dev.ohs.player.generated.state.PatientSummaryState
-import dev.ohs.player.reference.app.feature.component.common.CardView
 import dev.ohs.player.reference.app.feature.component.common.StatusChip
 import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
@@ -58,77 +57,58 @@ fun PatientCard(
   val fullName =
     listOfNotNull(patient.givenName, patient.familyName).joinToString(" ").ifBlank { "Unknown" }
 
-  CardView(
-    elevationDp = config.elevation?.floatValue() ?: 2f,
-    contentPaddingDp = config.padding?.floatValue() ?: 16f,
-    onClick = onClick,
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(RoundedCornerShape(18.dp))
+        .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+        .padding(horizontal = 12.dp, vertical = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(14.dp),
+    verticalAlignment = Alignment.CenterVertically,
   ) {
-    header {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Box(
-          modifier =
-            Modifier.size(52.dp)
-              .clip(CircleShape)
-              .background(MaterialTheme.colorScheme.primaryContainer),
-          contentAlignment = Alignment.Center,
-        ) {
-          Text(
-            text = initials,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            fontWeight = FontWeight.Bold,
-          )
+    Box(
+      modifier =
+        Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+      contentAlignment = Alignment.Center,
+    ) {
+      Text(
+        text = initials,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onPrimary,
+        fontWeight = FontWeight.Bold,
+      )
+    }
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = fullName,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+      )
+      val subtitleParts = buildList {
+        if (config.showAge != false) {
+          calculateAge(patient.birthDate?.toString())?.let { add("Age $it") }
         }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-          Text(
-            text = fullName,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-          )
-          val subtitleParts = buildList {
-            if (config.showAge != false) {
-              calculateAge(patient.birthDate?.toString())?.let { add("Age $it") }
-            }
-            if (config.showGender != false) {
-              patient.gender?.let { add(it.replaceFirstChar { c -> c.uppercaseChar() }) }
-            }
-          }
-          if (subtitleParts.isNotEmpty()) {
-            Text(
-              text = subtitleParts.joinToString(" · "),
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-          patient.mrn?.let {
-            Text(
-              text = it,
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.outline,
-            )
-          }
-        }
-        Column(
-          horizontalAlignment = Alignment.End,
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-          if (config.showStatusChip != false) {
-            StatusChip(isActive = patient.active ?: false)
-          }
-          if (onClick != null) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-              modifier = Modifier.size(16.dp),
-            )
-          }
+        if (config.showGender != false) {
+          patient.gender?.let { add(it.replaceFirstChar { c -> c.uppercaseChar() }) }
         }
       }
+      if (subtitleParts.isNotEmpty()) {
+        Text(
+          text = subtitleParts.joinToString(" · "),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+      patient.mrn?.let {
+        Text(
+          text = it,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.outline,
+        )
+      }
+    }
+    if (config.showStatusChip != false) {
+      StatusChip(isActive = patient.active ?: false)
     }
   }
 }

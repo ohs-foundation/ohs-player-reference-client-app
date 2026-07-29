@@ -57,6 +57,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
+import dev.ohs.player.reference.app.feature.group.list.LocalSelectedGroupId
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
 import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 import kotlinx.coroutines.launch
@@ -259,10 +261,12 @@ fun HomeScreen(
           if (isExpandedWidth) {
             Row(modifier = Modifier.fillMaxSize()) {
               Box(modifier = Modifier.weight(1f).fillMaxSize()) {
-                GroupListScreen(
-                  onGroupClick = { selectedGroupId = it },
-                  onDataCaptureClick = onDataCaptureClick,
-                )
+                CompositionLocalProvider(LocalSelectedGroupId provides selectedGroupId) {
+                  GroupListScreen(
+                    onGroupClick = { selectedGroupId = it },
+                    onDataCaptureClick = onDataCaptureClick,
+                  )
+                }
               }
               VerticalDivider()
               Box(modifier = Modifier.weight(1.5f).fillMaxSize()) {

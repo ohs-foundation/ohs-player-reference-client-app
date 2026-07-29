@@ -26,6 +26,7 @@ import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.engine.sync.defaultRetryConfiguration
 import dev.ohs.fhir.engine.sync.runSync
 import dev.ohs.fhir.engine.sync.syncDispatcher
+import dev.ohs.player.reference.app.data.DataChangeSignal
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -228,6 +229,7 @@ internal object Sync {
       if (lastResult is SyncJobStatus.Succeeded) break
       attempt++
     }
+    if (lastResult is SyncJobStatus.Succeeded) DataChangeSignal.notifyChanged()
     return lastResult
   }
 

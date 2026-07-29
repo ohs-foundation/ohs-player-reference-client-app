@@ -63,11 +63,12 @@ class FhirEngineRepositoryTest {
           .trimIndent(),
       )
 
+    val revisionBefore = repository.revision.value
     repository.upsert(patient)
 
     val stored = repository.get("Patient", "patient-1") as? Patient
     assertEquals("patient-1", stored?.id)
-    assertEquals(1L, repository.revision.value)
+    assertEquals(revisionBefore + 1, repository.revision.value)
   }
 
   @Test
@@ -84,13 +85,14 @@ class FhirEngineRepositoryTest {
         """{"resourceType": "Patient", "id": "patient-2", "active": false}""",
       )
 
+    val revisionBefore = repository.revision.value
     repository.upsert(original)
     repository.upsert(updated)
 
     val stored = repository.get("Patient", "patient-2") as? Patient
     assertEquals(false, stored?.active?.value)
     assertEquals(listOf("patient-2"), repository.all("Patient").mapNotNull { it.id })
-    assertEquals(2L, repository.revision.value)
+    assertEquals(revisionBefore + 2, repository.revision.value)
   }
 
   @Test
@@ -136,10 +138,11 @@ class FhirEngineRepositoryTest {
           .trimIndent(),
       )
 
+    val revisionBefore = repository.revision.value
     val storedCount = repository.upsert(bundle)
 
     assertEquals(2, storedCount)
-    assertEquals(1L, repository.revision.value)
+    assertEquals(revisionBefore + 1, repository.revision.value)
     val patients = repository.all("Patient").filterIsInstance<Patient>()
     assertEquals(1, patients.size)
     val patientId = patients.first().id.orEmpty()
@@ -198,12 +201,13 @@ class FhirEngineRepositoryTest {
           .trimIndent(),
       )
 
+    val revisionBefore = repository.revision.value
     val storedCount = repository.upsert(bundle)
 
     // 4 stored: absolute-fullUrl patient, request-url patient, generated-id patient, and the
     // group. The 5th entry (resource == null) is silently dropped and does not count.
     assertEquals(4, storedCount)
-    assertEquals(1L, repository.revision.value)
+    assertEquals(revisionBefore + 1, repository.revision.value)
 
     val patients = repository.all("Patient").filterIsInstance<Patient>()
     assertEquals(3, patients.size)

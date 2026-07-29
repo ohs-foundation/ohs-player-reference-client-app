@@ -23,6 +23,7 @@ import dev.ohs.fhir.engine.sync.DownloadWorkManager
 import dev.ohs.fhir.engine.sync.FhirSyncWorker
 import dev.ohs.fhir.engine.sync.upload.UploadStrategy
 import dev.ohs.player.reference.app.auth.ensureFreshSessionForSync
+import dev.ohs.player.reference.app.data.DataChangeSignal
 
 /**
  * WorkManager entry point for this app's sync, enqueued via [dev.ohs.fhir.engine.sync.Sync]. Built
@@ -40,7 +41,7 @@ class AppFhirSyncWorker(appContext: Context, workerParams: WorkerParameters) :
    */
   override suspend fun doWork(): Result {
     ensureFreshSessionForSync()
-    return super.doWork()
+    return super.doWork().also { if (it is Result.Success) DataChangeSignal.notifyChanged() }
   }
 
   override fun getFhirEngine() = syncTask.getFhirEngine()

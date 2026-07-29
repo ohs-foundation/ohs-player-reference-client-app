@@ -19,6 +19,7 @@ import co.touchlab.kermit.Logger
 import dev.ohs.fhir.engine.FhirEngineProvider
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.engine.sync.runSync
+import dev.ohs.player.reference.app.data.DataChangeSignal
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -125,6 +126,7 @@ class IosSyncManager : SyncManager {
             Logger.e(e) { "IosSyncManager: one-time sync failed" }
             SyncJobStatus.Failed()
           }
+        if (result is SyncJobStatus.Succeeded) DataChangeSignal.notifyChanged()
         statusFlow.emit(result)
       }
   }

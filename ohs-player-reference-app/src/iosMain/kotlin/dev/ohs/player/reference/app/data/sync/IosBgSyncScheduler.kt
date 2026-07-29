@@ -20,6 +20,7 @@ import dev.ohs.fhir.engine.sync.FhirSyncTask
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.engine.sync.runSync
 import dev.ohs.player.reference.app.auth.ensureFreshSessionForSync
+import dev.ohs.player.reference.app.data.DataChangeSignal
 import kotlin.concurrent.AtomicInt
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.cinterop.BetaInteropApi
@@ -108,6 +109,7 @@ internal class IosBgSyncScheduler(
         ensureFreshSessionForSync()
         val status = taskFactory().runSync(taskName = taskIdentifier, onProgress = {})
         Logger.d { "IosBgSyncScheduler: sync completed with $status" }
+        if (status is SyncJobStatus.Succeeded) DataChangeSignal.notifyChanged()
         completeOnce(status is SyncJobStatus.Succeeded)
       } catch (e: CancellationException) {
         throw e

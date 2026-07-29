@@ -1,3 +1,11 @@
+// Web Worker backing the wasmJs SQLite driver for the browser build. It wraps the official
+// `@sqlite.org/sqlite-wasm` package (see package.json) and exposes an open/prepare/step/close
+// message protocol that the Kotlin/Wasm side drives over `postMessage`.
+//
+// This must run in a dedicated Worker, not the main thread: persistence uses SQLite's OPFS VFS
+// (`sqlite3.oo1.OpfsDb`), which relies on synchronous OPFS access handles that the browser only
+// exposes off the main thread. The protocol below is adapted from the worker examples shipped
+// with `@sqlite.org/sqlite-wasm`.
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 
 let sqlite3 = null;
@@ -117,13 +125,13 @@ const commandMap = {
 function handleMessage(e) {
     const requestMsg = e.data;
     console.log("handleMessage: " + JSON.stringify(requestMsg));
-    if (!Object.hasOwn(requestMsg, 'data') && requestMsg.data == null) {
+    if (!Object.hasOwn(requestMsg, 'data') || requestMsg.data == null) {
         postMessage(
             {'id': requestMsg.id, 'error': "Invalid request, missing 'data'."}
         );
         return;
     }
-    if (!Object.hasOwn(requestMsg.data, 'cmd') && requestMsg.data.cmd == null) {
+    if (!Object.hasOwn(requestMsg.data, 'cmd') || requestMsg.data.cmd == null) {
         postMessage(
             {'id': requestMsg.id, 'error': "Invalid request, missing 'cmd'."}
         );

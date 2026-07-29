@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app.data.sync
+package dev.ohs.player.reference.app
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import dev.ohs.fhir.engine.sync.createDataStore
-import dev.ohs.player.reference.app.desktopStorageDirectory
 import java.io.File
 
-private val dataStore: DataStore<Preferences> by lazy {
-  createDataStore { File(desktopStorageDirectory, SYNC_TIMESTAMP_DATASTORE_FILE_NAME).absolutePath }
-}
-
-internal actual fun createSyncTimestampDataStore(): DataStore<Preferences> = dataStore
+/**
+ * One desktop storage root: the FHIR database, KSafe, and the sync-timestamp DataStore all live
+ * here.
+ */
+internal val desktopStorageDirectory: File =
+  File(System.getProperty("user.home").orEmpty().ifBlank { "." }, ".player-reference")

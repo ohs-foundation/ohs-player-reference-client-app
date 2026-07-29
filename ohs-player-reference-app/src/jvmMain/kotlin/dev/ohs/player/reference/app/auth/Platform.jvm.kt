@@ -18,16 +18,15 @@ package dev.ohs.player.reference.app.auth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.sun.net.httpserver.HttpServer
+import dev.ohs.player.reference.app.desktopStorageDirectory
 import eu.anifantakis.lib.ksafe.KSafe
 import java.awt.Desktop
-import java.io.File
 import java.net.InetSocketAddress
 import java.net.URI
 import java.security.SecureRandom
 import kotlinx.coroutines.suspendCancellableCoroutine
 
-internal actual fun createKSafe(): KSafe =
-  KSafe(baseDir = File(System.getProperty("user.home"), ".ohs-player-reference-app"))
+internal actual fun createKSafe(): KSafe = KSafe(baseDir = desktopStorageDirectory)
 
 internal actual fun secureRandomBytes(size: Int): ByteArray =
   ByteArray(size).also { SecureRandom().nextBytes(it) }

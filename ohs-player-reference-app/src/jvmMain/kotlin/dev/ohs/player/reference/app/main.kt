@@ -26,20 +26,15 @@ import dev.ohs.fhir.engine.sync.remote.HttpLogger
 import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
 import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
-import dev.ohs.player.reference.app.data.sync.ForegroundPeriodicSyncUseCase
-import dev.ohs.player.reference.app.data.sync.ForegroundSyncNowUseCase
-import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
+import dev.ohs.player.reference.app.data.sync.ForegroundSyncManager
 import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
-import java.io.File
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import org.koin.dsl.module
 
 fun main() = application {
-  val userHome = System.getProperty("user.home").orEmpty().ifBlank { "." }
-  val storageDirectory = File(userHome, ".ohs-player-reference-app").absolutePath
   FhirEngineProvider.init(
     FhirEngineConfiguration(
-      storageDirectory = storageDirectory,
+      storageDirectory = desktopStorageDirectory.absolutePath,
       serverConfiguration =
         ServerConfiguration(
           baseUrl = GeneratedAuthConfig.FHIR_BASE_URL,
@@ -57,8 +52,7 @@ fun main() = application {
   initKoin(
     module {
       single<FhirEngine> { FhirEngineProvider.getInstance() }
-      single<SyncNowUseCase> { ForegroundSyncNowUseCase() }
-      single<PeriodicSyncUseCase> { ForegroundPeriodicSyncUseCase() }
+      single<SyncManager> { ForegroundSyncManager() }
     }
   )
   Window(onCloseRequest = ::exitApplication, title = "OHS Player Reference App") { App() }

@@ -32,16 +32,30 @@ import platform.Foundation.NSNotificationCenter
 import platform.UIKit.UIApplicationDidEnterBackgroundNotification
 import platform.UIKit.UIApplicationWillEnterForegroundNotification
 
+/** Must match `BGTaskSchedulerPermittedIdentifiers` in `iosApp/iosApp/Info.plist`. */
+internal const val PERIODIC_SYNC_TASK_IDENTIFIER = "dev.ohs.player.reference.app.sync.periodic"
+
 /**
- * Runs a one-time sync on a dedicated [Dispatchers.IO]-backed scope decoupled from the caller, so
+ * iOS [SyncManager]. Periodic sync runs as a `BGProcessingTask` via [IosBgSyncScheduler];
+ * registration happens in the constructor (not lazily) because `BGTaskScheduler` requires it before
+ * `applicationDidFinishLaunching` returns — see [IosBgSyncScheduler]'s docs and
+ * [dev.ohs.player.reference.app.MainViewController], which constructs this eagerly.
+ *
+ * One-time sync runs on a dedicated [Dispatchers.IO]-backed scope decoupled from the caller, so
  * backgrounding the triggering screen doesn't cancel an in-flight network sync. Mirrors
  * kotlin-fhir-engine's engine-app `FhirSyncController.ios.kt`: iOS suspends networking for
- * backgrounded apps with no active background task, so an in-progress sync job is cancelled on
+ * backgrounded apps with no active background task, so an in-progress one-time sync is cancelled on
  * [UIApplicationDidEnterBackgroundNotification] and relaunched from scratch on
- * [UIApplicationWillEnterForegroundNotification], with [invoke] suspending across the relaunch
+ * [UIApplicationWillEnterForegroundNotification], with [syncNow] suspending across the relaunch
  * until a terminal result arrives.
  */
-class IosSyncNowUseCase : SyncNowUseCase {
+class IosSyncManager : SyncManager {
+  private val scheduler =
+    IosBgSyncScheduler(
+      taskIdentifier = PERIODIC_SYNC_TASK_IDENTIFIER,
+      taskFactory = { AppFhirSyncTask(FhirEngineProvider.getInstance()) },
+    )
+
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
   private var currentJob: Job? = null
@@ -49,6 +63,8 @@ class IosSyncNowUseCase : SyncNowUseCase {
   private var syncWasRunning = false
 
   init {
+    scheduler.register()
+
     NSNotificationCenter.defaultCenter.addObserverForName(
       UIApplicationDidEnterBackgroundNotification,
       null,
@@ -57,7 +73,7 @@ class IosSyncNowUseCase : SyncNowUseCase {
       if (currentJob?.isActive == true) {
         syncWasRunning = true
         currentJob?.cancel()
-        Logger.d { "IosSyncNowUseCase: sync suspended on background" }
+        Logger.d { "IosSyncManager: sync suspended on background" }
       }
     }
 
@@ -69,22 +85,30 @@ class IosSyncNowUseCase : SyncNowUseCase {
       if (syncWasRunning) {
         syncWasRunning = false
         launchSyncJob()
-        Logger.d { "IosSyncNowUseCase: sync restarted on foreground" }
+        Logger.d { "IosSyncManager: sync restarted on foreground" }
       }
     }
   }
 
-  override suspend fun invoke(): SyncJobStatus {
+  override suspend fun syncNow(): SyncJobStatus {
     val statusFlow = MutableSharedFlow<SyncJobStatus>(replay = 1)
     currentStatusFlow = statusFlow
     launchSyncJob()
     return statusFlow.first { it is SyncJobStatus.Succeeded || it is SyncJobStatus.Failed }
   }
 
-  override suspend fun cancel() {
+  override suspend fun cancelSyncNow() {
     syncWasRunning = false
     currentJob?.cancel()
     currentStatusFlow?.emit(SyncJobStatus.Failed())
+  }
+
+  override suspend fun startPeriodicSync() {
+    scheduler.schedule()
+  }
+
+  override suspend fun cancelPeriodicSync() {
+    scheduler.cancel()
   }
 
   private fun launchSyncJob() {
@@ -98,7 +122,7 @@ class IosSyncNowUseCase : SyncNowUseCase {
           } catch (e: CancellationException) {
             throw e
           } catch (e: Exception) {
-            Logger.e(e) { "IosSyncNowUseCase: one-time sync failed" }
+            Logger.e(e) { "IosSyncManager: one-time sync failed" }
             SyncJobStatus.Failed()
           }
         statusFlow.emit(result)

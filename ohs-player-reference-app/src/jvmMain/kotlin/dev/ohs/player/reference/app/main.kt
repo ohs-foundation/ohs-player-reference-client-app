@@ -43,11 +43,12 @@ fun main() = application {
       serverConfiguration =
         ServerConfiguration(
           baseUrl = GeneratedAuthConfig.FHIR_BASE_URL,
-          networkConfiguration = NetworkConfiguration(
-            connectionTimeOut = SYNC_TIMEOUT_DURATION,
-            readTimeOut = SYNC_TIMEOUT_DURATION,
-            writeTimeOut = SYNC_TIMEOUT_DURATION,
-          ),
+          networkConfiguration =
+            NetworkConfiguration(
+              connectionTimeOut = SYNC_TIMEOUT_DURATION,
+              readTimeOut = SYNC_TIMEOUT_DURATION,
+              writeTimeOut = SYNC_TIMEOUT_DURATION,
+            ),
           httpLogger = HttpLogger(level = HttpLogger.Level.HEADERS),
           authenticator = FhirBearerAuthenticator,
         ),

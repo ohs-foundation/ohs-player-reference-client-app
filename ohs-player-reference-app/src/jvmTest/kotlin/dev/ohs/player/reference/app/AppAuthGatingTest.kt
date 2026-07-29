@@ -107,9 +107,11 @@ private class InMemorySessionStore(initial: Session? = null) : SessionStore {
 
 /** Satisfies AuthViewModel's constructor; no test in this file calls logout(). */
 private class NoOpFhirEngine : FhirEngine {
-  override suspend fun create(vararg resource: Resource): List<String> = error("not used in this test")
+  override suspend fun create(vararg resource: Resource): List<String> =
+    error("not used in this test")
 
-  override suspend fun get(type: ResourceType, id: String): Resource = error("not used in this test")
+  override suspend fun get(type: ResourceType, id: String): Resource =
+    error("not used in this test")
 
   override suspend fun update(vararg resource: Resource) = error("not used in this test")
 
@@ -229,7 +231,11 @@ class AppAuthGatingTest {
     val repository = InMemorySampleFhirRepository()
     runBlocking { repository.upsert(testPatient()) }
     val syncNowUseCase = FakeAppSyncNowUseCase()
-    startTestKoin(session = testSession(), fhirRepository = repository, syncNowUseCase = syncNowUseCase)
+    startTestKoin(
+      session = testSession(),
+      fhirRepository = repository,
+      syncNowUseCase = syncNowUseCase,
+    )
 
     setContent { App() }
 

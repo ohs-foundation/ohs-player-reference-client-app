@@ -28,7 +28,8 @@ import kotlinx.serialization.json.Json
 
 class InitialSyncViewModelTest {
 
-  private class FakeSyncNowUseCase(private val result: suspend () -> SyncJobStatus) : SyncNowUseCase {
+  private class FakeSyncNowUseCase(private val result: suspend () -> SyncJobStatus) :
+    SyncNowUseCase {
     var invocationCount = 0
       private set
 
@@ -102,8 +103,9 @@ class InitialSyncViewModelTest {
   fun retry_afterFailure_syncsAgain() = runTest {
     val repository = InMemorySampleFhirRepository()
     var shouldFail = true
-    val syncNowUseCase =
-      FakeSyncNowUseCase { if (shouldFail) SyncJobStatus.Failed() else SyncJobStatus.Succeeded() }
+    val syncNowUseCase = FakeSyncNowUseCase {
+      if (shouldFail) SyncJobStatus.Failed() else SyncJobStatus.Succeeded()
+    }
     val periodicSyncUseCase = FakePeriodicSyncUseCase()
     val viewModel = InitialSyncViewModel(repository, syncNowUseCase, periodicSyncUseCase)
     viewModel.start().join()

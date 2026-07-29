@@ -55,7 +55,7 @@ fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Un
       FloatingActionButton(onClick = onDataCaptureClick) {
         Icon(Icons.Filled.Add, contentDescription = "Register household")
       }
-    },
+    }
   ) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
       ListScaffold<GroupListState>(

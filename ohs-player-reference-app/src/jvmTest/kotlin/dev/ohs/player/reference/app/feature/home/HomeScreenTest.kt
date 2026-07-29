@@ -134,11 +134,10 @@ class HomeScreenTest {
   fun tappingCancelSync_whileSyncing_callsCancelAndShowsCancelledMessage() = runComposeUiTest {
     val syncStarted = CompletableDeferred<Unit>()
     val releaseSyncResult = CompletableDeferred<SyncJobStatus>()
-    val fake =
-      FakeHomeScreenSyncNowUseCase {
-        syncStarted.complete(Unit)
-        releaseSyncResult.await()
-      }
+    val fake = FakeHomeScreenSyncNowUseCase {
+      syncStarted.complete(Unit)
+      releaseSyncResult.await()
+    }
     startTestKoin(fake)
     val registry = buildAppViewRegistry()
     setContent {

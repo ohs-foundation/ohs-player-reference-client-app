@@ -43,8 +43,8 @@ import kotlinx.coroutines.test.runTest
 /**
  * A no-op [FhirSyncTask] whose download step optionally blocks on [gate] before completing empty
  * (no requests, no local changes) — real enough for [dev.ohs.fhir.engine.sync.runSync] to reach
- * [dev.ohs.fhir.engine.sync.SyncJobStatus.Succeeded] without ever touching the network. Matches
- * the shape kotlin-fhir-engine's own `DownloaderImplTest.TestDownloadWorkManager` uses.
+ * [dev.ohs.fhir.engine.sync.SyncJobStatus.Succeeded] without ever touching the network. Matches the
+ * shape kotlin-fhir-engine's own `DownloaderImplTest.TestDownloadWorkManager` uses.
  */
 private class TestFhirSyncTask(private val gate: CompletableDeferred<Unit>? = null) : FhirSyncTask {
   override fun getFhirEngine(): FhirEngine = FhirEngineProvider.getInstance()
@@ -85,7 +85,9 @@ class SyncTest {
     // between tests instead of re-initializing.
     if (FhirEngineProvider.isNotInitialized()) {
       FhirEngineProvider.init(
-        FhirEngineConfiguration(storageDirectory = Files.createTempDirectory("sync-test").toString())
+        FhirEngineConfiguration(
+          storageDirectory = Files.createTempDirectory("sync-test").toString()
+        )
       )
     }
     FhirEngineProvider.getInstance().clearDatabase()

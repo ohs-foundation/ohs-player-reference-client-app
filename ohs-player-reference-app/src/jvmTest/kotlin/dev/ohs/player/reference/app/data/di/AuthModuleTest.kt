@@ -40,9 +40,11 @@ import org.koin.test.inject
 
 /** Satisfies AuthViewModel's constructor; this test never calls logout(). */
 private class NoOpFhirEngine : FhirEngine {
-  override suspend fun create(vararg resource: Resource): List<String> = error("not used in this test")
+  override suspend fun create(vararg resource: Resource): List<String> =
+    error("not used in this test")
 
-  override suspend fun get(type: ResourceType, id: String): Resource = error("not used in this test")
+  override suspend fun get(type: ResourceType, id: String): Resource =
+    error("not used in this test")
 
   override suspend fun update(vararg resource: Resource) = error("not used in this test")
 

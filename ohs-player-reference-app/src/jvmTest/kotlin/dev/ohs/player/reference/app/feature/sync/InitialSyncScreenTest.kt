@@ -36,7 +36,9 @@ class InitialSyncScreenTest {
     }
 
     assertTrue(
-      onAllNodesWithText("Setting up your data", substring = true).fetchSemanticsNodes().isNotEmpty()
+      onAllNodesWithText("Setting up your data", substring = true)
+        .fetchSemanticsNodes()
+        .isNotEmpty()
     )
   }
 

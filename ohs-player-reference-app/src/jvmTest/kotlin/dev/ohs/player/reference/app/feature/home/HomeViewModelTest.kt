@@ -33,6 +33,7 @@ private class FakeSyncNowUseCase(
 ) : SyncNowUseCase {
   var invocationCount = 0
     private set
+
   var cancelCount = 0
     private set
 

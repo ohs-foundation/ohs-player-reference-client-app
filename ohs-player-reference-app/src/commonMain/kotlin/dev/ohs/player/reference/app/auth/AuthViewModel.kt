@@ -29,10 +29,8 @@ import kotlinx.coroutines.launch
  * [AuthorizationLauncher] is platform UI, so it's passed in from the composable rather than
  * constructed here.
  */
-internal class AuthViewModel(
-  private val service: AuthService,
-  private val fhirEngine: FhirEngine,
-) : ViewModel() {
+internal class AuthViewModel(private val service: AuthService, private val fhirEngine: FhirEngine) :
+  ViewModel() {
 
   private val _state = MutableStateFlow<AuthState>(AuthState.Loading)
   val state: StateFlow<AuthState> = _state.asStateFlow()

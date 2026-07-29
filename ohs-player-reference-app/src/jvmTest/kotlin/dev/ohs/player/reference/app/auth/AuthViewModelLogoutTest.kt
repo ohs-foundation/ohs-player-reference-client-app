@@ -98,9 +98,7 @@ class AuthViewModelLogoutTest {
       }
     }
     val client =
-      HttpClient(engine) {
-        install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-      }
+      HttpClient(engine) { install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) } }
     return OidcAuthApi(OAuthConfig("https://idp.example.org", "client", "openid"), client)
   }
 

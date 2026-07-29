@@ -18,8 +18,8 @@ package dev.ohs.player.reference.app.data.sync
 import kotlinx.browser.window
 
 /**
- * `navigator.onLine` is a best-effort browser signal (reliably `false` when definitely offline,
- * but can still report `true` without real connectivity) — good enough to skip an obviously
- * doomed periodic sync cycle.
+ * `navigator.onLine` is a best-effort browser signal (reliably `false` when definitely offline, but
+ * can still report `true` without real connectivity) — good enough to skip an obviously doomed
+ * periodic sync cycle.
  */
 internal actual fun isNetworkConnected(): Boolean = window.navigator.onLine

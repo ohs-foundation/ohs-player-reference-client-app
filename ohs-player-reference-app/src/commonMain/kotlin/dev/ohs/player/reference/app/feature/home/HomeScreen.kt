@@ -16,10 +16,11 @@
 package dev.ohs.player.reference.app.feature.home
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -44,6 +45,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,20 +55,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
+import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
 import kotlinx.coroutines.launch
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_cancel_sync
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_last_synced
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_open_navigation_menu
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_registers
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_select_household
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sign_out
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_cancelled
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_failed
@@ -73,22 +82,20 @@ import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * Material 3's "expanded" window size class breakpoint: at or above it the drawer stays permanent.
- */
-private val HOME_EXPANDED_WIDTH_BREAKPOINT: Dp = 840.dp
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun HomeScreen(
   onGroupClick: (String) -> Unit,
   onDataCaptureClick: () -> Unit,
+  onMemberClick: (String) -> Unit,
+  onAddMembers: (String) -> Unit,
   onSignOut: () -> Unit,
 ) {
   val homeViewModel: HomeViewModel = koinViewModel()
   val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
   var selectedDestination by remember { mutableStateOf(HomeDestination.Households) }
+  var selectedGroupId by rememberSaveable { mutableStateOf<String?>(null) }
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
   val snackbarHostState = remember { SnackbarHostState() }
@@ -106,8 +113,11 @@ fun HomeScreen(
     }
   }
 
-  BoxWithConstraints {
-    val isExpandedWidth = maxWidth >= HOME_EXPANDED_WIDTH_BREAKPOINT
+  Box(modifier = Modifier.fillMaxSize()) {
+    val isExpandedWidth =
+      currentWindowAdaptiveInfo()
+        .windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
 
     fun closeDrawerIfCompact() {
       if (!isExpandedWidth) scope.launch { drawerState.close() }
@@ -193,7 +203,32 @@ fun HomeScreen(
     val content: @Composable () -> Unit = {
       when (selectedDestination) {
         HomeDestination.Households ->
-          GroupListScreen(onGroupClick = onGroupClick, onDataCaptureClick = onDataCaptureClick)
+          if (isExpandedWidth) {
+            Row(modifier = Modifier.fillMaxSize()) {
+              Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+                GroupListScreen(
+                  onGroupClick = { selectedGroupId = it },
+                  onDataCaptureClick = onDataCaptureClick,
+                )
+              }
+              VerticalDivider()
+              Box(modifier = Modifier.weight(1.5f).fillMaxSize()) {
+                val groupId = selectedGroupId
+                if (groupId != null) {
+                  GroupProfileScreen(
+                    groupId = groupId,
+                    onBack = { selectedGroupId = null },
+                    onMemberClick = onMemberClick,
+                    onAddMembers = { onAddMembers(groupId) },
+                  )
+                } else {
+                  EmptyDetailPlaceholder()
+                }
+              }
+            }
+          } else {
+            GroupListScreen(onGroupClick = onGroupClick, onDataCaptureClick = onDataCaptureClick)
+          }
       }
     }
 
@@ -228,5 +263,17 @@ fun HomeScreen(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun EmptyDetailPlaceholder() {
+  Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+    Text(
+      text = stringResource(Res.string.home_select_household),
+      style = MaterialTheme.typography.bodyLarge,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      textAlign = TextAlign.Center,
+    )
   }
 }

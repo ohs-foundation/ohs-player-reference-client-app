@@ -104,6 +104,15 @@ fun App() {
                         )
                       )
                     },
+                    onMemberClick = { id -> navController.navigate("patientProfile/$id") },
+                    onAddMembers = { groupId ->
+                      navController.navigate(
+                        questionnaireHostRoute(
+                          questionnaireId = QuestionnaireIds.HOUSEHOLD_MEMBERS,
+                          groupId = groupId,
+                        )
+                      )
+                    },
                     onSignOut = { authViewModel.logout() },
                   )
                 }

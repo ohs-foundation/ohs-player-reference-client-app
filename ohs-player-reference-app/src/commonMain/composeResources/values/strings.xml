@@ -28,6 +28,7 @@
     <string name="home_open_navigation_menu">Open navigation menu</string>
     <string name="home_sync_failed">Sync failed. Please try again.</string>
     <string name="home_sync_cancelled">Sync cancelled.</string>
+    <string name="home_select_household">Select a household to view details</string>
 
     <!-- Initial sync screen -->
     <string name="initial_sync_title">Setting up your data…</string>

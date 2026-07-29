@@ -73,7 +73,15 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onMemberClick = {},
+            onAddMembers = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 
@@ -98,7 +106,15 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onMemberClick = {},
+            onAddMembers = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 
@@ -131,7 +147,15 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onMemberClick = {},
+            onAddMembers = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 
@@ -159,7 +183,15 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onMemberClick = {},
+            onAddMembers = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 

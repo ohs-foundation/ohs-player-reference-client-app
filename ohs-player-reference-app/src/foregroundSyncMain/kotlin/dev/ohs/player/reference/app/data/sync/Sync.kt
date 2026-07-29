@@ -75,6 +75,11 @@ internal object Sync {
     return runOneTimeSync(uniqueWorkName, taskFactory, retryConfiguration, syncTimeout)
   }
 
+  /** Cancels an active one-time sync for [T]. No-op if none is active. */
+  suspend inline fun <reified T : FhirSyncTask> cancelOneTimeSync() {
+    cancelSync("${T::class.simpleName}-oneTimeSync")
+  }
+
   suspend fun runOneTimeSync(
     uniqueWorkName: String,
     taskFactory: () -> FhirSyncTask,
@@ -135,6 +140,18 @@ internal object Sync {
 
     mutex.withLock { activeSyncs[uniqueWorkName] = SyncHandle(job, statusFlow) }
     return statusFlow
+  }
+
+  suspend fun cancelSync(uniqueWorkName: String) {
+    val handle = mutex.withLock { activeSyncs[uniqueWorkName] }
+    if (handle == null || !handle.job.isActive) {
+      Logger.w { "No active sync found for: $uniqueWorkName" }
+      return
+    }
+    handle.progressChannel.emit(CurrentSyncJobStatus.Cancelled)
+    handle.job.cancel()
+    mutex.withLock { activeSyncs.remove(uniqueWorkName) }
+    removeUniqueWorkNameInDataStore(fhirDataStore, uniqueWorkName)
   }
 
   private suspend fun runSyncWithTimeout(

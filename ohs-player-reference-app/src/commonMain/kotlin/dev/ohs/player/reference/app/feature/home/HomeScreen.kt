@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
@@ -121,8 +122,13 @@ fun HomeScreen(
           )
         }
         NavigationDrawerItem(
-          label = { Text("Sync now") },
-          icon = { Icon(Icons.Filled.Refresh, contentDescription = null) },
+          label = { Text(if (uiState.isSyncing) "Cancel sync" else "Sync now") },
+          icon = {
+            Icon(
+              if (uiState.isSyncing) Icons.Filled.Close else Icons.Filled.Refresh,
+              contentDescription = null,
+            )
+          },
           badge = {
             if (uiState.isSyncing) {
               CircularProgressIndicator(
@@ -134,10 +140,12 @@ fun HomeScreen(
           },
           selected = false,
           onClick = {
-            if (!uiState.isSyncing) {
+            if (uiState.isSyncing) {
+              homeViewModel.cancelSync()
+            } else {
               homeViewModel.syncNow()
-              closeDrawerIfCompact()
             }
+            closeDrawerIfCompact()
           },
         )
         NavigationDrawerItem(

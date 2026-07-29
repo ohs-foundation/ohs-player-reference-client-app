@@ -131,6 +131,41 @@ class HomeScreenTest {
   }
 
   @Test
+  fun tappingCancelSync_whileSyncing_callsCancelAndShowsCancelledMessage() = runComposeUiTest {
+    val syncStarted = CompletableDeferred<Unit>()
+    val releaseSyncResult = CompletableDeferred<SyncJobStatus>()
+    val fake =
+      FakeHomeScreenSyncNowUseCase {
+        syncStarted.complete(Unit)
+        releaseSyncResult.await()
+      }
+    startTestKoin(fake)
+    val registry = buildAppViewRegistry()
+    setContent {
+      CompositionLocalProvider(LocalViewRegistry provides registry) {
+        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+      }
+    }
+
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithText("Sync now").fetchSemanticsNodes().isNotEmpty()
+    }
+    onNodeWithText("Sync now").performClick()
+    waitUntil(timeoutMillis = 5_000L) { syncStarted.isCompleted }
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithText("Cancel sync").fetchSemanticsNodes().isNotEmpty()
+    }
+
+    onNodeWithText("Cancel sync").performClick()
+    waitUntil(timeoutMillis = 5_000L) { fake.cancelCalled }
+    releaseSyncResult.complete(SyncJobStatus.Failed())
+
+    waitUntil(timeoutMillis = 5_000L) {
+      onAllNodesWithText("Sync cancelled.").fetchSemanticsNodes().isNotEmpty()
+    }
+  }
+
+  @Test
   fun tappingSyncNow_onFailure_showsSnackbarMessage() = runComposeUiTest {
     startTestKoin(FakeHomeScreenSyncNowUseCase { SyncJobStatus.Failed() })
     val registry = buildAppViewRegistry()

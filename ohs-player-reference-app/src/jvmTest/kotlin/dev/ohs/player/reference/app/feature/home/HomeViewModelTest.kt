@@ -24,6 +24,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 
 private class FakeSyncNowUseCase(
@@ -122,6 +123,35 @@ class HomeViewModelTest {
 
     assertNull(second)
     assertEquals(1, fake.invocationCount)
+  }
+
+  @Test
+  fun cancelSync_whileSyncing_callsUseCaseCancelAndSetsCancelledMessage() = runTest {
+    val fhirDataStore = newFhirDataStore()
+    val releaseSyncResult = CompletableDeferred<SyncJobStatus>()
+    val fake = FakeSyncNowUseCase(fhirDataStore) { releaseSyncResult.await() }
+    val viewModel = HomeViewModel(fake, fhirDataStore)
+
+    val job = viewModel.syncNow()
+    viewModel.cancelSync()
+    releaseSyncResult.complete(SyncJobStatus.Failed())
+    job?.join()
+
+    assertEquals(1, fake.cancelCount)
+    val state = viewModel.uiState.value
+    assertEquals(false, state.isSyncing)
+    assertEquals("Sync cancelled.", state.syncError)
+  }
+
+  @Test
+  fun cancelSync_whileNotSyncing_isNoOp() = runTest {
+    val fhirDataStore = newFhirDataStore()
+    val fake = FakeSyncNowUseCase(fhirDataStore) { SyncJobStatus.Succeeded() }
+    val viewModel = HomeViewModel(fake, fhirDataStore)
+
+    viewModel.cancelSync()
+
+    assertEquals(0, fake.cancelCount)
   }
 
   @Test

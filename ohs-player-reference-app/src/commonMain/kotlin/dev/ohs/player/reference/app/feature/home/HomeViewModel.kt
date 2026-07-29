@@ -44,6 +44,8 @@ class HomeViewModel(
   private val _uiState = MutableStateFlow(HomeUiState())
   val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+  private var cancelRequested = false
+
   init {
     viewModelScope.launch {
       val lastSyncedAt = fhirDataStore.readLastSyncTimestamp()?.toDisplayString()
@@ -57,6 +59,7 @@ class HomeViewModel(
    */
   fun syncNow(): Job? {
     if (_uiState.value.isSyncing) return null
+    cancelRequested = false
     _uiState.update { it.copy(isSyncing = true, syncError = null) }
     return viewModelScope.launch {
       val result =
@@ -72,12 +75,19 @@ class HomeViewModel(
           val lastSyncedAt = fhirDataStore.readLastSyncTimestamp()?.toDisplayString()
           _uiState.update { it.copy(isSyncing = false, lastSyncedAt = lastSyncedAt) }
         }
-        else ->
-          _uiState.update {
-            it.copy(isSyncing = false, syncError = "Sync failed. Please try again.")
-          }
+        else -> {
+          val message = if (cancelRequested) "Sync cancelled." else "Sync failed. Please try again."
+          _uiState.update { it.copy(isSyncing = false, syncError = message) }
+        }
       }
     }
+  }
+
+  /** Cancels an in-flight [syncNow]. No-op if no sync is currently running. */
+  fun cancelSync() {
+    if (!_uiState.value.isSyncing) return
+    cancelRequested = true
+    viewModelScope.launch { syncNowUseCase.cancel() }
   }
 
   fun clearSyncError() {

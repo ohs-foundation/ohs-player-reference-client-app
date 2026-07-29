@@ -29,6 +29,9 @@ import dev.ohs.player.reference.app.data.di.initKoin
 import dev.ohs.player.reference.app.data.sync.ForegroundSyncManager
 import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
 import dev.ohs.player.reference.app.data.sync.SyncManager
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.app_logo
+import org.jetbrains.compose.resources.painterResource
 import org.koin.dsl.module
 
 fun main() = application {
@@ -55,5 +58,11 @@ fun main() = application {
       single<SyncManager> { ForegroundSyncManager() }
     }
   )
-  Window(onCloseRequest = ::exitApplication, title = "OHS Player Reference App") { App() }
+  Window(
+    onCloseRequest = ::exitApplication,
+    title = "Player Reference",
+    icon = painterResource(Res.drawable.app_logo),
+  ) {
+    App()
+  }
 }

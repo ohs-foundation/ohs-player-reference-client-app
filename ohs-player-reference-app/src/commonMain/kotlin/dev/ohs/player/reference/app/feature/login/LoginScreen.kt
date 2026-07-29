@@ -15,6 +15,7 @@
  */
 package dev.ohs.player.reference.app.feature.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.app_logo
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_brand
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_card_title
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_error_dismiss
@@ -60,6 +62,7 @@ import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_sign_in
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_subtitle
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_tagline
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Material 3's "expanded" window size class breakpoint (matches HomeWidthBreakpoint.kt). */
@@ -140,12 +143,22 @@ private fun ExpandedLogin(signingIn: Boolean, onSignIn: () -> Unit) {
           modifier = Modifier.padding(40.dp),
           verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-          Text(
-            text = stringResource(Res.string.login_brand),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-          )
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+          ) {
+            Image(
+              painter = painterResource(Res.drawable.app_logo),
+              contentDescription = null,
+              modifier = Modifier.size(28.dp),
+            )
+            Text(
+              text = stringResource(Res.string.login_brand),
+              style = MaterialTheme.typography.labelLarge,
+              color = MaterialTheme.colorScheme.primary,
+              fontWeight = FontWeight.Bold,
+            )
+          }
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
               stringResource(Res.string.login_card_title),
@@ -223,12 +236,22 @@ private fun CompactLogin(signingIn: Boolean, onSignIn: () -> Unit) {
 
 @Composable
 private fun Wordmark(color: androidx.compose.ui.graphics.Color) {
-  Text(
-    text = stringResource(Res.string.login_brand),
-    style = MaterialTheme.typography.titleLarge,
-    color = color,
-    fontWeight = FontWeight.Bold,
-  )
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    Image(
+      painter = painterResource(Res.drawable.app_logo),
+      contentDescription = null,
+      modifier = Modifier.size(32.dp),
+    )
+    Text(
+      text = stringResource(Res.string.login_brand),
+      style = MaterialTheme.typography.titleLarge,
+      color = color,
+      fontWeight = FontWeight.Bold,
+    )
+  }
 }
 
 @Composable

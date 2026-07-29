@@ -402,8 +402,13 @@ compose.desktop {
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
-      packageName = "dev.ohs.player.reference.app"
+      packageName = "PlayerReference"
       packageVersion = composePackageVersion
+
+      val iconsDir = project.layout.projectDirectory.dir("desktop-icons")
+      macOS { iconFile.set(iconsDir.file("app-icon.icns")) }
+      windows { iconFile.set(iconsDir.file("app-icon.ico")) }
+      linux { iconFile.set(iconsDir.file("app-icon.png")) }
     }
   }
 }

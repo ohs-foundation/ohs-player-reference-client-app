@@ -69,10 +69,6 @@ class FhirEngineRepository(private val fhirEngine: FhirEngine) : FhirRepository 
     }
   }
 
-  override suspend fun hasAnyData(): Boolean =
-    fhirEngine.count(Search(ResourceType.Patient)) > 0 ||
-      fhirEngine.count(Search(ResourceType.Group)) > 0
-
   private suspend fun upsertResource(resource: Resource) {
     val withId = if (resource.id == null) resource.withId(generateId()) else resource
     val type = ResourceType.valueOf(withId.resourceType)

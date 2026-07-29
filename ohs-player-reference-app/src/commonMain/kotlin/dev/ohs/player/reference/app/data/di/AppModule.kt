@@ -26,6 +26,9 @@ import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.GroupRepository
 import dev.ohs.player.reference.app.data.repository.PatientRepository
+import dev.ohs.player.reference.app.data.sync.DataStoreInitialSyncStore
+import dev.ohs.player.reference.app.data.sync.InitialSyncStore
+import dev.ohs.player.reference.app.data.sync.createSyncTimestampDataStore
 import dev.ohs.player.reference.app.feature.group.list.GroupListViewModel
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileViewModel
 import dev.ohs.player.reference.app.feature.home.HomeViewModel
@@ -59,12 +62,15 @@ internal val repositoryModule = module {
 internal val serviceModule = module { factory { QuestionnaireService(get()) } }
 
 /**
- * [SyncNowUseCase] isn't bound here — each platform's `initKoin` caller supplies its own
+ * [SyncManager] isn't bound here — each platform's `initKoin` caller supplies its own
  * implementation, constructing `AppFhirSyncTask` directly rather than through Koin (see
- * `WorkManagerSyncNowUseCase` on Android, `ForegroundSyncNowUseCase` on JVM/web, and
- * `IosSyncNowUseCase` on iOS).
+ * `WorkManagerSyncManager` on Android, `ForegroundSyncManager` on JVM/web, and `IosSyncManager` on
+ * iOS).
  */
-internal val syncModule = module { single { FhirEngineProvider.getFhirDataStore() } }
+internal val syncModule = module {
+  single { FhirEngineProvider.getFhirDataStore() }
+  single<InitialSyncStore> { DataStoreInitialSyncStore(createSyncTimestampDataStore()) }
+}
 
 /**
  * `SessionStore`/`SessionRepository`/`AuthService` — everything downstream of the plain
@@ -87,5 +93,5 @@ internal val viewModelModule = module {
   }
   viewModel { HomeViewModel(get(), get()) }
   viewModel { AuthViewModel(get(), get()) }
-  viewModel { InitialSyncViewModel(get(), get(), get()) }
+  viewModel { InitialSyncViewModel(get(), get()) }
 }

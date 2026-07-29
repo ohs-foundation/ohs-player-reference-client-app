@@ -18,9 +18,8 @@ package dev.ohs.player.reference.app.feature.sync
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ohs.fhir.engine.sync.SyncJobStatus
-import dev.ohs.player.reference.app.data.repository.FhirRepository
-import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.InitialSyncStore
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,23 +33,22 @@ sealed interface InitialSyncGateState {
 
   data object Syncing : InitialSyncGateState
 
-  data class Failed(val message: String) : InitialSyncGateState
+  data object Failed : InitialSyncGateState
 
   data object Passed : InitialSyncGateState
 }
 
 /**
- * Gates a freshly-authenticated session behind a one-time blocking sync when the local FHIR
- * database is empty. [start] deliberately has no "already ran" guard — it must fully re-run its
- * check every time it's called, because Koin can hand back the same ViewModel instance across a
- * logout → login round-trip (the top-level `App()` composables aren't scoped per auth session), and
- * a fresh login must always be re-evaluated (e.g. after
- * [dev.ohs.player.reference.app.auth.AuthViewModel.logout] wipes local data).
+ * Gates a freshly-authenticated session behind a one-time blocking sync until a first sync has
+ * succeeded (tracked by [InitialSyncStore], not by whether the local database happens to hold any
+ * resources — a legitimately-empty account is still "synced"). [start] deliberately has no "already
+ * ran" guard — it must fully re-run its check every time it's called, because Koin can hand back
+ * the same ViewModel instance across a logout → login round-trip (the top-level `App()` composables
+ * aren't scoped per auth session), so a fresh login must always be re-evaluated.
  */
 class InitialSyncViewModel(
-  private val fhirRepository: FhirRepository,
-  private val syncNowUseCase: SyncNowUseCase,
-  private val periodicSyncUseCase: PeriodicSyncUseCase,
+  private val syncManager: SyncManager,
+  private val initialSyncStore: InitialSyncStore,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow<InitialSyncGateState>(InitialSyncGateState.Checking)
@@ -64,7 +62,7 @@ class InitialSyncViewModel(
 
   private suspend fun runCheck() {
     _state.value = InitialSyncGateState.Checking
-    if (fhirRepository.hasAnyData()) {
+    if (initialSyncStore.isComplete()) {
       passGate()
     } else {
       runSync()
@@ -75,22 +73,23 @@ class InitialSyncViewModel(
     _state.value = InitialSyncGateState.Syncing
     val result =
       try {
-        syncNowUseCase.invoke()
+        syncManager.syncNow()
       } catch (e: CancellationException) {
         throw e
       } catch (e: Exception) {
         SyncJobStatus.Failed()
       }
     when (result) {
-      is SyncJobStatus.Succeeded -> passGate()
-      else ->
-        _state.value =
-          InitialSyncGateState.Failed("Sync failed. Please check your connection and try again.")
+      is SyncJobStatus.Succeeded -> {
+        initialSyncStore.markComplete()
+        passGate()
+      }
+      else -> _state.value = InitialSyncGateState.Failed
     }
   }
 
   private suspend fun passGate() {
-    periodicSyncUseCase.start()
+    syncManager.startPeriodicSync()
     _state.value = InitialSyncGateState.Passed
   }
 }

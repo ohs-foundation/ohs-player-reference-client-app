@@ -18,11 +18,14 @@ package dev.ohs.player.reference.app.feature.home
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_destination_households
+import org.jetbrains.compose.resources.StringResource
 
 /**
  * A top-level destination reachable from [HomeScreen]'s navigation drawer. `Households` is the only
  * entry today; adding a second destination later is a new enum entry, not a rewrite.
  */
-enum class HomeDestination(val label: String, val icon: ImageVector) {
-  Households(label = "Households", icon = Icons.Filled.Home)
+enum class HomeDestination(val label: StringResource, val icon: ImageVector) {
+  Households(label = Res.string.home_destination_households, icon = Icons.Filled.Home)
 }

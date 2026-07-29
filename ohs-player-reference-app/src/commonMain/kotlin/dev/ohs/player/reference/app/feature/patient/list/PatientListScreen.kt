@@ -32,6 +32,10 @@ import dev.ohs.player.generated.state.PatientSummaryState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.scaffold.ListScaffold
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.patient_list_empty
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.patient_list_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +60,7 @@ fun PatientListScreen(onPatientClick: (String) -> Unit) {
     layout(VerticalListRenderer.VIEW_TYPE)
     topBar {
       TopAppBar(
-        title = { Text("Patients") },
+        title = { Text(stringResource(Res.string.patient_list_title)) },
         colors =
           TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -64,6 +68,6 @@ fun PatientListScreen(onPatientClick: (String) -> Unit) {
           ),
       )
     }
-    emptyState { Text("No patients") }
+    emptyState { Text(stringResource(Res.string.patient_list_empty)) }
   }
 }

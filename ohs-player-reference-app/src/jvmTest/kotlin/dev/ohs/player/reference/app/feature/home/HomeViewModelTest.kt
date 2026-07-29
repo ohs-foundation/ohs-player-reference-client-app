@@ -18,7 +18,7 @@ package dev.ohs.player.reference.app.feature.home
 import dev.ohs.fhir.engine.sync.FhirDataStore
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.engine.sync.createDataStore
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,17 +27,17 @@ import kotlin.test.assertNull
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 
-private class FakeSyncNowUseCase(
+private class RecordingSyncManager(
   private val fhirDataStore: FhirDataStore,
   private val result: suspend () -> SyncJobStatus,
-) : SyncNowUseCase {
+) : SyncManager {
   var invocationCount = 0
     private set
 
   var cancelCount = 0
     private set
 
-  override suspend fun invoke(): SyncJobStatus {
+  override suspend fun syncNow(): SyncJobStatus {
     invocationCount++
     val status = result()
     // Mirrors FhirSynchronizer's real behavior of persisting the timestamp on every terminal
@@ -46,9 +46,13 @@ private class FakeSyncNowUseCase(
     return status
   }
 
-  override suspend fun cancel() {
+  override suspend fun cancelSyncNow() {
     cancelCount++
   }
+
+  override suspend fun startPeriodicSync() {}
+
+  override suspend fun cancelPeriodicSync() {}
 }
 
 class HomeViewModelTest {
@@ -62,7 +66,7 @@ class HomeViewModelTest {
   fun initialState_withNoPriorSync_hasNoLastSyncedAt() = runTest {
     val viewModel =
       HomeViewModel(
-        FakeSyncNowUseCase(newFhirDataStore()) { SyncJobStatus.Succeeded() },
+        RecordingSyncManager(newFhirDataStore()) { SyncJobStatus.Succeeded() },
         newFhirDataStore(),
       )
 
@@ -73,7 +77,10 @@ class HomeViewModelTest {
   fun syncNow_onSuccess_clearsIsSyncingAndPopulatesLastSyncedAt() = runTest {
     val fhirDataStore = newFhirDataStore()
     val viewModel =
-      HomeViewModel(FakeSyncNowUseCase(fhirDataStore) { SyncJobStatus.Succeeded() }, fhirDataStore)
+      HomeViewModel(
+        RecordingSyncManager(fhirDataStore) { SyncJobStatus.Succeeded() },
+        fhirDataStore,
+      )
 
     viewModel.syncNow()?.join()
 
@@ -87,13 +94,13 @@ class HomeViewModelTest {
   fun syncNow_onFailure_clearsIsSyncingAndSetsSyncError() = runTest {
     val fhirDataStore = newFhirDataStore()
     val viewModel =
-      HomeViewModel(FakeSyncNowUseCase(fhirDataStore) { SyncJobStatus.Failed() }, fhirDataStore)
+      HomeViewModel(RecordingSyncManager(fhirDataStore) { SyncJobStatus.Failed() }, fhirDataStore)
 
     viewModel.syncNow()?.join()
 
     val state = viewModel.uiState.value
     assertEquals(false, state.isSyncing)
-    assertEquals("Sync failed. Please try again.", state.syncError)
+    assertEquals(SyncError.Failed, state.syncError)
   }
 
   @Test
@@ -101,7 +108,7 @@ class HomeViewModelTest {
     val fhirDataStore = newFhirDataStore()
     val viewModel =
       HomeViewModel(
-        FakeSyncNowUseCase(fhirDataStore) { throw RuntimeException("network down") },
+        RecordingSyncManager(fhirDataStore) { throw RuntimeException("network down") },
         fhirDataStore,
       )
 
@@ -109,13 +116,13 @@ class HomeViewModelTest {
 
     val state = viewModel.uiState.value
     assertEquals(false, state.isSyncing)
-    assertEquals("Sync failed. Please try again.", state.syncError)
+    assertEquals(SyncError.Failed, state.syncError)
   }
 
   @Test
   fun syncNow_whileAlreadySyncing_doesNotStartASecondSync() = runTest {
     val fhirDataStore = newFhirDataStore()
-    val fake = FakeSyncNowUseCase(fhirDataStore) { SyncJobStatus.Succeeded() }
+    val fake = RecordingSyncManager(fhirDataStore) { SyncJobStatus.Succeeded() }
     val viewModel = HomeViewModel(fake, fhirDataStore)
 
     val first = viewModel.syncNow()
@@ -130,7 +137,7 @@ class HomeViewModelTest {
   fun cancelSync_whileSyncing_callsUseCaseCancelAndSetsCancelledMessage() = runTest {
     val fhirDataStore = newFhirDataStore()
     val releaseSyncResult = CompletableDeferred<SyncJobStatus>()
-    val fake = FakeSyncNowUseCase(fhirDataStore) { releaseSyncResult.await() }
+    val fake = RecordingSyncManager(fhirDataStore) { releaseSyncResult.await() }
     val viewModel = HomeViewModel(fake, fhirDataStore)
 
     val job = viewModel.syncNow()
@@ -141,13 +148,13 @@ class HomeViewModelTest {
     assertEquals(1, fake.cancelCount)
     val state = viewModel.uiState.value
     assertEquals(false, state.isSyncing)
-    assertEquals("Sync cancelled.", state.syncError)
+    assertEquals(SyncError.Cancelled, state.syncError)
   }
 
   @Test
   fun cancelSync_whileNotSyncing_isNoOp() = runTest {
     val fhirDataStore = newFhirDataStore()
-    val fake = FakeSyncNowUseCase(fhirDataStore) { SyncJobStatus.Succeeded() }
+    val fake = RecordingSyncManager(fhirDataStore) { SyncJobStatus.Succeeded() }
     val viewModel = HomeViewModel(fake, fhirDataStore)
 
     viewModel.cancelSync()
@@ -159,7 +166,7 @@ class HomeViewModelTest {
   fun clearSyncError_removesTheErrorMessage() = runTest {
     val fhirDataStore = newFhirDataStore()
     val viewModel =
-      HomeViewModel(FakeSyncNowUseCase(fhirDataStore) { SyncJobStatus.Failed() }, fhirDataStore)
+      HomeViewModel(RecordingSyncManager(fhirDataStore) { SyncJobStatus.Failed() }, fhirDataStore)
     viewModel.syncNow()?.join()
 
     viewModel.clearSyncError()

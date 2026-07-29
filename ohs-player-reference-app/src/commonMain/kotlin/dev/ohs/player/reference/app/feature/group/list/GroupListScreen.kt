@@ -35,6 +35,10 @@ import dev.ohs.player.generated.state.GroupListState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.scaffold.ListScaffold
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_list_empty
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_list_register_household
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +57,10 @@ fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Un
   Scaffold(
     floatingActionButton = {
       FloatingActionButton(onClick = onDataCaptureClick) {
-        Icon(Icons.Filled.Add, contentDescription = "Register household")
+        Icon(
+          Icons.Filled.Add,
+          contentDescription = stringResource(Res.string.group_list_register_household),
+        )
       }
     }
   ) { padding ->
@@ -65,7 +72,7 @@ fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Un
       ) {
         component(ViewTypeCS.GroupCard)
         layout(VerticalListRenderer.VIEW_TYPE)
-        emptyState { Text("No households") }
+        emptyState { Text(stringResource(Res.string.group_list_empty)) }
       }
     }
   }

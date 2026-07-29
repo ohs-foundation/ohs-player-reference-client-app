@@ -16,4 +16,49 @@
     <string name="login_sign_in">Sign in</string>
     <string name="login_error_title">Sign-in failed</string>
     <string name="login_error_dismiss">Dismiss</string>
+
+    <!-- Home screen -->
+    <string name="home_destination_households">Households</string>
+    <string name="home_registers">Registers</string>
+    <string name="home_last_synced">Last synced: %1$s</string>
+    <string name="home_sync_now">Sync now</string>
+    <string name="home_cancel_sync">Cancel sync</string>
+    <string name="home_sync_in_progress">Sync in progress</string>
+    <string name="home_sign_out">Sign out</string>
+    <string name="home_open_navigation_menu">Open navigation menu</string>
+    <string name="home_sync_failed">Sync failed. Please try again.</string>
+    <string name="home_sync_cancelled">Sync cancelled.</string>
+
+    <!-- Initial sync screen -->
+    <string name="initial_sync_title">Setting up your data…</string>
+    <string name="initial_sync_subtitle">This may take a moment the first time.</string>
+    <string name="initial_sync_failed_title">Couldn\'t sync your data</string>
+    <string name="initial_sync_failed_body">Sync failed. Please check your connection and try again.</string>
+    <string name="initial_sync_retry">Retry</string>
+    <string name="initial_sync_continue">Continue without syncing</string>
+
+    <!-- Group list screen -->
+    <string name="group_list_register_household">Register household</string>
+    <string name="group_list_empty">No households</string>
+
+    <!-- Group profile screen -->
+    <string name="group_profile_default_name">Household</string>
+    <string name="group_profile_back">Back</string>
+    <string name="group_profile_add_members">Add members</string>
+    <string name="group_profile_add_members_description">Add household members</string>
+
+    <!-- Patient list screen -->
+    <string name="patient_list_title">Patients</string>
+    <string name="patient_list_empty">No patients</string>
+
+    <!-- Patient profile screen -->
+    <string name="patient_profile_default_name">Patient</string>
+    <string name="patient_profile_back">Back</string>
+    <string name="patient_profile_add_clinical_data">Add clinical data</string>
+    <string name="patient_profile_not_found">Patient not found</string>
+
+    <!-- Questionnaire screen -->
+    <string name="questionnaire_title">Questionnaire</string>
+    <string name="questionnaire_back">Back</string>
+    <string name="questionnaire_retry">Retry</string>
 </resources>

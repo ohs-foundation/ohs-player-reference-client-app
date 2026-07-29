@@ -52,6 +52,11 @@ import dev.ohs.fhir.datacapture.QuestionnaireItemViewFactoryMatchersProvider
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_back
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_retry
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -95,12 +100,12 @@ fun QuestionnaireHostScreen(
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { Text(title ?: "Questionnaire") },
+        title = { Text(title ?: stringResource(Res.string.questionnaire_title)) },
         navigationIcon = {
           IconButton(onClick = onBack) {
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
+              contentDescription = stringResource(Res.string.questionnaire_back),
               tint = MaterialTheme.colorScheme.onPrimary,
             )
           }
@@ -140,7 +145,9 @@ fun QuestionnaireHostScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(16.dp),
               )
-              TextButton(onClick = viewModel::load) { Text("Retry") }
+              TextButton(onClick = viewModel::load) {
+                Text(stringResource(Res.string.questionnaire_retry))
+              }
             }
           }
 

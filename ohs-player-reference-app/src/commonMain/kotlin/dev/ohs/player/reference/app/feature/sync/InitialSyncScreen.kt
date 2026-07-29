@@ -35,6 +35,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.initial_sync_continue
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.initial_sync_failed_body
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.initial_sync_failed_title
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.initial_sync_retry
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.initial_sync_subtitle
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.initial_sync_title
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Full-screen blocking gate shown between login and Home: a progress state while checking/syncing,
@@ -51,7 +59,7 @@ fun InitialSyncScreen(
     when (state) {
       InitialSyncGateState.Checking,
       InitialSyncGateState.Syncing -> SyncingContent()
-      is InitialSyncGateState.Failed -> FailedContent(state.message, onRetry, onContinueAnyway)
+      InitialSyncGateState.Failed -> FailedContent(onRetry, onContinueAnyway)
       InitialSyncGateState.Passed -> Unit
     }
   }
@@ -65,12 +73,12 @@ private fun SyncingContent() {
   ) {
     CircularProgressIndicator()
     Text(
-      text = "Setting up your data…",
+      text = stringResource(Res.string.initial_sync_title),
       style = MaterialTheme.typography.titleMedium,
       textAlign = TextAlign.Center,
     )
     Text(
-      text = "This may take a moment the first time.",
+      text = stringResource(Res.string.initial_sync_subtitle),
       style = MaterialTheme.typography.bodyMedium,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
       textAlign = TextAlign.Center,
@@ -79,7 +87,7 @@ private fun SyncingContent() {
 }
 
 @Composable
-private fun FailedContent(message: String, onRetry: () -> Unit, onContinueAnyway: () -> Unit) {
+private fun FailedContent(onRetry: () -> Unit, onContinueAnyway: () -> Unit) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -91,15 +99,21 @@ private fun FailedContent(message: String, onRetry: () -> Unit, onContinueAnyway
       modifier = Modifier.size(48.dp),
     )
     Text(
-      text = "Couldn't sync your data",
+      text = stringResource(Res.string.initial_sync_failed_title),
       style = MaterialTheme.typography.titleMedium,
       color = MaterialTheme.colorScheme.error,
       textAlign = TextAlign.Center,
     )
-    Text(text = message, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
-    Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) { Text("Retry") }
+    Text(
+      text = stringResource(Res.string.initial_sync_failed_body),
+      style = MaterialTheme.typography.bodyMedium,
+      textAlign = TextAlign.Center,
+    )
+    Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+      Text(stringResource(Res.string.initial_sync_retry))
+    }
     TextButton(onClick = onContinueAnyway, modifier = Modifier.fillMaxWidth()) {
-      Text("Continue without syncing")
+      Text(stringResource(Res.string.initial_sync_continue))
     }
   }
 }

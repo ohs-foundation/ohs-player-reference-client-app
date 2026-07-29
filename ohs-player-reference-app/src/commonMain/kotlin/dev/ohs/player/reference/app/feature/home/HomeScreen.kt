@@ -55,11 +55,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
 import kotlinx.coroutines.launch
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_cancel_sync
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_last_synced
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_open_navigation_menu
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_registers
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sign_out
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_cancelled
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_failed
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_in_progress
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_sync_now
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+
+/**
+ * Material 3's "expanded" window size class breakpoint: at or above it the drawer stays permanent.
+ */
+private val HOME_EXPANDED_WIDTH_BREAKPOINT: Dp = 840.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,31 +93,38 @@ fun HomeScreen(
   val scope = rememberCoroutineScope()
   val snackbarHostState = remember { SnackbarHostState() }
 
+  val syncErrorMessage =
+    when (uiState.syncError) {
+      SyncError.Failed -> stringResource(Res.string.home_sync_failed)
+      SyncError.Cancelled -> stringResource(Res.string.home_sync_cancelled)
+      null -> null
+    }
   LaunchedEffect(uiState.syncError) {
-    uiState.syncError?.let { message ->
-      snackbarHostState.showSnackbar(message)
+    if (syncErrorMessage != null) {
+      snackbarHostState.showSnackbar(syncErrorMessage)
       homeViewModel.clearSyncError()
     }
   }
 
   BoxWithConstraints {
-    val isExpandedWidth = isHomeDrawerExpandedWidth(maxWidth)
+    val isExpandedWidth = maxWidth >= HOME_EXPANDED_WIDTH_BREAKPOINT
 
     fun closeDrawerIfCompact() {
       if (!isExpandedWidth) scope.launch { drawerState.close() }
     }
 
     val drawerItems: @Composable () -> Unit = {
+      val syncInProgressDescription = stringResource(Res.string.home_sync_in_progress)
       Column(modifier = Modifier.fillMaxHeight()) {
         Text(
-          text = "Registers",
+          text = stringResource(Res.string.home_registers),
           style = MaterialTheme.typography.titleSmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.padding(start = 28.dp, top = 16.dp, bottom = 8.dp),
         )
         HomeDestination.entries.forEach { destination ->
           NavigationDrawerItem(
-            label = { Text(destination.label) },
+            label = { Text(stringResource(destination.label)) },
             icon = { Icon(destination.icon, contentDescription = null) },
             selected = destination == selectedDestination,
             onClick = {
@@ -115,14 +139,20 @@ fun HomeScreen(
         HorizontalDivider()
         uiState.lastSyncedAt?.let { lastSyncedAt ->
           Text(
-            text = "Last synced: $lastSyncedAt",
+            text = stringResource(Res.string.home_last_synced, lastSyncedAt),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 28.dp, top = 8.dp),
           )
         }
         NavigationDrawerItem(
-          label = { Text(if (uiState.isSyncing) "Cancel sync" else "Sync now") },
+          label = {
+            Text(
+              stringResource(
+                if (uiState.isSyncing) Res.string.home_cancel_sync else Res.string.home_sync_now
+              )
+            )
+          },
           icon = {
             Icon(
               if (uiState.isSyncing) Icons.Filled.Close else Icons.Filled.Refresh,
@@ -133,7 +163,7 @@ fun HomeScreen(
             if (uiState.isSyncing) {
               CircularProgressIndicator(
                 modifier =
-                  Modifier.size(16.dp).semantics { contentDescription = "Sync in progress" },
+                  Modifier.size(16.dp).semantics { contentDescription = syncInProgressDescription },
                 strokeWidth = 2.dp,
               )
             }
@@ -149,7 +179,7 @@ fun HomeScreen(
           },
         )
         NavigationDrawerItem(
-          label = { Text("Sign out") },
+          label = { Text(stringResource(Res.string.home_sign_out)) },
           icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
           selected = false,
           onClick = {
@@ -181,10 +211,13 @@ fun HomeScreen(
         Scaffold(
           topBar = {
             TopAppBar(
-              title = { Text(selectedDestination.label) },
+              title = { Text(stringResource(selectedDestination.label)) },
               navigationIcon = {
                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                  Icon(Icons.Filled.Menu, contentDescription = "Open navigation menu")
+                  Icon(
+                    Icons.Filled.Menu,
+                    contentDescription = stringResource(Res.string.home_open_navigation_menu),
+                  )
                 }
               },
             )

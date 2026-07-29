@@ -19,7 +19,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ohs.fhir.engine.sync.FhirDataStore
 import dev.ohs.fhir.engine.sync.SyncJobStatus
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import kotlin.time.Instant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -31,14 +31,20 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
+/** Why the last sync ended without success — the screen maps each to a localized message. */
+enum class SyncError {
+  Failed,
+  Cancelled,
+}
+
 data class HomeUiState(
   val isSyncing: Boolean = false,
   val lastSyncedAt: String? = null,
-  val syncError: String? = null,
+  val syncError: SyncError? = null,
 )
 
 class HomeViewModel(
-  private val syncNowUseCase: SyncNowUseCase,
+  private val syncManager: SyncManager,
   private val fhirDataStore: FhirDataStore,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(HomeUiState())
@@ -64,7 +70,7 @@ class HomeViewModel(
     return viewModelScope.launch {
       val result =
         try {
-          syncNowUseCase.invoke()
+          syncManager.syncNow()
         } catch (e: CancellationException) {
           throw e
         } catch (e: Exception) {
@@ -76,8 +82,8 @@ class HomeViewModel(
           _uiState.update { it.copy(isSyncing = false, lastSyncedAt = lastSyncedAt) }
         }
         else -> {
-          val message = if (cancelRequested) "Sync cancelled." else "Sync failed. Please try again."
-          _uiState.update { it.copy(isSyncing = false, syncError = message) }
+          val error = if (cancelRequested) SyncError.Cancelled else SyncError.Failed
+          _uiState.update { it.copy(isSyncing = false, syncError = error) }
         }
       }
     }
@@ -87,7 +93,7 @@ class HomeViewModel(
   fun cancelSync() {
     if (!_uiState.value.isSyncing) return
     cancelRequested = true
-    viewModelScope.launch { syncNowUseCase.cancel() }
+    viewModelScope.launch { syncManager.cancelSyncNow() }
   }
 
   fun clearSyncError() {

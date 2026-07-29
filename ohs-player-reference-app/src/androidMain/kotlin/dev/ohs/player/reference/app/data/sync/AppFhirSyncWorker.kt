@@ -22,6 +22,7 @@ import dev.ohs.fhir.engine.sync.ConflictResolver
 import dev.ohs.fhir.engine.sync.DownloadWorkManager
 import dev.ohs.fhir.engine.sync.FhirSyncWorker
 import dev.ohs.fhir.engine.sync.upload.UploadStrategy
+import dev.ohs.player.reference.app.auth.ensureFreshSessionForSync
 
 /**
  * WorkManager entry point for this app's sync, enqueued via [dev.ohs.fhir.engine.sync.Sync]. Built
@@ -31,6 +32,16 @@ import dev.ohs.fhir.engine.sync.upload.UploadStrategy
 class AppFhirSyncWorker(appContext: Context, workerParams: WorkerParameters) :
   FhirSyncWorker(appContext, workerParams) {
   private val syncTask = AppFhirSyncTask(FhirEngineProvider.getInstance(appContext))
+
+  /**
+   * WorkManager can relaunch this worker in a fresh process after the app was killed, where the UI
+   * bootstrap never ran and [dev.ohs.player.reference.app.auth.SessionRepository] is empty. Hydrate
+   * and refresh the session first so the sync's requests carry a valid Bearer token.
+   */
+  override suspend fun doWork(): Result {
+    ensureFreshSessionForSync()
+    return super.doWork()
+  }
 
   override fun getFhirEngine() = syncTask.getFhirEngine()
 

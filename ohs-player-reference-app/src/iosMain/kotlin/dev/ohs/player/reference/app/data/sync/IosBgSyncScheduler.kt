@@ -19,6 +19,7 @@ import co.touchlab.kermit.Logger
 import dev.ohs.fhir.engine.sync.FhirSyncTask
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.engine.sync.runSync
+import dev.ohs.player.reference.app.auth.ensureFreshSessionForSync
 import kotlin.concurrent.AtomicInt
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.cinterop.BetaInteropApi
@@ -102,6 +103,9 @@ internal class IosBgSyncScheduler(
 
     scope.launch {
       try {
+        // A background launch never runs the UI bootstrap, so hydrate + refresh the session first
+        // to hand the sync's requests a valid Bearer token.
+        ensureFreshSessionForSync()
         val status = taskFactory().runSync(taskName = taskIdentifier, onProgress = {})
         Logger.d { "IosBgSyncScheduler: sync completed with $status" }
         completeOnce(status is SyncJobStatus.Succeeded)

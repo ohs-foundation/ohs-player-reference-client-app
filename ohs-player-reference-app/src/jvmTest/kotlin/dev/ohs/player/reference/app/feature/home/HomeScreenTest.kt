@@ -77,8 +77,8 @@ class HomeScreenTest {
           HomeScreen(
             onGroupClick = {},
             onDataCaptureClick = {},
-            onMemberClick = {},
             onAddMembers = {},
+            onAddClinicalData = {},
             onSignOut = {},
           )
         }
@@ -110,8 +110,8 @@ class HomeScreenTest {
           HomeScreen(
             onGroupClick = {},
             onDataCaptureClick = {},
-            onMemberClick = {},
             onAddMembers = {},
+            onAddClinicalData = {},
             onSignOut = {},
           )
         }
@@ -151,8 +151,8 @@ class HomeScreenTest {
           HomeScreen(
             onGroupClick = {},
             onDataCaptureClick = {},
-            onMemberClick = {},
             onAddMembers = {},
+            onAddClinicalData = {},
             onSignOut = {},
           )
         }
@@ -187,8 +187,8 @@ class HomeScreenTest {
           HomeScreen(
             onGroupClick = {},
             onDataCaptureClick = {},
-            onMemberClick = {},
             onAddMembers = {},
+            onAddClinicalData = {},
             onSignOut = {},
           )
         }

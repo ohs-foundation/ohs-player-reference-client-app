@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,7 +54,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_back
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_close
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_retry
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_title
 import org.jetbrains.compose.resources.stringResource
@@ -105,8 +105,8 @@ fun QuestionnaireHostScreen(
         navigationIcon = {
           IconButton(onClick = onBack) {
             Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = stringResource(Res.string.questionnaire_back),
+              imageVector = Icons.Filled.Close,
+              contentDescription = stringResource(Res.string.questionnaire_close),
               tint = MaterialTheme.colorScheme.onPrimary,
             )
           }

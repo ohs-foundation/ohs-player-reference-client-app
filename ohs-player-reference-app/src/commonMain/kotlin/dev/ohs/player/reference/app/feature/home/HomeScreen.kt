@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Close
@@ -38,11 +39,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.PermanentDrawerSheet
-import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
@@ -67,6 +69,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import dev.ohs.player.reference.app.feature.group.list.GroupListScreen
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileScreen
+import dev.ohs.player.reference.app.feature.patient.profile.PatientProfileScreen
 import kotlinx.coroutines.launch
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.home_cancel_sync
@@ -87,8 +90,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun HomeScreen(
   onGroupClick: (String) -> Unit,
   onDataCaptureClick: () -> Unit,
-  onMemberClick: (String) -> Unit,
   onAddMembers: (String) -> Unit,
+  onAddClinicalData: (String) -> Unit,
   onSignOut: () -> Unit,
 ) {
   val homeViewModel: HomeViewModel = koinViewModel()
@@ -96,6 +99,7 @@ fun HomeScreen(
 
   var selectedDestination by remember { mutableStateOf(HomeDestination.Households) }
   var selectedGroupId by rememberSaveable { mutableStateOf<String?>(null) }
+  var selectedPatientId by rememberSaveable(selectedGroupId) { mutableStateOf<String?>(null) }
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
   val snackbarHostState = remember { SnackbarHostState() }
@@ -114,10 +118,12 @@ fun HomeScreen(
   }
 
   Box(modifier = Modifier.fillMaxSize()) {
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isExpandedWidth =
-      currentWindowAdaptiveInfo()
-        .windowSizeClass
-        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+      windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    val isMediumWidth =
+      !isExpandedWidth &&
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
     fun closeDrawerIfCompact() {
       if (!isExpandedWidth) scope.launch { drawerState.close() }
@@ -213,16 +219,23 @@ fun HomeScreen(
               }
               VerticalDivider()
               Box(modifier = Modifier.weight(1.5f).fillMaxSize()) {
+                val patientId = selectedPatientId
                 val groupId = selectedGroupId
-                if (groupId != null) {
-                  GroupProfileScreen(
-                    groupId = groupId,
-                    onBack = { selectedGroupId = null },
-                    onMemberClick = onMemberClick,
-                    onAddMembers = { onAddMembers(groupId) },
-                  )
-                } else {
-                  EmptyDetailPlaceholder()
+                when {
+                  patientId != null ->
+                    PatientProfileScreen(
+                      patientId = patientId,
+                      onBack = { selectedPatientId = null },
+                      onAddClinicalData = { onAddClinicalData(patientId) },
+                    )
+                  groupId != null ->
+                    GroupProfileScreen(
+                      groupId = groupId,
+                      onBack = { selectedGroupId = null },
+                      onMemberClick = { selectedPatientId = it },
+                      onAddMembers = { onAddMembers(groupId) },
+                    )
+                  else -> EmptyDetailPlaceholder()
                 }
               }
             }
@@ -233,7 +246,63 @@ fun HomeScreen(
     }
 
     if (isExpandedWidth) {
-      PermanentNavigationDrawer(drawerContent = { PermanentDrawerSheet { drawerItems() } }) {
+      Row(modifier = Modifier.fillMaxSize()) {
+        Surface(
+          modifier = Modifier.width(280.dp).fillMaxHeight(),
+          color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ) {
+          drawerItems()
+        }
+        VerticalDivider()
+        Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
+          Box(modifier = Modifier.padding(padding)) { content() }
+        }
+      }
+    } else if (isMediumWidth) {
+      Row(modifier = Modifier.fillMaxSize()) {
+        NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh) {
+          val syncInProgressDescription = stringResource(Res.string.home_sync_in_progress)
+          HomeDestination.entries.forEach { destination ->
+            NavigationRailItem(
+              selected = destination == selectedDestination,
+              onClick = { selectedDestination = destination },
+              icon = { Icon(destination.icon, contentDescription = null) },
+              label = { Text(stringResource(destination.label)) },
+            )
+          }
+          Spacer(modifier = Modifier.weight(1f))
+          NavigationRailItem(
+            selected = false,
+            onClick = {
+              if (uiState.isSyncing) homeViewModel.cancelSync() else homeViewModel.syncNow()
+            },
+            icon = {
+              if (uiState.isSyncing) {
+                Icon(
+                  Icons.Filled.Close,
+                  contentDescription = null,
+                  modifier = Modifier.semantics { contentDescription = syncInProgressDescription },
+                )
+              } else {
+                Icon(Icons.Filled.Refresh, contentDescription = null)
+              }
+            },
+            label = {
+              Text(
+                stringResource(
+                  if (uiState.isSyncing) Res.string.home_cancel_sync else Res.string.home_sync_now
+                )
+              )
+            },
+          )
+          NavigationRailItem(
+            selected = false,
+            onClick = onSignOut,
+            icon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
+            label = { Text(stringResource(Res.string.home_sign_out)) },
+          )
+        }
+        VerticalDivider()
         Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { padding ->
           Box(modifier = Modifier.padding(padding)) { content() }
         }
@@ -241,7 +310,14 @@ fun HomeScreen(
     } else {
       ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { ModalDrawerSheet { drawerItems() } },
+        drawerContent = {
+          ModalDrawerSheet(
+            modifier = Modifier.width(300.dp),
+            drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+          ) {
+            drawerItems()
+          }
+        },
       ) {
         Scaffold(
           topBar = {

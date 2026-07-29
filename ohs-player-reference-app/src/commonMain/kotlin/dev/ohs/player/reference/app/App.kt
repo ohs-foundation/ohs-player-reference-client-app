@@ -104,12 +104,19 @@ fun App() {
                         )
                       )
                     },
-                    onMemberClick = { id -> navController.navigate("patientProfile/$id") },
                     onAddMembers = { groupId ->
                       navController.navigate(
                         questionnaireHostRoute(
                           questionnaireId = QuestionnaireIds.HOUSEHOLD_MEMBERS,
                           groupId = groupId,
+                        )
+                      )
+                    },
+                    onAddClinicalData = { patientId ->
+                      navController.navigate(
+                        questionnaireHostRoute(
+                          questionnaireId = QuestionnaireIds.PATIENT_CLINICAL_DATA,
+                          patientId = patientId,
                         )
                       )
                     },

@@ -39,7 +39,7 @@
     <string name="initial_sync_continue">Continue without syncing</string>
 
     <!-- Group list screen -->
-    <string name="group_list_register_household">Register household</string>
+    <string name="group_list_register_household">Add household</string>
     <string name="group_list_empty">No households</string>
 
     <!-- Group profile screen -->
@@ -61,5 +61,6 @@
     <!-- Questionnaire screen -->
     <string name="questionnaire_title">Questionnaire</string>
     <string name="questionnaire_back">Back</string>
+    <string name="questionnaire_close">Close</string>
     <string name="questionnaire_retry">Retry</string>
 </resources>

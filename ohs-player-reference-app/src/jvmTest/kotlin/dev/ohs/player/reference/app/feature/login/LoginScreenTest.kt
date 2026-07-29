@@ -41,7 +41,7 @@ class LoginScreenTest {
       }
     }
 
-    onNodeWithText("Sign in", ignoreCase = true).performClick()
+    onNodeWithText("Continue to sign in", ignoreCase = true).performClick()
 
     assertTrue(clicked)
   }

@@ -9,9 +9,9 @@
 
     <!-- Login screen -->
     <string name="login_brand">Player Reference</string>
-    <string name="login_card_title">Sign in to Player Reference</string>
-    <string name="login_redirect_hint">You'll be securely redirected to your organization's sign-in page to continue.</string>
-    <string name="login_sign_in">Sign in</string>
+    <string name="login_card_title">Sign in</string>
+    <string name="login_redirect_hint">We'll hand you over to your organization's sign-in page, then bring you straight back.</string>
+    <string name="login_sign_in">Continue to sign in</string>
     <string name="login_error_title">Sign-in failed</string>
     <string name="login_error_dismiss">Dismiss</string>
 

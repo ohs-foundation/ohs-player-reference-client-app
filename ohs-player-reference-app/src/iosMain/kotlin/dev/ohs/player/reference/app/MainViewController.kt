@@ -25,7 +25,9 @@ import dev.ohs.fhir.engine.sync.remote.HttpLogger
 import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
 import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
+import dev.ohs.player.reference.app.data.sync.IosPeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.IosSyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
 import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import org.koin.dsl.module
@@ -46,10 +48,14 @@ fun MainViewController() = run {
         )
     )
   )
+  // Constructed eagerly (not inside the Koin lambda, which is lazy) so BGTaskScheduler
+  // registration happens now, during app launch — see IosBgSyncScheduler's docs.
+  val periodicSyncUseCase = IosPeriodicSyncUseCase()
   initKoin(
     module {
       single<FhirEngine> { FhirEngineProvider.getInstance() }
       single<SyncNowUseCase> { IosSyncNowUseCase() }
+      single<PeriodicSyncUseCase> { periodicSyncUseCase }
     }
   )
   ComposeUIViewController { App() }

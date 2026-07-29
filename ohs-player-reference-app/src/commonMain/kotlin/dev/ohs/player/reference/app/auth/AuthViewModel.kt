@@ -17,7 +17,7 @@ package dev.ohs.player.reference.app.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,8 +29,10 @@ import kotlinx.coroutines.launch
  * [AuthorizationLauncher] is platform UI, so it's passed in from the composable rather than
  * constructed here.
  */
-internal class AuthViewModel(private val service: AuthService, private val fhirEngine: FhirEngine) :
-  ViewModel() {
+internal class AuthViewModel(
+  private val service: AuthService,
+  private val syncManager: SyncManager,
+) : ViewModel() {
 
   private val _state = MutableStateFlow<AuthState>(AuthState.Loading)
   val state: StateFlow<AuthState> = _state.asStateFlow()
@@ -47,38 +49,34 @@ internal class AuthViewModel(private val service: AuthService, private val fhirE
   fun bootstrap(launcher: AuthorizationLauncher) {
     if (bootstrapped) return
     bootstrapped = true
-    viewModelScope.launch {
-      when (val redirect = service.completeRedirectLoginIfPresent(launcher)) {
-        is LoginOutcome.Authenticated -> {
-          _state.value = AuthState.Authenticated(redirect.session)
-          return@launch
-        }
-        is LoginOutcome.Error -> _error.value = redirect.message
-        else -> Unit
-      }
-      val session = service.ensureFreshSession()
-      if (session != null) {
-        _state.value = AuthState.Authenticated(session)
-        revalidateInBackground()
-      } else {
-        _state.value = AuthState.Unauthenticated
-      }
-    }
+    viewModelScope.launch { runBootstrap(launcher) }
   }
 
   /**
    * Test seam: same bootstrap logic, but against [AuthorizationLauncherApi] so tests can fake it.
    */
-  internal suspend fun bootstrapForTest(launcher: AuthorizationLauncherApi) {
+  internal suspend fun bootstrapForTest(launcher: AuthorizationLauncherApi) = runBootstrap(launcher)
+
+  private suspend fun runBootstrap(launcher: AuthorizationLauncherApi) {
+    when (val redirect = service.completeRedirectLoginIfPresent(launcher)) {
+      is LoginOutcome.Authenticated -> {
+        _state.value = AuthState.Authenticated(redirect.session)
+        return
+      }
+      is LoginOutcome.Error -> _error.value = redirect.message
+      else -> Unit
+    }
     val session = service.ensureFreshSession()
-    _state.value =
-      if (session != null) AuthState.Authenticated(session) else AuthState.Unauthenticated
+    if (session != null) {
+      _state.value = AuthState.Authenticated(session)
+      revalidateInBackground()
+    } else {
+      _state.value = AuthState.Unauthenticated
+    }
   }
 
   private fun revalidateInBackground() {
-    viewModelScope.launch {
-      if (!service.revalidateSession()) _state.value = AuthState.Unauthenticated
-    }
+    viewModelScope.launch { if (!service.revalidateSession()) signOut() }
   }
 
   fun login(launcher: AuthorizationLauncher) {
@@ -113,7 +111,18 @@ internal class AuthViewModel(private val service: AuthService, private val fhirE
 
   private suspend fun runLogout() {
     service.logout()
-    fhirEngine.clearDatabase()
+    signOut()
+  }
+
+  /**
+   * Ends the local session: stops any in-flight and recurring sync before dropping to the login
+   * screen, so neither can keep firing with a stale/absent token after a logout or a server-side
+   * revoke. Local FHIR data is intentionally left on disk — logout clears the session, not the
+   * data.
+   */
+  private suspend fun signOut() {
+    syncManager.cancelSyncNow()
+    syncManager.cancelPeriodicSync()
     _state.value = AuthState.Unauthenticated
   }
 }

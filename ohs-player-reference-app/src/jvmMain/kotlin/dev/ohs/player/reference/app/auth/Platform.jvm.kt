@@ -77,7 +77,7 @@ actual class AuthorizationLauncher(private val port: Int) : AuthorizationLaunche
         }
     }
 
-  actual fun consumeRedirectCallback(): String? = null
+  actual override fun consumeRedirectCallback(): String? = null
 }
 
 @Composable

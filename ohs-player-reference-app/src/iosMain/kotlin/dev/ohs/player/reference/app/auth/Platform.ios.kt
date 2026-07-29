@@ -81,7 +81,7 @@ actual class AuthorizationLauncher(
       session.start()
     }
 
-  actual fun consumeRedirectCallback(): String? = null
+  actual override fun consumeRedirectCallback(): String? = null
 }
 
 private class PresentationContextProvider :

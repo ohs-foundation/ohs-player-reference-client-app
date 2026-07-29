@@ -58,7 +58,7 @@ internal class AuthService(
    * Web: on app start, finishes a login if this page load is a redirect back from the provider.
    * Returns null when there is nothing to complete.
    */
-  suspend fun completeRedirectLoginIfPresent(launcher: AuthorizationLauncher): LoginOutcome? {
+  suspend fun completeRedirectLoginIfPresent(launcher: AuthorizationLauncherApi): LoginOutcome? {
     val callbackUrl = launcher.consumeRedirectCallback() ?: return null
     return completeLogin(callbackUrl, launcher.redirectUri)
   }

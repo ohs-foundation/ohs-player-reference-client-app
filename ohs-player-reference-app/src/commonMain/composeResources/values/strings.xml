@@ -62,4 +62,25 @@
     <string name="questionnaire_close">Close</string>
     <string name="questionnaire_back">Back</string>
     <string name="questionnaire_retry">Retry</string>
+
+    <!-- Shared item labels -->
+    <string name="label_age">Age %1$s</string>
+    <string name="label_mrn">MRN %1$s</string>
+    <string name="name_unknown">Unknown</string>
+    <!-- Section header -->
+    <string name="section_collapse">Collapse</string>
+    <string name="section_expand">Expand</string>
+    <!-- Household profile -->
+    <string name="group_default_name">Household</string>
+    <string name="group_unknown_name">Unknown Household</string>
+    <string name="group_head">Head: %1$s</string>
+    <string name="group_member_count_one">%1$s member</string>
+    <string name="group_member_count_other">%1$s members</string>
+    <!-- Patient clinical items -->
+    <string name="condition_unknown">Unknown condition</string>
+    <string name="condition_since">Since %1$s</string>
+    <string name="medication_unknown">Unknown medication</string>
+    <string name="allergy_unknown">Unknown substance</string>
+    <string name="immunization_unknown">Unknown vaccine</string>
+    <string name="immunization_given">Given %1$s</string>
 </resources>

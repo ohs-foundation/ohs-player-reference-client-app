@@ -38,6 +38,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.GroupCardConfig
 import dev.ohs.player.generated.state.GroupListState
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_member_count_one
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_member_count_other
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_unknown_name
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Selected household id for the two-pane list-detail highlight; null when there is no open pane.
@@ -50,10 +55,14 @@ fun GroupCard(
   config: GroupCardConfig = GroupCardConfig(),
   onClick: (() -> Unit)? = null,
 ) {
-  val name = group.groupName ?: "Unknown Household"
+  val name = group.groupName ?: stringResource(Res.string.group_unknown_name)
   val initials = name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "H"
   val count = group.memberCount ?: "0"
-  val memberLabel = if (count == "1") "1 member" else "$count members"
+  val memberLabel =
+    stringResource(
+      if (count == "1") Res.string.group_member_count_one else Res.string.group_member_count_other,
+      count,
+    )
   val selected = group.groupId != null && group.groupId == LocalSelectedGroupId.current
 
   Row(

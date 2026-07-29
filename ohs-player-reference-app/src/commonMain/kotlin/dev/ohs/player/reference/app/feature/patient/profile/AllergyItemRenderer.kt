@@ -24,6 +24,9 @@ import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.StatusChipData
 import dev.ohs.player.reference.app.feature.component.common.StatusRow
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.allergy_unknown
+import org.jetbrains.compose.resources.stringResource
 
 class AllergyItemRenderer : ComponentRenderer<PatientAllergyState, AllergyItemConfig> {
   @Composable
@@ -34,16 +37,12 @@ class AllergyItemRenderer : ComponentRenderer<PatientAllergyState, AllergyItemCo
   ) {
     val showCriticality = config.showCriticality != false
     StatusRow(
-      title = item.substance ?: "Unknown substance",
+      title = item.substance ?: stringResource(Res.string.allergy_unknown),
       modifier = options.modifier,
       subtitle =
         if (showCriticality) item.criticality?.replaceFirstChar { it.uppercaseChar() } else null,
       subtitleColor = criticalityColor(item.criticality).copy(alpha = 0.85f),
       accentColor = if (showCriticality) criticalityColor(item.criticality) else null,
-      rowBackground =
-        if (item.criticality?.lowercase() == "high")
-          criticalityColor(item.criticality).copy(alpha = 0.06f)
-        else Color.Transparent,
       status =
         if (config.showStatus != false)
           item.allergyStatus?.let {

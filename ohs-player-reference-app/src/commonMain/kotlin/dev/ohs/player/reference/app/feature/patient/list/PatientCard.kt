@@ -41,6 +41,10 @@ import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.label_age
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.name_unknown
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun PatientCard(
@@ -55,7 +59,9 @@ fun PatientCard(
       }
       .ifBlank { "?" }
   val fullName =
-    listOfNotNull(patient.givenName, patient.familyName).joinToString(" ").ifBlank { "Unknown" }
+    listOfNotNull(patient.givenName, patient.familyName).joinToString(" ").ifBlank {
+      stringResource(Res.string.name_unknown)
+    }
 
   Row(
     modifier =
@@ -86,7 +92,9 @@ fun PatientCard(
       )
       val subtitleParts = buildList {
         if (config.showAge != false) {
-          calculateAge(patient.birthDate?.toString())?.let { add("Age $it") }
+          calculateAge(patient.birthDate?.toString())?.let {
+            add(stringResource(Res.string.label_age, it))
+          }
         }
         if (config.showGender != false) {
           patient.gender?.let { add(it.replaceFirstChar { c -> c.uppercaseChar() }) }

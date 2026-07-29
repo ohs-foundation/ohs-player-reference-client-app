@@ -24,6 +24,10 @@ import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.StatusChipData
 import dev.ohs.player.reference.app.feature.component.common.StatusRow
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.condition_since
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.condition_unknown
+import org.jetbrains.compose.resources.stringResource
 
 private val AmberAccent = Color(0xFFE37400)
 
@@ -35,7 +39,6 @@ class ConditionItemRenderer : ComponentRenderer<PatientConditionState, Condition
     options: RenderOptions,
   ) {
     val status = item.conditionStatus?.lowercase()
-    val isActive = status == "active"
     val accentColor =
       when (status) {
         "active" -> AmberAccent
@@ -43,11 +46,13 @@ class ConditionItemRenderer : ComponentRenderer<PatientConditionState, Condition
         else -> MaterialTheme.colorScheme.outline
       }
     StatusRow(
-      title = item.conditionCode ?: "Unknown condition",
+      title = item.conditionCode ?: stringResource(Res.string.condition_unknown),
       modifier = options.modifier,
-      subtitle = if (config.showOnsetDate != false) item.onsetDate?.let { "Since $it" } else null,
+      subtitle =
+        if (config.showOnsetDate != false)
+          item.onsetDate?.let { stringResource(Res.string.condition_since, it) }
+        else null,
       accentColor = accentColor,
-      rowBackground = if (isActive) AmberAccent.copy(alpha = 0.06f) else Color.Transparent,
       status =
         if (config.showStatus != false)
           item.conditionStatus?.let {

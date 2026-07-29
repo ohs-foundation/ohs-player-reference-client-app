@@ -24,12 +24,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +36,12 @@ import dev.ohs.player.generated.config.GroupHeaderConfig
 import dev.ohs.player.generated.state.GroupHeaderState
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
-import dev.ohs.player.reference.app.feature.component.common.Chip
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_default_name
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_head
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_member_count_one
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_member_count_other
+import org.jetbrains.compose.resources.stringResource
 
 class GroupHeaderRenderer : ComponentRenderer<GroupHeaderState, GroupHeaderConfig> {
   @Composable
@@ -57,71 +56,57 @@ fun GroupHeaderCard(
   config: GroupHeaderConfig = GroupHeaderConfig(),
   modifier: Modifier = Modifier,
 ) {
-  val name = item.groupName ?: "Household"
+  val name = item.groupName ?: stringResource(Res.string.group_default_name)
   val initials = name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "H"
   val memberCount = item.memberCount ?: "0"
   val headName =
     listOfNotNull(item.headGivenName, item.headFamilyName).joinToString(" ").ifBlank { null }
-
-  Card(
-    modifier = modifier.fillMaxWidth(),
-    elevation =
-      CardDefaults.elevatedCardElevation(
-        defaultElevation = (config.elevation?.floatValue() ?: 2f).dp
-      ),
-  ) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding((config.padding?.floatValue() ?: 20f).dp),
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Box(
-        modifier =
-          Modifier.size(72.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer),
-        contentAlignment = Alignment.Center,
-      ) {
-        Text(
-          text = initials,
-          style = MaterialTheme.typography.headlineMedium,
-          color = MaterialTheme.colorScheme.onPrimaryContainer,
-          fontWeight = FontWeight.Bold,
-        )
-      }
-      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        HorizontalDivider(
-          modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-          color = MaterialTheme.colorScheme.outlineVariant,
-        )
+  val meta =
+    buildList {
         if (config.showMemberCount != false) {
-          Row {
-            Chip(
-              label = "$memberCount member${if (memberCount == "1") "" else "s"}",
-              containerColor = MaterialTheme.colorScheme.surfaceVariant,
-              contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+          add(
+            stringResource(
+              if (memberCount == "1") Res.string.group_member_count_one
+              else Res.string.group_member_count_other,
+              memberCount,
             )
-          }
+          )
         }
         if (config.showHeadName != false && headName != null) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            Icon(
-              imageVector = Icons.Default.Person,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(14.dp),
-            )
-            Text(
-              text = "Head: $headName",
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
+          add(stringResource(Res.string.group_head, headName))
         }
+      }
+      .joinToString(" · ")
+
+  Row(
+    modifier = modifier.fillMaxWidth().padding((config.padding?.floatValue() ?: 20f).dp),
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Box(
+      modifier =
+        Modifier.size(72.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+      contentAlignment = Alignment.Center,
+    ) {
+      Text(
+        text = initials,
+        style = MaterialTheme.typography.headlineMedium,
+        color = MaterialTheme.colorScheme.onPrimary,
+        fontWeight = FontWeight.Bold,
+      )
+    }
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+      Text(
+        text = name,
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold,
+      )
+      if (meta.isNotEmpty()) {
+        Text(
+          text = meta,
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
       }
     }
   }

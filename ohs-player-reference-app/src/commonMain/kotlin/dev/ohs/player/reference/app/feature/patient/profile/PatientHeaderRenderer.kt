@@ -20,14 +20,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +37,11 @@ import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.StatusChip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.label_age
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.label_mrn
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.name_unknown
+import org.jetbrains.compose.resources.stringResource
 
 class PatientHeaderRenderer : ComponentRenderer<PatientSummaryState, PatientHeaderConfig> {
   @Composable
@@ -67,7 +67,22 @@ fun PatientHeaderCard(
       }
       .ifBlank { "?" }
   val fullName =
-    listOfNotNull(patient.givenName, patient.familyName).joinToString(" ").ifBlank { "Unknown" }
+    listOfNotNull(patient.givenName, patient.familyName).joinToString(" ").ifBlank {
+      stringResource(Res.string.name_unknown)
+    }
+  val meta =
+    buildList {
+        calculateAge(patient.birthDate?.toString())?.let {
+          add(stringResource(Res.string.label_age, it))
+        }
+        if (config.showGender != false) {
+          patient.gender?.let { add(it.replaceFirstChar { c -> c.uppercaseChar() }) }
+        }
+        if (config.showMrn != false)
+          patient.mrn?.let { add(stringResource(Res.string.label_mrn, it)) }
+        patient.phone?.let { add(it) }
+      }
+      .joinToString(" · ")
 
   Row(
     modifier = modifier.fillMaxWidth(),
@@ -76,74 +91,29 @@ fun PatientHeaderCard(
   ) {
     Box(
       modifier =
-        Modifier.size(80.dp)
-          .clip(CircleShape)
-          .background(MaterialTheme.colorScheme.primaryContainer),
+        Modifier.size(72.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
       contentAlignment = Alignment.Center,
     ) {
       Text(
         text = initials,
         style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = MaterialTheme.colorScheme.onPrimary,
         fontWeight = FontWeight.Bold,
       )
     }
-    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
       Text(
         text = fullName,
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
       )
-      val ageParts = buildList {
-        calculateAge(patient.birthDate?.toString())?.let { add("Age $it") }
-        if (config.showGender != false) {
-          patient.gender?.let { add(it.replaceFirstChar { c -> c.uppercaseChar() }) }
-        }
-      }
-      if (ageParts.isNotEmpty()) {
+      if (meta.isNotEmpty()) {
         Text(
-          text = ageParts.joinToString(" · "),
+          text = meta,
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
-      HorizontalDivider(
-        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-      )
-      if (config.showMrn != false) {
-        patient.mrn?.let { mrn ->
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-              text = "MRN",
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.outline,
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = mrn,
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurface,
-            )
-          }
-        }
-      }
-      patient.phone?.let { phone ->
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Text(
-            text = "Phone",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = phone,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
-          )
-        }
-      }
-      Spacer(modifier = Modifier.height(4.dp))
       if (config.showStatus != false) {
         StatusChip(isActive = patient.active ?: false)
       }

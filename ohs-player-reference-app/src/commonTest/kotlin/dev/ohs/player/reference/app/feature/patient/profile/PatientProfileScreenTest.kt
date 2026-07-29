@@ -70,9 +70,9 @@ class PatientProfileScreenTest {
     val scrollable = onNode(hasScrollAction())
     listOf("Amina Diallo", "Allergies", "Medications", "Conditions", "Immunizations").forEach { text
       ->
-      scrollable.performScrollToNode(hasText(text))
+      scrollable.performScrollToNode(hasText(text, ignoreCase = true))
       assertTrue(
-        onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty(),
+        onAllNodesWithText(text, ignoreCase = true).fetchSemanticsNodes().isNotEmpty(),
         "Expected to find '$text' after scrolling the patient profile",
       )
     }

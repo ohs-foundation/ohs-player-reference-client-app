@@ -43,6 +43,8 @@ import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.Chip
 import dev.ohs.player.reference.app.feature.patient.list.calculateAge
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.label_age
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.name_unknown
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_child
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_guardian
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.relationship_non_relative
@@ -79,7 +81,7 @@ fun MemberItemRow(
       .ifBlank { "?" }
   val fullName =
     listOfNotNull(item.memberGivenName, item.memberFamilyName).joinToString(" ").ifBlank {
-      "Unknown"
+      stringResource(Res.string.name_unknown)
     }
   val relationshipLabel = item.relationshipCode?.toRelationshipLabel()
 
@@ -94,15 +96,13 @@ fun MemberItemRow(
   ) {
     Box(
       modifier =
-        Modifier.size(40.dp)
-          .clip(CircleShape)
-          .background(MaterialTheme.colorScheme.primaryContainer),
+        Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
       contentAlignment = Alignment.Center,
     ) {
       Text(
         text = initials,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onPrimary,
         fontWeight = FontWeight.Bold,
       )
     }
@@ -114,7 +114,9 @@ fun MemberItemRow(
       )
       val subtitleParts = buildList {
         if (config.showAge != false) {
-          calculateAge(item.memberBirthDate?.toString())?.let { add("Age $it") }
+          calculateAge(item.memberBirthDate?.toString())?.let {
+            add(stringResource(Res.string.label_age, it))
+          }
         }
         if (config.showGender != false) {
           item.memberGender?.let { add(it.replaceFirstChar { c -> c.uppercaseChar() }) }

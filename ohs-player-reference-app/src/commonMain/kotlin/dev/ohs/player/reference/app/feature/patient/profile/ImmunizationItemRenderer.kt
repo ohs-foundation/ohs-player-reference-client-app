@@ -17,13 +17,16 @@ package dev.ohs.player.reference.app.feature.patient.profile
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import dev.ohs.player.generated.config.ImmunizationItemConfig
 import dev.ohs.player.generated.state.PatientImmunizationState
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.StatusChipData
 import dev.ohs.player.reference.app.feature.component.common.StatusRow
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.immunization_given
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.immunization_unknown
+import org.jetbrains.compose.resources.stringResource
 
 class ImmunizationItemRenderer :
   ComponentRenderer<PatientImmunizationState, ImmunizationItemConfig> {
@@ -35,14 +38,14 @@ class ImmunizationItemRenderer :
   ) {
     val isCompleted = item.immunizationStatus?.lowercase() == "completed"
     StatusRow(
-      title = item.vaccineName ?: "Unknown vaccine",
+      title = item.vaccineName ?: stringResource(Res.string.immunization_unknown),
       modifier = options.modifier,
-      subtitle = if (config.showDate != false) item.occurrenceDate?.let { "Given $it" } else null,
+      subtitle =
+        if (config.showDate != false)
+          item.occurrenceDate?.let { stringResource(Res.string.immunization_given, it) }
+        else null,
       accentColor =
         if (isCompleted) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline,
-      rowBackground =
-        if (isCompleted) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.25f)
-        else Color.Transparent,
       status =
         if (config.showStatus != false)
           item.immunizationStatus?.let {

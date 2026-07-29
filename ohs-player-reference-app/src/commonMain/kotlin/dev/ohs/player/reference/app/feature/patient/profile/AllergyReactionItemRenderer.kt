@@ -30,6 +30,9 @@ import dev.ohs.player.generated.state.AllergyReactionState
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.Chip
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.allergy_unknown
+import org.jetbrains.compose.resources.stringResource
 
 class AllergyReactionItemRenderer :
   ComponentRenderer<AllergyReactionState, AllergyReactionItemConfig> {
@@ -56,7 +59,7 @@ fun AllergyReactionItemRow(
   ) {
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
       Text(
-        text = item.substance ?: "Unknown substance",
+        text = item.substance ?: stringResource(Res.string.allergy_unknown),
         style = MaterialTheme.typography.bodyMedium,
       )
       if (config.showManifestation != false) {

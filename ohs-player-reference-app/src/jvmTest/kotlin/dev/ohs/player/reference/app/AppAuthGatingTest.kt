@@ -45,6 +45,7 @@ import dev.ohs.player.reference.app.data.di.repositoryModule
 import dev.ohs.player.reference.app.data.di.viewModelModule
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
+import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -75,6 +76,12 @@ private class FakeAppSyncNowUseCase : SyncNowUseCase {
     invocationCount++
     return SyncJobStatus.Succeeded()
   }
+
+  override suspend fun cancel() {}
+}
+
+private class FakeAppPeriodicSyncUseCase : PeriodicSyncUseCase {
+  override suspend fun start() {}
 
   override suspend fun cancel() {}
 }
@@ -177,6 +184,7 @@ class AppAuthGatingTest {
           single<FhirRepository> { fhirRepository }
           single { newFhirDataStore() }
           single<SyncNowUseCase> { syncNowUseCase }
+          single<PeriodicSyncUseCase> { FakeAppPeriodicSyncUseCase() }
           single { OAuthConfig("https://idp.example.org", "client", "openid") }
           single<SessionStore> { InMemorySessionStore(initial = session) }
           single { OidcAuthApi(get(), client) }

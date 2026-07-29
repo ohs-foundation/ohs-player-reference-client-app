@@ -18,6 +18,7 @@ package dev.ohs.player.reference.app.feature.sync
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.model.r4.Patient
 import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
+import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -39,6 +40,17 @@ class InitialSyncViewModelTest {
     override suspend fun cancel() {}
   }
 
+  private class FakePeriodicSyncUseCase : PeriodicSyncUseCase {
+    var startCount = 0
+      private set
+
+    override suspend fun start() {
+      startCount++
+    }
+
+    override suspend fun cancel() {}
+  }
+
   private val json = Json { ignoreUnknownKeys = true }
 
   private fun testPatient() =
@@ -49,35 +61,41 @@ class InitialSyncViewModelTest {
     val repository = InMemorySampleFhirRepository()
     repository.upsert(testPatient())
     val syncNowUseCase = FakeSyncNowUseCase { SyncJobStatus.Succeeded() }
-    val viewModel = InitialSyncViewModel(repository, syncNowUseCase)
+    val periodicSyncUseCase = FakePeriodicSyncUseCase()
+    val viewModel = InitialSyncViewModel(repository, syncNowUseCase, periodicSyncUseCase)
 
     viewModel.start().join()
 
     assertEquals(InitialSyncGateState.Passed, viewModel.state.value)
     assertEquals(0, syncNowUseCase.invocationCount)
+    assertEquals(1, periodicSyncUseCase.startCount)
   }
 
   @Test
   fun start_withNoData_syncsThenPasses() = runTest {
     val repository = InMemorySampleFhirRepository()
     val syncNowUseCase = FakeSyncNowUseCase { SyncJobStatus.Succeeded() }
-    val viewModel = InitialSyncViewModel(repository, syncNowUseCase)
+    val periodicSyncUseCase = FakePeriodicSyncUseCase()
+    val viewModel = InitialSyncViewModel(repository, syncNowUseCase, periodicSyncUseCase)
 
     viewModel.start().join()
 
     assertEquals(InitialSyncGateState.Passed, viewModel.state.value)
     assertEquals(1, syncNowUseCase.invocationCount)
+    assertEquals(1, periodicSyncUseCase.startCount)
   }
 
   @Test
   fun start_withNoDataAndSyncFails_goesFailed() = runTest {
     val repository = InMemorySampleFhirRepository()
     val syncNowUseCase = FakeSyncNowUseCase { SyncJobStatus.Failed() }
-    val viewModel = InitialSyncViewModel(repository, syncNowUseCase)
+    val periodicSyncUseCase = FakePeriodicSyncUseCase()
+    val viewModel = InitialSyncViewModel(repository, syncNowUseCase, periodicSyncUseCase)
 
     viewModel.start().join()
 
     assertIs<InitialSyncGateState.Failed>(viewModel.state.value)
+    assertEquals(0, periodicSyncUseCase.startCount)
   }
 
   @Test
@@ -86,7 +104,8 @@ class InitialSyncViewModelTest {
     var shouldFail = true
     val syncNowUseCase =
       FakeSyncNowUseCase { if (shouldFail) SyncJobStatus.Failed() else SyncJobStatus.Succeeded() }
-    val viewModel = InitialSyncViewModel(repository, syncNowUseCase)
+    val periodicSyncUseCase = FakePeriodicSyncUseCase()
+    val viewModel = InitialSyncViewModel(repository, syncNowUseCase, periodicSyncUseCase)
     viewModel.start().join()
     assertIs<InitialSyncGateState.Failed>(viewModel.state.value)
 
@@ -95,18 +114,21 @@ class InitialSyncViewModelTest {
 
     assertEquals(InitialSyncGateState.Passed, viewModel.state.value)
     assertEquals(2, syncNowUseCase.invocationCount)
+    assertEquals(1, periodicSyncUseCase.startCount)
   }
 
   @Test
-  fun continueAnyway_movesToPassed() = runTest {
+  fun continueAnyway_movesToPassedAndStartsPeriodicSync() = runTest {
     val repository = InMemorySampleFhirRepository()
     val syncNowUseCase = FakeSyncNowUseCase { SyncJobStatus.Failed() }
-    val viewModel = InitialSyncViewModel(repository, syncNowUseCase)
+    val periodicSyncUseCase = FakePeriodicSyncUseCase()
+    val viewModel = InitialSyncViewModel(repository, syncNowUseCase, periodicSyncUseCase)
     viewModel.start().join()
     assertIs<InitialSyncGateState.Failed>(viewModel.state.value)
 
-    viewModel.continueAnyway()
+    viewModel.continueAnyway().join()
 
     assertEquals(InitialSyncGateState.Passed, viewModel.state.value)
+    assertEquals(1, periodicSyncUseCase.startCount)
   }
 }

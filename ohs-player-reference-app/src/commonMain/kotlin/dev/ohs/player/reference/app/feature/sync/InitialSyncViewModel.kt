@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.player.reference.app.data.repository.FhirRepository
+import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
@@ -49,6 +50,7 @@ sealed interface InitialSyncGateState {
 class InitialSyncViewModel(
   private val fhirRepository: FhirRepository,
   private val syncNowUseCase: SyncNowUseCase,
+  private val periodicSyncUseCase: PeriodicSyncUseCase,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow<InitialSyncGateState>(InitialSyncGateState.Checking)
@@ -58,14 +60,12 @@ class InitialSyncViewModel(
 
   fun retry(): Job = viewModelScope.launch { runSync() }
 
-  fun continueAnyway() {
-    _state.value = InitialSyncGateState.Passed
-  }
+  fun continueAnyway(): Job = viewModelScope.launch { passGate() }
 
   private suspend fun runCheck() {
     _state.value = InitialSyncGateState.Checking
     if (fhirRepository.hasAnyData()) {
-      _state.value = InitialSyncGateState.Passed
+      passGate()
     } else {
       runSync()
     }
@@ -81,11 +81,16 @@ class InitialSyncViewModel(
       } catch (e: Exception) {
         SyncJobStatus.Failed()
       }
-    _state.value =
-      when (result) {
-        is SyncJobStatus.Succeeded -> InitialSyncGateState.Passed
-        else ->
+    when (result) {
+      is SyncJobStatus.Succeeded -> passGate()
+      else ->
+        _state.value =
           InitialSyncGateState.Failed("Sync failed. Please check your connection and try again.")
-      }
+    }
+  }
+
+  private suspend fun passGate() {
+    periodicSyncUseCase.start()
+    _state.value = InitialSyncGateState.Passed
   }
 }

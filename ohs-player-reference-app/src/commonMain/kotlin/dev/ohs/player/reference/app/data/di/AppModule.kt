@@ -87,5 +87,5 @@ internal val viewModelModule = module {
   }
   viewModel { HomeViewModel(get(), get()) }
   viewModel { AuthViewModel(get(), get()) }
-  viewModel { InitialSyncViewModel(get(), get()) }
+  viewModel { InitialSyncViewModel(get(), get(), get()) }
 }

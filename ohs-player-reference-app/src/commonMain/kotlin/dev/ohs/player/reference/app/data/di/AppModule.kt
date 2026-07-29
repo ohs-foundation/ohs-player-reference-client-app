@@ -16,7 +16,6 @@
 package dev.ohs.player.reference.app.data.di
 
 import dev.ohs.fhir.engine.FhirEngineProvider
-import dev.ohs.fhir.engine.sync.FhirSyncTask
 import dev.ohs.player.reference.app.auth.AuthService
 import dev.ohs.player.reference.app.auth.AuthViewModel
 import dev.ohs.player.reference.app.auth.OAuthConfig
@@ -27,9 +26,6 @@ import dev.ohs.player.reference.app.data.repository.FhirEngineRepository
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.GroupRepository
 import dev.ohs.player.reference.app.data.repository.PatientRepository
-import dev.ohs.player.reference.app.data.sync.AppFhirSyncTask
-import dev.ohs.player.reference.app.data.sync.RunSyncNowUseCase
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import dev.ohs.player.reference.app.feature.group.list.GroupListViewModel
 import dev.ohs.player.reference.app.feature.group.profile.GroupProfileViewModel
 import dev.ohs.player.reference.app.feature.home.HomeViewModel
@@ -62,11 +58,13 @@ internal val repositoryModule = module {
 
 internal val serviceModule = module { factory { QuestionnaireService(get()) } }
 
-internal val syncModule = module {
-  single { FhirEngineProvider.getFhirDataStore() }
-  single<FhirSyncTask> { AppFhirSyncTask(get()) }
-  single<SyncNowUseCase> { RunSyncNowUseCase(get()) }
-}
+/**
+ * [SyncNowUseCase] isn't bound here — each platform's `initKoin` caller supplies its own
+ * implementation, constructing `AppFhirSyncTask` directly rather than through Koin (see
+ * `WorkManagerSyncNowUseCase` on Android, `ForegroundSyncNowUseCase` on JVM/web, and
+ * `IosSyncNowUseCase` on iOS).
+ */
+internal val syncModule = module { single { FhirEngineProvider.getFhirDataStore() } }
 
 /**
  * `SessionStore`/`SessionRepository`/`AuthService` — everything downstream of the plain

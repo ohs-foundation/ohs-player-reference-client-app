@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
 import java.util.Properties
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -30,7 +33,26 @@ plugins {
 }
 
 kotlin {
-  androidTarget { compilerOptions { jvmTarget.set(JvmTarget.JVM_11) } }
+  // Desktop, js and wasmJs lack a native OS background scheduler, so they share a "foregroundSync"
+  // source set (see `foregroundSyncMain/.../data/sync/Sync.kt`) letting one coroutine-based
+  // scheduler serve all three instead of a separate implementation per platform. js and wasmJs
+  // further share a nested "foregroundSyncWeb", kept apart from the default `webMain` group, which
+  // holds web code unrelated to sync.
+  applyDefaultHierarchyTemplate {
+    common {
+      group("foregroundSync") {
+        withJvm()
+        group("foregroundSyncWeb") {
+          withJs()
+          withWasmJs()
+        }
+      }
+    }
+  }
+
+  // fhir-engine's Android artifact ships inline functions (e.g. Sync.oneTimeSync) compiled at JVM
+  // target 21 — inlining them requires this target to be at least as high.
+  androidTarget { compilerOptions { jvmTarget.set(JvmTarget.JVM_21) } }
 
   listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
     iosTarget.binaries.framework {
@@ -61,6 +83,7 @@ kotlin {
       implementation(libs.androidx.activity.compose)
       implementation(libs.ktor.client.okhttp)
       implementation(libs.androidx.browser)
+      implementation(libs.androidx.work.runtime)
     }
     commonMain.dependencies {
       implementation(project(":ohs-player-library"))
@@ -305,8 +328,8 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
   }
 }
 

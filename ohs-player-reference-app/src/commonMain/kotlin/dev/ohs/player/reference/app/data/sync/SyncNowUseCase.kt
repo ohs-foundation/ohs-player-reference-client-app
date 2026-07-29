@@ -15,7 +15,6 @@
  */
 package dev.ohs.player.reference.app.data.sync
 
-import dev.ohs.fhir.engine.sync.FhirSyncTask
 import dev.ohs.fhir.engine.sync.SyncJobStatus
 import dev.ohs.fhir.engine.sync.runSync
 
@@ -23,13 +22,11 @@ import dev.ohs.fhir.engine.sync.runSync
  * Triggers a one-time sync and returns its terminal result. A dedicated interface (rather than
  * calling [runSync] directly) so [dev.ohs.player.reference.app.feature.home.HomeViewModel] can be
  * unit-tested against a fake — [runSync] is a top-level extension function that reaches into the
- * library's global `FhirEngineProvider` singleton, so no [FhirSyncTask] instance, real or fake,
- * makes it independently testable.
+ * library's global `FhirEngineProvider` singleton, so no `FhirSyncTask` instance, real or fake,
+ * makes it independently testable. Each platform supplies its own implementation — see
+ * `AppFhirSyncWorker`/`WorkManagerSyncNowUseCase` (Android), `ForegroundSyncNowUseCase` (JVM/web),
+ * and `IosSyncNowUseCase` (iOS).
  */
 fun interface SyncNowUseCase {
   suspend fun invoke(): SyncJobStatus
-}
-
-class RunSyncNowUseCase(private val fhirSyncTask: FhirSyncTask) : SyncNowUseCase {
-  override suspend fun invoke(): SyncJobStatus = fhirSyncTask.runSync(taskName = null) {}
 }

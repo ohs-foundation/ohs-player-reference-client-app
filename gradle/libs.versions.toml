@@ -9,6 +9,7 @@ androidx-core = "1.18.0"
 androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.10.0"
 androidx-testExt = "1.3.0"
+androidx-work = "2.8.1"
 composeHotReload = "1.1.1"
 composeMultiplatform = "1.11.0"
 composeMaterialIcons = "1.7.3"
@@ -87,6 +88,7 @@ ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ksafe = { module = "eu.anifantakis:ksafe", version.ref = "ksafe" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "androidxBrowser" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 kotlincrypto-hash-bom = { module = "org.kotlincrypto.hash:bom", version.ref = "kotlincryptoHash" }
 kotlincrypto-hash-sha2 = { module = "org.kotlincrypto.hash:sha2" }
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinxBrowser" }

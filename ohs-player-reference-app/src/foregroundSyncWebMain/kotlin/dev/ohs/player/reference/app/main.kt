@@ -20,10 +20,15 @@ import androidx.compose.ui.window.ComposeViewport
 import dev.ohs.fhir.engine.FhirEngine
 import dev.ohs.fhir.engine.FhirEngineConfiguration
 import dev.ohs.fhir.engine.FhirEngineProvider
+import dev.ohs.fhir.engine.NetworkConfiguration
 import dev.ohs.fhir.engine.ServerConfiguration
+import dev.ohs.fhir.engine.sync.remote.HttpLogger
 import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
 import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
+import dev.ohs.player.reference.app.data.sync.ForegroundSyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
+import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
 import org.koin.dsl.module
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -33,10 +38,21 @@ fun main() {
       serverConfiguration =
         ServerConfiguration(
           baseUrl = GeneratedAuthConfig.FHIR_BASE_URL,
+          networkConfiguration = NetworkConfiguration(
+            connectionTimeOut = SYNC_TIMEOUT_DURATION,
+            readTimeOut = SYNC_TIMEOUT_DURATION,
+            writeTimeOut = SYNC_TIMEOUT_DURATION,
+          ),
+          httpLogger = HttpLogger(level = HttpLogger.Level.HEADERS),
           authenticator = FhirBearerAuthenticator,
         )
     )
   )
-  initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance() } })
+  initKoin(
+    module {
+      single<FhirEngine> { FhirEngineProvider.getInstance() }
+      single<SyncNowUseCase> { ForegroundSyncNowUseCase() }
+    }
+  )
   ComposeViewport { App() }
 }

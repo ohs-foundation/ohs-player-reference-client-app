@@ -34,12 +34,14 @@ import dev.ohs.fhir.model.r4.terminologies.ResourceType
 private val SYNC_RESOURCE_PARAMS: ResourceSearchParams =
   mapOf(ResourceType.Patient to emptyMap(), ResourceType.Group to emptyMap())
 
+const val SYNC_TIMEOUT_DURATION = 120L
+
 /**
  * This app's [FhirSyncTask]: downloads [SYNC_RESOURCE_PARAMS], resolves conflicts in favor of the
  * local change, and uploads pending local changes as a single bundle request.
  */
 class AppFhirSyncTask(private val fhirEngine: FhirEngine) : FhirSyncTask {
-  private val timestampContext = InMemoryTimestampContext()
+  private val timestampContext = DataStoreTimestampContext(createSyncTimestampDataStore())
 
   override fun getFhirEngine(): FhirEngine = fhirEngine
 

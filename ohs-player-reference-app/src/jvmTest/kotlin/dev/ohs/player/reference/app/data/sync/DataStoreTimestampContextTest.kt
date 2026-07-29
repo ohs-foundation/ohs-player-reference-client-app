@@ -15,24 +15,33 @@
  */
 package dev.ohs.player.reference.app.data.sync
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import dev.ohs.fhir.engine.sync.createDataStore
 import dev.ohs.fhir.model.r4.terminologies.ResourceType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlinx.coroutines.test.runTest
 
-class InMemoryTimestampContextTest {
+class DataStoreTimestampContextTest {
+
+  private fun testDataStore(): DataStore<Preferences> {
+    val file = kotlin.io.path.createTempFile(suffix = ".preferences_pb").toFile()
+    file.deleteOnExit()
+    return createDataStore { file.absolutePath }
+  }
 
   @Test
   fun getLasUpdateTimestamp_beforeAnySave_isNull() = runTest {
-    val context = InMemoryTimestampContext()
+    val context = DataStoreTimestampContext(testDataStore())
 
     assertNull(context.getLasUpdateTimestamp(ResourceType.Patient))
   }
 
   @Test
   fun saveThenGet_roundTripsPerResourceType() = runTest {
-    val context = InMemoryTimestampContext()
+    val context = DataStoreTimestampContext(testDataStore())
 
     context.saveLastUpdatedTimestamp(ResourceType.Patient, "2026-07-15T10:00:00Z")
     context.saveLastUpdatedTimestamp(ResourceType.Group, "2026-07-14T09:00:00Z")
@@ -43,7 +52,7 @@ class InMemoryTimestampContextTest {
 
   @Test
   fun saveWithNullTimestamp_doesNotOverwriteExistingValue() = runTest {
-    val context = InMemoryTimestampContext()
+    val context = DataStoreTimestampContext(testDataStore())
     context.saveLastUpdatedTimestamp(ResourceType.Patient, "2026-07-15T10:00:00Z")
 
     context.saveLastUpdatedTimestamp(ResourceType.Patient, null)

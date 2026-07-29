@@ -18,12 +18,11 @@ package dev.ohs.player.reference.app.data.sync
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import dev.ohs.fhir.engine.sync.createDataStore
+import dev.ohs.player.reference.app.desktopStorageDirectory
 import java.io.File
 
 private val dataStore: DataStore<Preferences> by lazy {
-  val userHome = System.getProperty("user.home").orEmpty().ifBlank { "." }
-  val storageDirectory = File(userHome, ".ohs-player-reference-app")
-  createDataStore { File(storageDirectory, SYNC_TIMESTAMP_DATASTORE_FILE_NAME).absolutePath }
+  createDataStore { File(desktopStorageDirectory, SYNC_TIMESTAMP_DATASTORE_FILE_NAME).absolutePath }
 }
 
 internal actual fun createSyncTimestampDataStore(): DataStore<Preferences> = dataStore

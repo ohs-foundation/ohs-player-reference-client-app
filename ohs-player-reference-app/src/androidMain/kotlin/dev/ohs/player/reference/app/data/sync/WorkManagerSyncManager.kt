@@ -17,17 +17,22 @@ package dev.ohs.player.reference.app.data.sync
 
 import android.content.Context
 import dev.ohs.fhir.engine.sync.CurrentSyncJobStatus
+import dev.ohs.fhir.engine.sync.PeriodicSyncConfiguration
+import dev.ohs.fhir.engine.sync.RepeatInterval
 import dev.ohs.fhir.engine.sync.Sync
 import dev.ohs.fhir.engine.sync.SyncJobStatus
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.flow.first
 
 /**
- * Runs a one-time sync through WorkManager (via [AppFhirSyncWorker]) rather than calling
- * [dev.ohs.fhir.engine.sync.runSync] in-process, so the sync survives the triggering screen being
- * backgrounded or the process dying mid-sync.
+ * Android [SyncManager]: runs sync through WorkManager (via [AppFhirSyncWorker]) rather than in
+ * process, so both one-time and periodic sync survive the triggering screen being backgrounded or
+ * the process dying mid-sync. [PeriodicSyncConfiguration]'s default `SyncConstraints` already
+ * requires `NetworkType.CONNECTED`, so WorkManager itself defers periodic runs until the device is
+ * online.
  */
-class WorkManagerSyncNowUseCase(private val context: Context) : SyncNowUseCase {
-  override suspend fun invoke(): SyncJobStatus {
+class WorkManagerSyncManager(private val context: Context) : SyncManager {
+  override suspend fun syncNow(): SyncJobStatus {
     val terminalStatus =
       Sync.oneTimeSync<AppFhirSyncWorker>(context).first {
         it is CurrentSyncJobStatus.Succeeded ||
@@ -40,7 +45,19 @@ class WorkManagerSyncNowUseCase(private val context: Context) : SyncNowUseCase {
     }
   }
 
-  override suspend fun cancel() {
+  override suspend fun cancelSyncNow() {
     Sync.cancelOneTimeSync<AppFhirSyncWorker>(context)
+  }
+
+  override suspend fun startPeriodicSync() {
+    Sync.periodicSync<AppFhirSyncWorker>(
+      context,
+      periodicSyncConfiguration =
+        PeriodicSyncConfiguration(repeat = RepeatInterval(interval = 15.minutes)),
+    )
+  }
+
+  override suspend fun cancelPeriodicSync() {
+    Sync.cancelPeriodicSync<AppFhirSyncWorker>(context)
   }
 }

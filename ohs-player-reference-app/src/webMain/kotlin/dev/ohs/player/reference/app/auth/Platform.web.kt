@@ -39,7 +39,7 @@ actual class AuthorizationLauncher(actual override val redirectUri: String) :
     return AuthResult.Redirecting
   }
 
-  actual fun consumeRedirectCallback(): String? {
+  actual override fun consumeRedirectCallback(): String? {
     val search = window.location.search
     if (!search.contains("code=") && !search.contains("error=")) return null
     val href = window.location.href

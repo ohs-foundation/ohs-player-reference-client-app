@@ -91,6 +91,10 @@ kotlin {
       implementation(libs.compose.foundation)
       implementation(libs.compose.material)
       implementation(libs.compose.material3)
+      implementation(libs.compose.adaptive)
+      implementation(libs.compose.adaptive.layout)
+      implementation(libs.compose.adaptive.navigation)
+      implementation(libs.compose.material3.adaptive.navigation.suite)
       implementation(libs.compose.materialIconsCore)
       implementation(libs.compose.ui)
       implementation(libs.compose.components.resources)
@@ -402,8 +406,13 @@ compose.desktop {
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
-      packageName = "dev.ohs.player.reference.app"
+      packageName = "PlayerReference"
       packageVersion = composePackageVersion
+
+      val iconsDir = project.layout.projectDirectory.dir("desktop-icons")
+      macOS { iconFile.set(iconsDir.file("app-icon.icns")) }
+      windows { iconFile.set(iconsDir.file("app-icon.ico")) }
+      linux { iconFile.set(iconsDir.file("app-icon.png")) }
     }
   }
 }

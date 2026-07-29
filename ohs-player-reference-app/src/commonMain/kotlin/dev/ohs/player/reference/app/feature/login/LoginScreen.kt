@@ -15,11 +15,13 @@
  */
 package dev.ohs.player.reference.app.feature.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,34 +34,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.app_logo
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_brand
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_card_title
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_error_dismiss
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_error_title
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_redirect_hint
 import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_sign_in
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_subtitle
-import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.login_tagline
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Material 3's "expanded" window size class breakpoint (matches HomeWidthBreakpoint.kt). */
@@ -67,9 +71,9 @@ private val LOGIN_EXPANDED_WIDTH_BREAKPOINT = 840.dp
 
 /**
  * PKCE redirect login — no password form; the primary action hands off to the identity provider.
- * Branches on width (never on platform), matching this app's existing manual-breakpoint convention
- * (`HomeWidthBreakpoint.kt`): Expanded (≥840dp) shows a brand panel beside a centered sign-in card;
- * Compact/Medium show a brand band over a sign-in sheet.
+ * Branches on width (never on platform): Expanded (>= 840dp) sets a solid brand panel beside a flat
+ * sign-in side; Compact/Medium stack a brand band over a rounded sign-in sheet. Both are flat — the
+ * brand color carries the identity, so there is no elevated card.
  */
 @Composable
 fun LoginScreen(
@@ -91,74 +95,39 @@ fun LoginScreen(
   }
 }
 
-/** Expanded: brand panel (left) + centered sign-in card on a grey field (right). */
+/** Expanded: solid brand panel (left) beside a flat sign-in side (right). */
 @Composable
 private fun ExpandedLogin(signingIn: Boolean, onSignIn: () -> Unit) {
   Row(Modifier.fillMaxSize()) {
-    Box(Modifier.weight(1f).fillMaxHeight().background(MaterialTheme.colorScheme.primary)) {
-      Column(
-        modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(48.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
-      ) {
-        Wordmark(MaterialTheme.colorScheme.onPrimary)
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-          Text(
-            text = stringResource(Res.string.login_tagline),
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onPrimary,
-          )
-          Box(
-            Modifier.width(56.dp)
-              .height(4.dp)
-              .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(2.dp))
-          )
-          Text(
-            text = stringResource(Res.string.login_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-          )
-        }
-      }
+    Column(
+      modifier =
+        Modifier.weight(5f)
+          .fillMaxHeight()
+          .background(MaterialTheme.colorScheme.primary)
+          .safeDrawingPadding()
+          .padding(44.dp)
+    ) {
+      MonoLogoMark(64.dp)
+      Spacer(Modifier.height(22.dp))
+      Text(
+        text = stringResource(Res.string.login_brand),
+        style = MaterialTheme.typography.displaySmall,
+        color = MaterialTheme.colorScheme.onPrimary,
+        fontWeight = FontWeight.Bold,
+      )
     }
 
     Box(
       modifier =
-        Modifier.weight(1f)
+        Modifier.weight(6f)
           .fillMaxHeight()
-          .background(MaterialTheme.colorScheme.background)
+          .background(MaterialTheme.colorScheme.surface)
           .safeDrawingPadding()
-          .padding(32.dp),
+          .padding(horizontal = 48.dp),
       contentAlignment = Alignment.Center,
     ) {
-      Surface(
-        modifier = Modifier.widthIn(max = 424.dp).fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 8.dp,
-      ) {
-        Column(
-          modifier = Modifier.padding(40.dp),
-          verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-          Text(
-            text = stringResource(Res.string.login_brand),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-          )
-          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-              stringResource(Res.string.login_card_title),
-              style = MaterialTheme.typography.headlineSmall,
-            )
-            Text(
-              text = stringResource(Res.string.login_redirect_hint),
-              style = MaterialTheme.typography.bodyMedium,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-          SignInButton(signingIn, onSignIn)
-        }
+      Column(modifier = Modifier.widthIn(max = 420.dp).fillMaxWidth()) {
+        SignInContent(signingIn, onSignIn, showBrandRow = true)
       }
     }
   }
@@ -167,28 +136,22 @@ private fun ExpandedLogin(signingIn: Boolean, onSignIn: () -> Unit) {
 /** Compact/Medium: brand band over a rounded sign-in sheet; button pinned low. */
 @Composable
 private fun CompactLogin(signingIn: Boolean, onSignIn: () -> Unit) {
-  Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+  Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
     Column(
       modifier =
         Modifier.fillMaxWidth()
           .background(MaterialTheme.colorScheme.primary)
           .statusBarsPadding()
-          .padding(horizontal = 32.dp, vertical = 32.dp),
+          .padding(horizontal = 28.dp, vertical = 44.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(12.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      Wordmark(MaterialTheme.colorScheme.onPrimary)
+      MonoLogoMark(56.dp)
       Text(
-        text = stringResource(Res.string.login_tagline),
+        text = stringResource(Res.string.login_brand),
         style = MaterialTheme.typography.headlineSmall,
         color = MaterialTheme.colorScheme.onPrimary,
-        textAlign = TextAlign.Center,
-      )
-      Text(
-        text = stringResource(Res.string.login_subtitle),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Bold,
       )
     }
 
@@ -201,34 +164,59 @@ private fun CompactLogin(signingIn: Boolean, onSignIn: () -> Unit) {
             RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
           )
           .navigationBarsPadding()
-          .padding(horizontal = 24.dp)
-          .padding(top = 28.dp, bottom = 20.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+          .padding(horizontal = 26.dp)
+          .padding(top = 32.dp, bottom = 22.dp),
+      verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-      Text(
-        stringResource(Res.string.login_card_title),
-        style = MaterialTheme.typography.headlineSmall,
-      )
-      Text(
-        text = stringResource(Res.string.login_redirect_hint),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-      )
-      Spacer(Modifier.weight(1f))
-      SignInButton(signingIn, onSignIn)
-      Spacer(Modifier.height(8.dp))
+      SignInContent(signingIn, onSignIn, showBrandRow = false, buttonAtBottom = true)
     }
   }
 }
 
 @Composable
-private fun Wordmark(color: androidx.compose.ui.graphics.Color) {
+private fun ColumnScope.SignInContent(
+  signingIn: Boolean,
+  onSignIn: () -> Unit,
+  showBrandRow: Boolean,
+  buttonAtBottom: Boolean = false,
+) {
+  if (showBrandRow) {
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      Image(
+        painter = painterResource(Res.drawable.app_logo),
+        contentDescription = null,
+        modifier = Modifier.size(24.dp),
+      )
+      Text(
+        text = stringResource(Res.string.login_brand).uppercase(),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+      )
+    }
+    Spacer(Modifier.height(26.dp))
+  }
+
   Text(
-    text = stringResource(Res.string.login_brand),
-    style = MaterialTheme.typography.titleLarge,
-    color = color,
-    fontWeight = FontWeight.Bold,
+    text = stringResource(Res.string.login_card_title),
+    style = MaterialTheme.typography.headlineMedium,
   )
+  Spacer(Modifier.height(10.dp))
+  Text(
+    text = stringResource(Res.string.login_redirect_hint),
+    style = MaterialTheme.typography.bodyLarge,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+  )
+
+  if (buttonAtBottom) {
+    Spacer(Modifier.weight(1f))
+  } else {
+    Spacer(Modifier.height(28.dp))
+  }
+  SignInButton(signingIn, onSignIn)
 }
 
 @Composable
@@ -236,9 +224,9 @@ private fun SignInButton(signingIn: Boolean, onSignIn: () -> Unit) {
   Button(
     onClick = onSignIn,
     enabled = !signingIn,
-    shape = RoundedCornerShape(8.dp),
+    shape = RoundedCornerShape(14.dp),
     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp),
-    modifier = Modifier.fillMaxWidth(),
+    modifier = Modifier.fillMaxWidth().height(52.dp),
   ) {
     if (signingIn) {
       CircularProgressIndicator(
@@ -247,7 +235,40 @@ private fun SignInButton(signingIn: Boolean, onSignIn: () -> Unit) {
         color = MaterialTheme.colorScheme.onPrimary,
       )
     } else {
-      Text(stringResource(Res.string.login_sign_in).uppercase())
+      Text(
+        text = stringResource(Res.string.login_sign_in),
+        style = MaterialTheme.typography.titleMedium,
+      )
+      Spacer(Modifier.size(8.dp))
+      Icon(
+        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+      )
+    }
+  }
+}
+
+/** The 2x2 brand mark rendered monochrome for the solid brand panel. */
+@Composable
+private fun MonoLogoMark(size: Dp) {
+  val gap = size * 0.09f
+  val cell = (size - gap) / 2
+  val corner = cell * 0.28f
+  val alphas = listOf(0.9f, 0.28f, 0.28f, 0.55f)
+  val cellModifier = { index: Int ->
+    Modifier.size(cell)
+      .clip(RoundedCornerShape(corner))
+      .background(Color.White.copy(alpha = alphas[index]))
+  }
+  Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+      Box(cellModifier(0))
+      Box(cellModifier(1))
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+      Box(cellModifier(2))
+      Box(cellModifier(3))
     }
   }
 }

@@ -75,6 +75,8 @@ class AuthServiceTest {
     private val onAuthorize: suspend (String) -> AuthResult,
   ) : AuthorizationLauncherApi {
     override suspend fun authorize(authUrl: String): AuthResult = onAuthorize(authUrl)
+
+    override fun consumeRedirectCallback(): String? = null
   }
 
   private val jsonHeaders = headersOf(HttpHeaders.ContentType, "application/json")
@@ -138,8 +140,6 @@ class AuthServiceTest {
   private fun service(store: SessionStore, api: OidcAuthApi) =
     AuthService(OAuthConfig("https://idp.example.org", "client", "openid"), store, api)
 
-  // ---- ensureFreshSession ----------------------------------------------------
-
   @Test
   fun refreshSuccess_updatesSession() = runTest {
     val store = FakeSessionStore(session(expired = true))
@@ -190,8 +190,6 @@ class AuthServiceTest {
     assertFalse(store.cleared)
   }
 
-  // ---- revalidateSession ------------------------------------------------------
-
   @Test
   fun revalidateRevoked_logsOut() = runTest {
     val store = FakeSessionStore(session(expired = false))
@@ -209,8 +207,6 @@ class AuthServiceTest {
     assertTrue(service(store, api).revalidateSession(), "offline probe must not log out")
     assertFalse(store.cleared)
   }
-
-  // ---- login / buildAuthorizationUrl -----------------------------------------
 
   @Test
   fun login_buildsAuthorizationUrlWithRequiredPkceParamsAndCompletesOnMatchingState() = runTest {

@@ -48,8 +48,7 @@ class InitialSyncScreenTest {
     setContent {
       MaterialTheme {
         InitialSyncScreen(
-          state =
-            InitialSyncGateState.Failed("Sync failed. Please check your connection and try again."),
+          state = InitialSyncGateState.Failed,
           onRetry = { retried = true },
           onContinueAnyway = {},
         )
@@ -67,8 +66,7 @@ class InitialSyncScreenTest {
     setContent {
       MaterialTheme {
         InitialSyncScreen(
-          state =
-            InitialSyncGateState.Failed("Sync failed. Please check your connection and try again."),
+          state = InitialSyncGateState.Failed,
           onRetry = {},
           onContinueAnyway = { continued = true },
         )

@@ -19,14 +19,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -57,6 +54,12 @@ import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.componentRenderer
 import dev.ohs.player.library.registry.layoutRenderer
 import dev.ohs.player.library.renderer.RenderOptions
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.patient_profile_add_clinical_data
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.patient_profile_back
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.patient_profile_default_name
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.patient_profile_not_found
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -108,9 +111,12 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalDat
     remember(registry) { registry.componentRenderer<PatientTelecomState>(ViewTypeCS.TelecomItem) }
 
   val patient = state?.patient
+  val defaultPatientName = stringResource(Res.string.patient_profile_default_name)
   val patientName =
-    remember(patient) {
-      listOfNotNull(patient?.givenName, patient?.familyName).joinToString(" ").ifBlank { "Patient" }
+    remember(patient, defaultPatientName) {
+      listOfNotNull(patient?.givenName, patient?.familyName).joinToString(" ").ifBlank {
+        defaultPatientName
+      }
     }
 
   Scaffold(
@@ -121,7 +127,7 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalDat
           IconButton(onClick = onBack) {
             Icon(
               Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
+              contentDescription = stringResource(Res.string.patient_profile_back),
               tint = MaterialTheme.colorScheme.onPrimary,
             )
           }
@@ -135,7 +141,10 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalDat
     },
     floatingActionButton = {
       FloatingActionButton(onClick = onAddClinicalData) {
-        Icon(Icons.Filled.Add, contentDescription = "Add clinical data")
+        Icon(
+          Icons.Filled.Add,
+          contentDescription = stringResource(Res.string.patient_profile_add_clinical_data),
+        )
       }
     },
   ) { padding ->
@@ -148,7 +157,7 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalDat
     }
     if (s.patient == null) {
       Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-        Text("Patient not found")
+        Text(stringResource(Res.string.patient_profile_not_found))
       }
       return@Scaffold
     }
@@ -158,16 +167,7 @@ fun PatientProfileScreen(patientId: String, onBack: () -> Unit, onAddClinicalDat
       contentPadding = PaddingValues(16.dp),
       verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-      item(key = "patient_header") {
-        Card(
-          modifier = Modifier.fillMaxWidth(),
-          elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-        ) {
-          Box(modifier = Modifier.padding(20.dp)) {
-            headerRenderer.Render(s.patient, RenderOptions())
-          }
-        }
-      }
+      item(key = "patient_header") { headerRenderer.Render(s.patient, RenderOptions()) }
 
       if (s.allergies.isNotEmpty()) {
         item(key = "allergies") {

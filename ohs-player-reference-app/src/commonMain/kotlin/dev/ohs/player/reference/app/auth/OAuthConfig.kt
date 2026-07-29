@@ -21,7 +21,8 @@ package dev.ohs.player.reference.app.auth
  * Only the [issuer] (plus client id and scopes) is configured; the concrete endpoints are resolved
  * at runtime via OIDC discovery ([OidcEndpoints]) from `{issuer}/.well-known/openid-configuration`.
  * The redirect URI is intentionally NOT part of this object — it is platform specific and provided
- * by the [AuthorizationLauncher].
+ * by the [AuthorizationLauncher]. [Default] is the single instance, baked in from
+ * `local.properties` via [GeneratedAuthConfig].
  */
 data class OAuthConfig(
   /**
@@ -38,7 +39,6 @@ data class OAuthConfig(
     get() = "${issuer.trimEnd('/')}/.well-known/openid-configuration"
 
   companion object {
-    /** The single config baked in from `local.properties`. */
     val Default: OAuthConfig =
       OAuthConfig(
         issuer = GeneratedAuthConfig.ISSUER,

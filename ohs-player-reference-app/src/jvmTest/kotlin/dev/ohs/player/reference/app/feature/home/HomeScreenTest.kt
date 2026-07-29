@@ -32,7 +32,8 @@ import dev.ohs.player.reference.app.data.di.repositoryModule
 import dev.ohs.player.reference.app.data.di.viewModelModule
 import dev.ohs.player.reference.app.data.repository.FhirRepository
 import dev.ohs.player.reference.app.data.repository.InMemorySampleFhirRepository
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.FakeSyncManager
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import java.nio.file.Files
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -42,18 +43,6 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 
-private class FakeHomeScreenSyncNowUseCase(private val result: suspend () -> SyncJobStatus) :
-  SyncNowUseCase {
-  var cancelCalled = false
-    private set
-
-  override suspend fun invoke(): SyncJobStatus = result()
-
-  override suspend fun cancel() {
-    cancelCalled = true
-  }
-}
-
 @OptIn(ExperimentalTestApi::class)
 class HomeScreenTest {
 
@@ -62,13 +51,13 @@ class HomeScreenTest {
     return FhirDataStore(createDataStore { path })
   }
 
-  private fun startTestKoin(syncNowUseCase: SyncNowUseCase) {
+  private fun startTestKoin(syncManager: SyncManager) {
     startKoin {
       modules(
         module {
           single<FhirRepository> { InMemorySampleFhirRepository() }
           single { newFhirDataStore() }
-          single<SyncNowUseCase> { syncNowUseCase }
+          single<SyncManager> { syncManager }
         },
         repositoryModule,
         viewModelModule,
@@ -80,11 +69,20 @@ class HomeScreenTest {
 
   @Test
   fun homeScreen_defaultsToHouseholdsContentWithDrawerSectionsVisible() = runComposeUiTest {
-    startTestKoin(FakeHomeScreenSyncNowUseCase { SyncJobStatus.Succeeded() })
+    startTestKoin(FakeSyncManager { SyncJobStatus.Succeeded() })
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            userName = "Test User",
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onAddMembers = {},
+            onAddClinicalData = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 
@@ -101,7 +99,7 @@ class HomeScreenTest {
     val syncStarted = CompletableDeferred<Unit>()
     val releaseSyncResult = CompletableDeferred<SyncJobStatus>()
     startTestKoin(
-      FakeHomeScreenSyncNowUseCase {
+      FakeSyncManager {
         syncStarted.complete(Unit)
         releaseSyncResult.await()
       }
@@ -109,7 +107,16 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            userName = "Test User",
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onAddMembers = {},
+            onAddClinicalData = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 
@@ -134,7 +141,7 @@ class HomeScreenTest {
   fun tappingCancelSync_whileSyncing_callsCancelAndShowsCancelledMessage() = runComposeUiTest {
     val syncStarted = CompletableDeferred<Unit>()
     val releaseSyncResult = CompletableDeferred<SyncJobStatus>()
-    val fake = FakeHomeScreenSyncNowUseCase {
+    val fake = FakeSyncManager {
       syncStarted.complete(Unit)
       releaseSyncResult.await()
     }
@@ -142,7 +149,16 @@ class HomeScreenTest {
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            userName = "Test User",
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onAddMembers = {},
+            onAddClinicalData = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 
@@ -156,7 +172,7 @@ class HomeScreenTest {
     }
 
     onNodeWithText("Cancel sync").performClick()
-    waitUntil(timeoutMillis = 5_000L) { fake.cancelCalled }
+    waitUntil(timeoutMillis = 5_000L) { fake.cancelSyncNowCount > 0 }
     releaseSyncResult.complete(SyncJobStatus.Failed())
 
     waitUntil(timeoutMillis = 5_000L) {
@@ -166,11 +182,20 @@ class HomeScreenTest {
 
   @Test
   fun tappingSyncNow_onFailure_showsSnackbarMessage() = runComposeUiTest {
-    startTestKoin(FakeHomeScreenSyncNowUseCase { SyncJobStatus.Failed() })
+    startTestKoin(FakeSyncManager { SyncJobStatus.Failed() })
     val registry = buildAppViewRegistry()
     setContent {
       CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme { HomeScreen(onGroupClick = {}, onDataCaptureClick = {}, onSignOut = {}) }
+        MaterialTheme {
+          HomeScreen(
+            userName = "Test User",
+            onGroupClick = {},
+            onDataCaptureClick = {},
+            onAddMembers = {},
+            onAddClinicalData = {},
+            onSignOut = {},
+          )
+        }
       }
     }
 

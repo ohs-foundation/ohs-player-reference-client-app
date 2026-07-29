@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app.feature.home
+package dev.ohs.player.reference.app
 
-import androidx.compose.ui.unit.dp
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import java.io.File
 
-class HomeWidthBreakpointTest {
-
-  @Test
-  fun isHomeDrawerExpandedWidth_belowBreakpoint_isFalse() {
-    assertFalse(isHomeDrawerExpandedWidth(600.dp))
-    assertFalse(isHomeDrawerExpandedWidth(839.dp))
-  }
-
-  @Test
-  fun isHomeDrawerExpandedWidth_atOrAboveBreakpoint_isTrue() {
-    assertTrue(isHomeDrawerExpandedWidth(840.dp))
-    assertTrue(isHomeDrawerExpandedWidth(1200.dp))
-  }
-}
+/**
+ * One desktop storage root: the FHIR database, KSafe, and the sync-timestamp DataStore all live
+ * here.
+ */
+internal val desktopStorageDirectory: File =
+  File(System.getProperty("user.home").orEmpty().ifBlank { "." }, ".player-reference")

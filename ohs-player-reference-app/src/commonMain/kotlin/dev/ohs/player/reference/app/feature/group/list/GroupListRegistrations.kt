@@ -33,6 +33,9 @@ fun ViewRegistry.registerGroupList() {
   )
   registerLayout<GroupListState>(
     VerticalListRenderer.VIEW_TYPE,
-    VerticalListRenderer(contentPadding = PaddingValues(16.dp), itemSpacing = 12.dp),
+    VerticalListRenderer(
+      contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+      itemSpacing = 2.dp,
+    ),
   )
 }

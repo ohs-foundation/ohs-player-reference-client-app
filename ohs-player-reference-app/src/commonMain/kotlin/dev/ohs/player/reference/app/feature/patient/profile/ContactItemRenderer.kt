@@ -36,6 +36,9 @@ import dev.ohs.player.generated.state.PatientContactState
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.Chip
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.name_unknown
+import org.jetbrains.compose.resources.stringResource
 
 class ContactItemRenderer : ComponentRenderer<PatientContactState, ContactItemConfig> {
   @Composable
@@ -62,7 +65,7 @@ fun ContactItemRow(
       .ifBlank { "?" }
   val fullName =
     listOfNotNull(item.contactGivenName, item.contactFamilyName).joinToString(" ").ifBlank {
-      "Unknown"
+      stringResource(Res.string.name_unknown)
     }
 
   Row(

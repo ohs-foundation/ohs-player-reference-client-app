@@ -17,13 +17,15 @@ package dev.ohs.player.reference.app.feature.patient.profile
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import dev.ohs.player.generated.config.MedicationItemConfig
 import dev.ohs.player.generated.state.PatientMedicationState
 import dev.ohs.player.library.renderer.ComponentRenderer
 import dev.ohs.player.library.renderer.RenderOptions
 import dev.ohs.player.reference.app.feature.component.common.StatusChipData
 import dev.ohs.player.reference.app.feature.component.common.StatusRow
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.medication_unknown
+import org.jetbrains.compose.resources.stringResource
 
 class MedicationItemRenderer : ComponentRenderer<PatientMedicationState, MedicationItemConfig> {
   @Composable
@@ -34,14 +36,11 @@ class MedicationItemRenderer : ComponentRenderer<PatientMedicationState, Medicat
   ) {
     val isStopped = item.medStatus?.lowercase() == "stopped"
     StatusRow(
-      title = item.medicationName ?: "Unknown medication",
+      title = item.medicationName ?: stringResource(Res.string.medication_unknown),
       modifier = options.modifier,
       subtitle = if (config.showDosage != false) item.dosage else null,
       accentColor =
         if (isStopped) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-      rowBackground =
-        if (isStopped) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f)
-        else Color.Transparent,
       status =
         if (config.showStatus != false)
           item.medStatus?.let {

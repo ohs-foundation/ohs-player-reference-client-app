@@ -26,11 +26,9 @@ import dev.ohs.fhir.engine.sync.remote.HttpLogger
 import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
 import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
-import dev.ohs.player.reference.app.data.sync.ForegroundPeriodicSyncUseCase
-import dev.ohs.player.reference.app.data.sync.ForegroundSyncNowUseCase
-import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
+import dev.ohs.player.reference.app.data.sync.ForegroundSyncManager
 import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import org.koin.dsl.module
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -54,8 +52,7 @@ fun main() {
   initKoin(
     module {
       single<FhirEngine> { FhirEngineProvider.getInstance() }
-      single<SyncNowUseCase> { ForegroundSyncNowUseCase() }
-      single<PeriodicSyncUseCase> { ForegroundPeriodicSyncUseCase() }
+      single<SyncManager> { ForegroundSyncManager() }
     }
   )
   ComposeViewport { App() }

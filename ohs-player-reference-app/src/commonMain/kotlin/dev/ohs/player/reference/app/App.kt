@@ -76,6 +76,9 @@ fun App() {
             onErrorDismiss = { authViewModel.clearError() },
           )
         is AuthState.Authenticated -> {
+          val session = (authState as AuthState.Authenticated).session
+          val userName =
+            session.user.fullName.ifBlank { session.user.username }.ifBlank { session.user.email }
           val initialSyncViewModel: InitialSyncViewModel = koinViewModel()
           val gateState by initialSyncViewModel.state.collectAsStateWithLifecycle()
           LaunchedEffect(Unit) { initialSyncViewModel.start() }
@@ -96,11 +99,28 @@ fun App() {
                 // Screen 1: Home (adaptive navigation drawer shell around the household list)
                 composable("home") {
                   HomeScreen(
+                    userName = userName,
                     onGroupClick = { id -> navController.navigate("groupProfile/$id") },
                     onDataCaptureClick = {
                       navController.navigate(
                         questionnaireHostRoute(
                           questionnaireId = QuestionnaireIds.HOUSEHOLD_REGISTRATION
+                        )
+                      )
+                    },
+                    onAddMembers = { groupId ->
+                      navController.navigate(
+                        questionnaireHostRoute(
+                          questionnaireId = QuestionnaireIds.HOUSEHOLD_MEMBERS,
+                          groupId = groupId,
+                        )
+                      )
+                    },
+                    onAddClinicalData = { patientId ->
+                      navController.navigate(
+                        questionnaireHostRoute(
+                          questionnaireId = QuestionnaireIds.PATIENT_CLINICAL_DATA,
+                          patientId = patientId,
                         )
                       )
                     },

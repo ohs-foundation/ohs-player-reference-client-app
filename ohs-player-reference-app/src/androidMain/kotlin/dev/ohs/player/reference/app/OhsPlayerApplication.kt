@@ -23,19 +23,21 @@ import dev.ohs.fhir.engine.FhirEngineProvider
 import dev.ohs.fhir.engine.NetworkConfiguration
 import dev.ohs.fhir.engine.ServerConfiguration
 import dev.ohs.fhir.engine.sync.remote.HttpLogger
+import dev.ohs.player.reference.app.auth.AndroidAppContext
 import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
 import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
-import dev.ohs.player.reference.app.data.sync.PeriodicSyncUseCase
 import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
-import dev.ohs.player.reference.app.data.sync.SyncNowUseCase
-import dev.ohs.player.reference.app.data.sync.WorkManagerPeriodicSyncUseCase
-import dev.ohs.player.reference.app.data.sync.WorkManagerSyncNowUseCase
+import dev.ohs.player.reference.app.data.sync.SyncManager
+import dev.ohs.player.reference.app.data.sync.WorkManagerSyncManager
 import org.koin.dsl.module
 
 class OhsPlayerApplication : Application() {
   override fun onCreate() {
     super.onCreate()
+    // Before FhirEngineProvider.init: creating KSafe / the sync-timestamp DataStore reaches for
+    // this, and a headless WorkManager launch never goes through MainActivity.
+    AndroidAppContext.init(this)
     FhirEngineProvider.init(
       FhirEngineConfiguration(
         serverConfiguration =
@@ -56,8 +58,7 @@ class OhsPlayerApplication : Application() {
     initKoin(
       module {
         single<FhirEngine> { FhirEngineProvider.getInstance(applicationContext) }
-        single<SyncNowUseCase> { WorkManagerSyncNowUseCase(applicationContext) }
-        single<PeriodicSyncUseCase> { WorkManagerPeriodicSyncUseCase(applicationContext) }
+        single<SyncManager> { WorkManagerSyncManager(applicationContext) }
       }
     )
     DataCapture.initialize(applicationContext)

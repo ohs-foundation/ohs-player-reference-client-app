@@ -19,6 +19,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,15 +30,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,18 +45,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.ohs.player.generated.config.SectionCardConfig
 import dev.ohs.player.library.renderer.ConfiguredRenderer
 import dev.ohs.player.library.renderer.LayoutRenderer
 import dev.ohs.player.library.renderer.RenderOptions
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.section_collapse
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.section_expand
+import org.jetbrains.compose.resources.stringResource
 
 /**
- * Layout renderer that wraps a list of items inside a titled section card. Registered under
+ * Layout renderer that introduces a list of items with a flat overline section label — no card,
+ * border, or per-row divider. Registered under
  * [dev.ohs.player.generated.viewtype.ViewTypeCS.SectionCard].
  *
- * Supports optional item-count badge and collapsible behavior driven by [SectionCardConfig].
+ * Supports an optional item count and collapsible behavior driven by [SectionCardConfig].
  */
 class SectionCardLayoutRenderer<T>(
   private val title: String,
@@ -80,86 +83,74 @@ class SectionCardLayoutRenderer<T>(
   ) {
     var expanded by rememberSaveable { mutableStateOf(true) }
     val tint = iconTint ?: MaterialTheme.colorScheme.primary
+    val collapsible = config.collapsible == true
 
-    Card(
-      modifier = modifier.fillMaxWidth(),
-      elevation =
-        CardDefaults.elevatedCardElevation(
-          defaultElevation = (config.elevation?.floatValue() ?: 2f).dp
-        ),
-    ) {
-      Column {
-        Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(tint))
-        Column(modifier = Modifier.padding((config.padding?.floatValue() ?: 16f).dp)) {
-          Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+      Row(
+        modifier =
+          Modifier.fillMaxWidth()
+            .then(if (collapsible) Modifier.clickable { expanded = !expanded } else Modifier)
+            .padding(top = 12.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Icon(
+          imageVector = icon,
+          contentDescription = null,
+          tint = tint,
+          modifier = Modifier.size(18.dp),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+          text = title.uppercase(),
+          style = MaterialTheme.typography.labelLarge,
+          letterSpacing = 0.8.sp,
+          fontWeight = FontWeight.SemiBold,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.weight(1f),
+        )
+        if (config.showItemCount != false) {
+          Text(
+            text = items.size.toString(),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+        if (collapsible) {
+          Spacer(modifier = Modifier.width(12.dp))
+          val toggleLabel =
+            stringResource(if (expanded) Res.string.section_collapse else Res.string.section_expand)
+          val barColor = MaterialTheme.colorScheme.onSurfaceVariant
+          Box(
+            modifier = Modifier.size(20.dp).semantics { contentDescription = toggleLabel },
+            contentAlignment = Alignment.Center,
+          ) {
             Box(
-              modifier =
-                Modifier.size(32.dp).clip(CircleShape).background(tint.copy(alpha = 0.12f)),
-              contentAlignment = Alignment.Center,
-            ) {
-              Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = tint,
-                modifier = Modifier.size(18.dp),
-              )
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-              text = title,
-              style = MaterialTheme.typography.titleSmall,
-              fontWeight = FontWeight.SemiBold,
-              color = MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.weight(1f),
+              Modifier.width(12.dp).height(2.dp).clip(RoundedCornerShape(1.dp)).background(barColor)
             )
-            if (config.showItemCount != false) {
+            if (!expanded) {
               Box(
-                modifier =
-                  Modifier.clip(CircleShape)
-                    .background(tint.copy(alpha = 0.12f))
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
-              ) {
-                Text(
-                  text = items.size.toString(),
-                  style = MaterialTheme.typography.labelMedium,
-                  color = tint,
-                  fontWeight = FontWeight.Bold,
-                )
-              }
-            }
-            if (config.collapsible == true) {
-              IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(32.dp)) {
-                Icon(
-                  imageVector =
-                    if (expanded) Icons.Default.KeyboardArrowUp
-                    else Icons.Default.KeyboardArrowDown,
-                  contentDescription = if (expanded) "Collapse" else "Expand",
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.size(20.dp),
-                )
-              }
+                Modifier.width(2.dp)
+                  .height(12.dp)
+                  .clip(RoundedCornerShape(1.dp))
+                  .background(barColor)
+              )
             }
           }
+        }
+      }
 
-          AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically(),
-            exit = shrinkVertically(),
-          ) {
-            Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-              HorizontalDivider(
-                modifier = Modifier.padding(top = 10.dp, bottom = 4.dp),
-                color = MaterialTheme.colorScheme.outlineVariant,
-              )
-              items.forEachIndexed { i, item ->
-                if (i > 0)
-                  HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 2.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                  )
-                component.Render(item, RenderOptions(onClick = { onItemClick(item) }))
-              }
-            }
+      AnimatedVisibility(
+        visible = expanded,
+        enter = expandVertically(),
+        exit = shrinkVertically(),
+      ) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+          HorizontalDivider(
+            modifier = Modifier.padding(bottom = 4.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+          )
+          items.forEach { item ->
+            component.Render(item, RenderOptions(onClick = { onItemClick(item) }))
           }
         }
       }

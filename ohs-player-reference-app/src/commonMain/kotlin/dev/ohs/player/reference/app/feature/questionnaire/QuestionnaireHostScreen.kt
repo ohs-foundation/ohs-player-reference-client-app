@@ -18,14 +18,18 @@ package dev.ohs.player.reference.app.feature.questionnaire
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,8 +37,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,6 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.ohs.fhir.datacapture.Questionnaire
 import dev.ohs.fhir.datacapture.QuestionnaireConfig
@@ -52,10 +55,15 @@ import dev.ohs.fhir.datacapture.QuestionnaireItemViewFactoryMatchersProvider
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_back
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_close
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_retry
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.questionnaire_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionnaireHostScreen(
   questionnaireId: String,
@@ -94,83 +102,109 @@ fun QuestionnaireHostScreen(
 
   Scaffold(
     topBar = {
-      TopAppBar(
-        title = { Text(title ?: "Questionnaire") },
-        navigationIcon = {
-          IconButton(onClick = onBack) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
-              tint = MaterialTheme.colorScheme.onPrimary,
-            )
-          }
-        },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-          ),
-      )
-    }
-  ) { padding ->
-    Column(
-      modifier = Modifier.fillMaxSize().padding(padding).padding(6.dp),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-      when (val state = uiState) {
-        is QuestionnaireHostUiState.Submitted ->
-          SubmissionBanner(message = state.result.successMessage, isSuccess = true)
-
-        is QuestionnaireHostUiState.Error -> Unit // rendered below, inline with a dismiss action
-        else -> Unit
-      }
-
-      Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-        when (val state = uiState) {
-          is QuestionnaireHostUiState.Loading -> CircularProgressIndicator()
-
-          is QuestionnaireHostUiState.Error -> {
-            Column(
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-              Text(
-                text = state.message,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp),
+      Surface(
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+      ) {
+        Box(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
+          Row(
+            modifier =
+              Modifier.align(Alignment.Center)
+                .widthIn(max = 720.dp)
+                .fillMaxWidth()
+                .height(64.dp)
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            IconButton(onClick = onBack) {
+              Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(Res.string.questionnaire_back),
               )
-              TextButton(onClick = viewModel::load) { Text("Retry") }
+            }
+            Text(
+              text = title ?: stringResource(Res.string.questionnaire_title),
+              style = MaterialTheme.typography.titleLarge,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+            )
+            IconButton(onClick = onBack) {
+              Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = stringResource(Res.string.questionnaire_close),
+              )
             }
           }
+        }
+      }
+    }
+  ) { padding ->
+    Box(
+      modifier = Modifier.fillMaxSize().padding(padding),
+      contentAlignment = Alignment.TopCenter,
+    ) {
+      Column(
+        modifier = Modifier.widthIn(max = 720.dp).fillMaxSize().padding(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        when (val state = uiState) {
+          is QuestionnaireHostUiState.Submitted ->
+            SubmissionBanner(message = state.result.successMessage, isSuccess = true)
 
-          is QuestionnaireHostUiState.Ready,
-          is QuestionnaireHostUiState.Submitting -> {
-            val questionnaireJson =
-              when (state) {
-                is QuestionnaireHostUiState.Ready -> state.questionnaireJson
-                is QuestionnaireHostUiState.Submitting -> state.questionnaireJson
-                else -> ""
+          is QuestionnaireHostUiState.Error -> Unit // rendered below, inline with a dismiss action
+          else -> Unit
+        }
+
+        Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+          when (val state = uiState) {
+            is QuestionnaireHostUiState.Loading -> CircularProgressIndicator()
+
+            is QuestionnaireHostUiState.Error -> {
+              Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+              ) {
+                Text(
+                  text = state.message,
+                  color = MaterialTheme.colorScheme.error,
+                  style = MaterialTheme.typography.bodyMedium,
+                  modifier = Modifier.padding(16.dp),
+                )
+                TextButton(onClick = viewModel::load) {
+                  Text(stringResource(Res.string.questionnaire_retry))
+                }
               }
-            Questionnaire(
-              questionnaireJson = questionnaireJson,
-              questionnaireLaunchContextMap = emptyMap(),
-              config =
-                QuestionnaireConfig(
-                  showReviewPage = true,
-                  showReviewPageFirst = false,
-                  isReadOnly = false,
-                  showCancelButton = false,
-                ),
-              onSubmit = { getResponse ->
-                coroutineScope.launch { viewModel.onSubmit(getResponse()) }
-              },
-              matchersProvider = viewItemMatchersProvider,
-              onCancel = {},
-            )
-          }
+            }
 
-          is QuestionnaireHostUiState.Submitted -> Unit
+            is QuestionnaireHostUiState.Ready,
+            is QuestionnaireHostUiState.Submitting -> {
+              val questionnaireJson =
+                when (state) {
+                  is QuestionnaireHostUiState.Ready -> state.questionnaireJson
+                  is QuestionnaireHostUiState.Submitting -> state.questionnaireJson
+                  else -> ""
+                }
+              Questionnaire(
+                questionnaireJson = questionnaireJson,
+                questionnaireLaunchContextMap = emptyMap(),
+                config =
+                  QuestionnaireConfig(
+                    showReviewPage = true,
+                    showReviewPageFirst = false,
+                    isReadOnly = false,
+                    showCancelButton = false,
+                  ),
+                onSubmit = { getResponse ->
+                  coroutineScope.launch { viewModel.onSubmit(getResponse()) }
+                },
+                matchersProvider = viewItemMatchersProvider,
+                onCancel = {},
+              )
+            }
+
+            is QuestionnaireHostUiState.Submitted -> Unit
+          }
         }
       }
     }

@@ -20,6 +20,7 @@ package dev.ohs.player.reference.app.auth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import eu.anifantakis.lib.ksafe.KSafe
+import eu.anifantakis.lib.ksafe.KSafeConfig
 import kotlin.coroutines.resume
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
@@ -31,6 +32,7 @@ import platform.AuthenticationServices.ASWebAuthenticationSession
 import platform.Foundation.NSError
 import platform.Foundation.NSURL
 import platform.Security.SecRandomCopyBytes
+import platform.Security.errSecSuccess
 import platform.Security.kSecRandomDefault
 import platform.UIKit.UIApplication
 import platform.UIKit.UISceneActivationStateForegroundActive
@@ -38,13 +40,22 @@ import platform.UIKit.UIWindow
 import platform.UIKit.UIWindowScene
 import platform.darwin.NSObject
 
-internal actual fun createKSafe(): KSafe = KSafe()
+/**
+ * `requireUnlockedDevice = false` keeps the Keychain key at
+ * `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, so the background `BGProcessingTask` sync can
+ * read the session while the device is locked (once it has been unlocked at least once since boot).
+ * Setting it `true` would break headless sync on a locked device.
+ */
+internal actual fun createKSafe(): KSafe =
+  KSafe(config = KSafeConfig(requireUnlockedDevice = false))
 
 internal actual fun secureRandomBytes(size: Int): ByteArray {
   val bytes = ByteArray(size)
-  bytes.usePinned { pinned ->
-    SecRandomCopyBytes(kSecRandomDefault, size.toULong(), pinned.addressOf(0))
-  }
+  val status =
+    bytes.usePinned { pinned ->
+      SecRandomCopyBytes(kSecRandomDefault, size.toULong(), pinned.addressOf(0))
+    }
+  check(status == errSecSuccess) { "SecRandomCopyBytes failed (OSStatus $status)" }
   return bytes
 }
 

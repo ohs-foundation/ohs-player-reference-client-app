@@ -15,16 +15,16 @@
  */
 package dev.ohs.player.reference.app.data.repository
 
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.db.ResourceNotFoundException
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.db.ResourceNotFoundException
+import dev.ohs.fhir.engine.resourceType
+import dev.ohs.fhir.engine.search.Search
 import dev.ohs.fhir.model.r4.Bundle
 import dev.ohs.fhir.model.r4.Resource
 import dev.ohs.fhir.model.r4.terminologies.ResourceType
-import dev.ohs.fhir.resourceType
-import dev.ohs.fhir.search.Search
+import dev.ohs.player.reference.app.data.DataChangeSignal
 import dev.ohs.player.reference.app.generateId
 import dev.ohs.player.reference.app.util.FhirJson
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -41,20 +41,19 @@ import kotlinx.serialization.json.jsonObject
 class FhirEngineRepository(private val fhirEngine: FhirEngine) : FhirRepository {
 
   private val json = FhirJson.instance
-  private val _revision = MutableStateFlow(0L)
 
-  override val revision: StateFlow<Long> = _revision
+  override val revision: StateFlow<Long> = DataChangeSignal.revision
 
   override suspend fun upsert(resource: Resource) {
     upsertResource(resource)
-    _revision.value += 1
+    DataChangeSignal.notifyChanged()
   }
 
   override suspend fun upsert(bundle: Bundle): Int {
     val normalized = normalizeBundleResources(bundle)
     if (normalized.isEmpty()) return 0
     fhirEngine.withTransaction { normalized.forEach { upsertResource(it) } }
-    _revision.value += 1
+    DataChangeSignal.notifyChanged()
     return normalized.size
   }
 

@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.ohs.player.reference.app
+package dev.ohs.player.reference.app.data.sync
 
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.ComposeViewport
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.FhirEngineConfiguration
-import dev.ohs.fhir.FhirEngineProvider
-import dev.ohs.player.reference.app.data.di.initKoin
-import org.koin.dsl.module
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import dev.ohs.fhir.engine.sync.createDataStore
+import dev.ohs.player.reference.app.desktopStorageDirectory
+import java.io.File
 
-@OptIn(ExperimentalComposeUiApi::class)
-fun main() {
-  FhirEngineProvider.init(FhirEngineConfiguration())
-  initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance() } })
-  ComposeViewport { App() }
+private val dataStore: DataStore<Preferences> by lazy {
+  createDataStore { File(desktopStorageDirectory, SYNC_TIMESTAMP_DATASTORE_FILE_NAME).absolutePath }
 }
+
+internal actual fun createSyncTimestampDataStore(): DataStore<Preferences> = dataStore

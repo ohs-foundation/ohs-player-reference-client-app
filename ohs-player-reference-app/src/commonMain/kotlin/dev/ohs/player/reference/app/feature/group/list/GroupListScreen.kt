@@ -16,19 +16,17 @@
 package dev.ohs.player.reference.app.feature.group.list
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,6 +36,10 @@ import dev.ohs.player.generated.state.GroupListState
 import dev.ohs.player.generated.viewtype.ViewTypeCS
 import dev.ohs.player.library.layout.VerticalListRenderer
 import dev.ohs.player.library.scaffold.ListScaffold
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_list_empty
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_list_register_household
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,20 +56,13 @@ fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Un
   }
 
   Scaffold(
-    topBar = {
-      TopAppBar(
-        title = { Text("Households") },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-          ),
-      )
-    },
+    contentWindowInsets = WindowInsets(0, 0, 0, 0),
     floatingActionButton = {
-      FloatingActionButton(onClick = onDataCaptureClick) {
-        Icon(Icons.Filled.Add, contentDescription = "Register household")
-      }
+      ExtendedFloatingActionButton(
+        onClick = onDataCaptureClick,
+        icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+        text = { Text(stringResource(Res.string.group_list_register_household)) },
+      )
     },
   ) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -78,7 +73,7 @@ fun GroupListScreen(onGroupClick: (String) -> Unit, onDataCaptureClick: () -> Un
       ) {
         component(ViewTypeCS.GroupCard)
         layout(VerticalListRenderer.VIEW_TYPE)
-        emptyState { Text("No households") }
+        emptyState { Text(stringResource(Res.string.group_list_empty)) }
       }
     }
   }

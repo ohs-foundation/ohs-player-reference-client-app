@@ -16,27 +16,38 @@
 package dev.ohs.player.reference.app.feature.group.list
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.ohs.player.generated.config.GroupCardConfig
 import dev.ohs.player.generated.state.GroupListState
-import dev.ohs.player.reference.app.feature.component.common.CardView
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_member_count_one
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_member_count_other
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_unknown_name
+import org.jetbrains.compose.resources.stringResource
+
+/**
+ * Selected household id for the two-pane list-detail highlight; null when there is no open pane.
+ */
+val LocalSelectedGroupId = compositionLocalOf<String?> { null }
 
 @Composable
 fun GroupCard(
@@ -44,58 +55,55 @@ fun GroupCard(
   config: GroupCardConfig = GroupCardConfig(),
   onClick: (() -> Unit)? = null,
 ) {
-  val name = group.groupName ?: "Unknown Household"
+  val name = group.groupName ?: stringResource(Res.string.group_unknown_name)
   val initials = name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "H"
   val count = group.memberCount ?: "0"
-  val memberLabel = if (count == "1") "1 member" else "$count members"
+  val memberLabel =
+    stringResource(
+      if (count == "1") Res.string.group_member_count_one else Res.string.group_member_count_other,
+      count,
+    )
+  val selected = group.groupId != null && group.groupId == LocalSelectedGroupId.current
 
-  CardView(
-    elevationDp = config.elevation?.floatValue() ?: 2f,
-    contentPaddingDp = config.padding?.floatValue() ?: 16f,
-    onClick = onClick,
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(RoundedCornerShape(18.dp))
+        .background(if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+        .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+        .padding(horizontal = 12.dp, vertical = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(14.dp),
+    verticalAlignment = Alignment.CenterVertically,
   ) {
-    header {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
-        Box(
-          modifier =
-            Modifier.size(40.dp)
-              .clip(CircleShape)
-              .background(MaterialTheme.colorScheme.primaryContainer),
-          contentAlignment = Alignment.Center,
-        ) {
-          Text(
-            text = initials,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            fontWeight = FontWeight.Bold,
-          )
-        }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-          Text(
-            text = name,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-          )
-          if (config.showMemberCount != false) {
-            Text(
-              text = memberLabel,
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-        }
-        if (onClick != null) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-            modifier = Modifier.size(16.dp),
-          )
-        }
+    Box(
+      modifier =
+        Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+      contentAlignment = Alignment.Center,
+    ) {
+      Text(
+        text = initials,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onPrimary,
+        fontWeight = FontWeight.Bold,
+      )
+    }
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = name,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        color =
+          if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+          else MaterialTheme.colorScheme.onSurface,
+      )
+      if (config.showMemberCount != false) {
+        Text(
+          text = memberLabel,
+          style = MaterialTheme.typography.bodyMedium,
+          color =
+            if (selected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
       }
     }
   }

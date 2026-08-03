@@ -29,6 +29,8 @@ fun initKoin(platformModule: Module) {
       fhirEngineRepositoryModule,
       repositoryModule,
       serviceModule,
+      syncModule,
+      authModule,
       viewModelModule,
     )
   }

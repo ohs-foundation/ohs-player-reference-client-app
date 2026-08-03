@@ -86,10 +86,15 @@ suspend fun patientProfileSearchResult(
 
 /**
  * Group list: root = Group only. Member count is derived from `Group.member.size` on the resource
- * itself — no additional includes needed.
+ * itself — no additional includes needed. Ordered newest first: `meta.lastUpdated` is a UTC
+ * instant, so its ISO-8601 string sorts chronologically; groups without one fall to the end.
  */
 suspend fun groupListSearchResults(repository: FhirRepository): List<SearchResult<Resource>> =
-  repository.all("Group").filterIsInstance<Group>().map { group -> SearchResult(resource = group) }
+  repository
+    .all("Group")
+    .filterIsInstance<Group>()
+    .sortedByDescending { it.meta?.lastUpdated?.value?.toString() }
+    .map { group -> SearchResult(resource = group) }
 
 /**
  * Group profile: root = Group, member Patients in included. Each `Group.member.entity` is a FHIR

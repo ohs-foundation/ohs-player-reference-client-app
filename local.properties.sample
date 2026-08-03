@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# local.properties.sample — copy to `local.properties` and fill in your values.
+# `local.properties` is git-ignored. These are read at build time by the
+# :ohs-player-reference-app `generateAuthConfig` task. CI may override any of
+# these with environment variables of the same name.
+#
+# PKCE uses a PUBLIC client, so there is NO client secret here.
+# ---------------------------------------------------------------------------
+
+# --- OAuth / OIDC provider ---------------------------------------------------
+# Provider-agnostic: the app resolves all endpoints via OIDC discovery at
+# {OAUTH_ISSUER}/.well-known/openid-configuration.
+#   Keycloak: https://host/realms/<realm>   (the realm IS part of the issuer)
+OAUTH_ISSUER=https://keycloak.example.org/realms/ohs-player
+# Public client id (PKCE / public client — no secret).
+OAUTH_CLIENT_ID=ohs-player-reference-app
+# OAuth scopes (space separated). offline_access yields a refresh token.
+OAUTH_SCOPES=openid profile email offline_access
+
+# --- Redirect URIs (must be registered as Valid Redirect URIs at the provider) ---
+# Android + iOS use a custom URI scheme deep link: {SCHEME}://{HOST}
+OAUTH_REDIRECT_SCHEME=dev.ohs.player.reference.app
+OAUTH_REDIRECT_HOST=auth
+# Desktop (JVM) uses a localhost loopback redirect on this port.
+# Register as: http://127.0.0.1:8765/callback (and http://localhost:8765/callback)
+OAUTH_DESKTOP_REDIRECT_PORT=8765
+# Web (JS/Wasm) uses a full-page redirect back to the app origin.
+OAUTH_WEB_REDIRECT_URL=http://localhost:8080/callback
+
+# --- FHIR server --------------------------------------------------------------
+# Base URL of the remote FHIR server. Requests are authenticated with the
+# signed-in session's Bearer token (see FhirBearerAuthenticator).
+FHIR_BASE_URL=https://hapi.fhir.org/baseR4

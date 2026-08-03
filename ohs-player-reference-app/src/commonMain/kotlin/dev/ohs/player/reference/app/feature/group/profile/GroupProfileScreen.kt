@@ -48,6 +48,12 @@ import dev.ohs.player.library.registry.LocalViewRegistry
 import dev.ohs.player.library.registry.componentRenderer
 import dev.ohs.player.library.registry.layoutRenderer
 import dev.ohs.player.library.renderer.RenderOptions
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_profile_add_members
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_profile_add_members_description
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_profile_back
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.group_profile_default_name
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -70,7 +76,8 @@ fun GroupProfileScreen(
   val memberSectionLayout =
     remember(registry) { registry.layoutRenderer<GroupMemberState>(ViewTypeCS.SectionCard) }
 
-  val groupName = state?.groupHeader?.groupName ?: "Household"
+  val groupName =
+    state?.groupHeader?.groupName ?: stringResource(Res.string.group_profile_default_name)
 
   Scaffold(
     topBar = {
@@ -80,7 +87,7 @@ fun GroupProfileScreen(
           IconButton(onClick = onBack) {
             Icon(
               Icons.AutoMirrored.Filled.ArrowBack,
-              contentDescription = "Back",
+              contentDescription = stringResource(Res.string.group_profile_back),
               tint = MaterialTheme.colorScheme.onPrimary,
             )
           }
@@ -95,8 +102,13 @@ fun GroupProfileScreen(
     floatingActionButton = {
       ExtendedFloatingActionButton(
         onClick = onAddMembers,
-        text = { Text("Add members") },
-        icon = { Icon(Icons.Filled.Add, contentDescription = "Add household members") },
+        text = { Text(stringResource(Res.string.group_profile_add_members)) },
+        icon = {
+          Icon(
+            Icons.Filled.Add,
+            contentDescription = stringResource(Res.string.group_profile_add_members_description),
+          )
+        },
       )
     },
   ) { padding ->

@@ -17,17 +17,52 @@ package dev.ohs.player.reference.app
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.FhirEngineConfiguration
-import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.FhirEngineConfiguration
+import dev.ohs.fhir.engine.FhirEngineProvider
+import dev.ohs.fhir.engine.NetworkConfiguration
+import dev.ohs.fhir.engine.ServerConfiguration
+import dev.ohs.fhir.engine.sync.remote.HttpLogger
+import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
+import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
-import java.io.File
+import dev.ohs.player.reference.app.data.sync.ForegroundSyncManager
+import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
+import dev.ohs.player.reference.app.data.sync.SyncManager
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.Res
+import ohsplayerreferenceclientapp.ohs_player_reference_app.generated.resources.app_logo
+import org.jetbrains.compose.resources.painterResource
 import org.koin.dsl.module
 
 fun main() = application {
-  val userHome = System.getProperty("user.home").orEmpty().ifBlank { "." }
-  val storageDirectory = File(userHome, ".ohs-player-reference-app").absolutePath
-  FhirEngineProvider.init(FhirEngineConfiguration(storageDirectory = storageDirectory))
-  initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance() } })
-  Window(onCloseRequest = ::exitApplication, title = "OHS Player Reference App") { App() }
+  FhirEngineProvider.init(
+    FhirEngineConfiguration(
+      storageDirectory = desktopStorageDirectory.absolutePath,
+      serverConfiguration =
+        ServerConfiguration(
+          baseUrl = GeneratedAuthConfig.FHIR_BASE_URL,
+          networkConfiguration =
+            NetworkConfiguration(
+              connectionTimeOut = SYNC_TIMEOUT_DURATION,
+              readTimeOut = SYNC_TIMEOUT_DURATION,
+              writeTimeOut = SYNC_TIMEOUT_DURATION,
+            ),
+          httpLogger = HttpLogger(level = HttpLogger.Level.HEADERS),
+          authenticator = FhirBearerAuthenticator,
+        ),
+    )
+  )
+  initKoin(
+    module {
+      single<FhirEngine> { FhirEngineProvider.getInstance() }
+      single<SyncManager> { ForegroundSyncManager() }
+    }
+  )
+  Window(
+    onCloseRequest = ::exitApplication,
+    title = "Player Reference",
+    icon = painterResource(Res.drawable.app_logo),
+  ) {
+    App()
+  }
 }

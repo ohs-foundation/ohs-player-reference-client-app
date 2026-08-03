@@ -16,18 +16,51 @@
 package dev.ohs.player.reference.app
 
 import android.app.Application
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.FhirEngineConfiguration
-import dev.ohs.fhir.FhirEngineProvider
 import dev.ohs.fhir.datacapture.DataCapture
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.FhirEngineConfiguration
+import dev.ohs.fhir.engine.FhirEngineProvider
+import dev.ohs.fhir.engine.NetworkConfiguration
+import dev.ohs.fhir.engine.ServerConfiguration
+import dev.ohs.fhir.engine.sync.remote.HttpLogger
+import dev.ohs.player.reference.app.auth.AndroidAppContext
+import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
+import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
+import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
+import dev.ohs.player.reference.app.data.sync.SyncManager
+import dev.ohs.player.reference.app.data.sync.WorkManagerSyncManager
 import org.koin.dsl.module
 
 class OhsPlayerApplication : Application() {
   override fun onCreate() {
     super.onCreate()
-    FhirEngineProvider.init(FhirEngineConfiguration(), applicationContext)
-    initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance(applicationContext) } })
+    // Before FhirEngineProvider.init: creating KSafe / the sync-timestamp DataStore reaches for
+    // this, and a headless WorkManager launch never goes through MainActivity.
+    AndroidAppContext.init(this)
+    FhirEngineProvider.init(
+      FhirEngineConfiguration(
+        serverConfiguration =
+          ServerConfiguration(
+            baseUrl = GeneratedAuthConfig.FHIR_BASE_URL,
+            networkConfiguration =
+              NetworkConfiguration(
+                connectionTimeOut = SYNC_TIMEOUT_DURATION,
+                readTimeOut = SYNC_TIMEOUT_DURATION,
+                writeTimeOut = SYNC_TIMEOUT_DURATION,
+              ),
+            httpLogger = HttpLogger(level = HttpLogger.Level.HEADERS),
+            authenticator = FhirBearerAuthenticator,
+          )
+      ),
+      applicationContext,
+    )
+    initKoin(
+      module {
+        single<FhirEngine> { FhirEngineProvider.getInstance(applicationContext) }
+        single<SyncManager> { WorkManagerSyncManager(applicationContext) }
+      }
+    )
     DataCapture.initialize(applicationContext)
   }
 }

@@ -35,6 +35,51 @@ Code generation is part of compilation. The `ig-codegen` Gradle plugin runs its 
 
 For iOS, open [`iosApp/`](./iosApp) in Xcode and run, or use the run-configuration widget in a Kotlin Multiplatform IDE.
 
+## Identity provider (OIDC) configuration
+
+Sign-in is provider-agnostic. The client speaks standard OpenID Connect and resolves every endpoint — authorization, token, userinfo, and end-session — at runtime from the provider's discovery document at `{issuer}/.well-known/openid-configuration`. Nothing is hardcoded per provider, so switching from one OAuth2/OIDC provider to another is a configuration change, not a code change: point `OAUTH_ISSUER` at the new provider (and update the client id, scopes, and redirect registration to match). See [`OidcAuthApi`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/auth/OidcAuthApi.kt) and [`OAuthConfig`](./ohs-player-reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/auth/OAuthConfig.kt).
+
+The flow is Authorization Code with PKCE and a `state` check. The provider must therefore expose the client as a **public client** (no client secret) that permits PKCE, and the app's redirect URIs must be registered as allowed redirects. Any standards-compliant OIDC provider — Keycloak, Okta, Zitadel, and others — works under these constraints.
+
+### Configure a provider
+
+1. Register a public (PKCE) client at your provider and note its client id.
+2. Register the per-platform redirect URIs below as allowed redirect URIs.
+3. Copy `local.properties.sample` to `local.properties` and fill in the keys below. The file is git-ignored; CI may override any key with an environment variable of the same name.
+
+Configuration is read at build time by the `generateAuthConfig` task and baked into `GeneratedAuthConfig`, which backs `OAuthConfig.Default`.
+
+| Key | Meaning | Example |
+| --- | --- | --- |
+| `OAUTH_ISSUER` | OIDC issuer; discovery is performed against `{issuer}/.well-known/openid-configuration` | `https://keycloak.example.org/realms/ohs-player` |
+| `OAUTH_CLIENT_ID` | Public client id (PKCE, no secret) | `ohs-player-reference-app` |
+| `OAUTH_SCOPES` | Space-separated scopes; `offline_access` yields a refresh token | `openid profile email offline_access` |
+| `OAUTH_REDIRECT_SCHEME` | Custom URI scheme for the mobile deep-link redirect | `dev.ohs.player.reference.app` |
+| `OAUTH_REDIRECT_HOST` | Host component of the mobile redirect | `auth` |
+| `OAUTH_DESKTOP_REDIRECT_PORT` | Localhost loopback port for the desktop (JVM) redirect | `8765` |
+| `OAUTH_WEB_REDIRECT_URL` | Full-page redirect URL for the web (JS/Wasm) build | `http://localhost:8080/callback` |
+| `FHIR_BASE_URL` | Base URL of the FHIR server; requests carry the session Bearer token | `https://hapi.fhir.org/baseR4` |
+
+### Issuer examples
+
+The issuer is the only value that identifies the provider. Note that for Keycloak the realm is part of the issuer.
+
+| Provider | `OAUTH_ISSUER` |
+| --- | --- |
+| Keycloak | `https://host/realms/<realm>` |
+| Okta | `https://<org>.okta.com` (or a custom authorization server, `https://<org>.okta.com/oauth2/<server-id>`) |
+| Zitadel | `https://<instance>.zitadel.cloud` |
+
+### Redirect URIs to register
+
+Each platform completes the authorization redirect differently, so register all of the ones you build for:
+
+| Platform | Redirect URI | Derived from |
+| --- | --- | --- |
+| Android / iOS | `{OAUTH_REDIRECT_SCHEME}://{OAUTH_REDIRECT_HOST}` | e.g. `dev.ohs.player.reference.app://auth` |
+| Desktop (JVM) | `http://127.0.0.1:{OAUTH_DESKTOP_REDIRECT_PORT}/callback` (also register the `http://localhost:...` form) | loopback port |
+| Web (JS/Wasm) | `OAUTH_WEB_REDIRECT_URL` | e.g. `http://localhost:8080/callback` |
+
 ## From FHIR data to view state
 
 A screen never consumes a raw FHIR resource. It consumes a typed *view-state* — a flat, serializable data class containing exactly the fields the screen needs. View-state is produced by a configuration-driven pipeline:

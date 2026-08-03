@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
 import java.util.Properties
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -30,7 +33,26 @@ plugins {
 }
 
 kotlin {
-  androidTarget { compilerOptions { jvmTarget.set(JvmTarget.JVM_11) } }
+  // Desktop, js and wasmJs lack a native OS background scheduler, so they share a "foregroundSync"
+  // source set (see `foregroundSyncMain/.../data/sync/Sync.kt`) letting one coroutine-based
+  // scheduler serve all three instead of a separate implementation per platform. js and wasmJs
+  // further share a nested "foregroundSyncWeb", kept apart from the default `webMain` group, which
+  // holds web code unrelated to sync.
+  applyDefaultHierarchyTemplate {
+    common {
+      group("foregroundSync") {
+        withJvm()
+        group("foregroundSyncWeb") {
+          withJs()
+          withWasmJs()
+        }
+      }
+    }
+  }
+
+  // fhir-engine's Android artifact ships inline functions (e.g. Sync.oneTimeSync) compiled at JVM
+  // target 21 — inlining them requires this target to be at least as high.
+  androidTarget { compilerOptions { jvmTarget.set(JvmTarget.JVM_21) } }
 
   listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
     iosTarget.binaries.framework {
@@ -52,10 +74,16 @@ kotlin {
     binaries.executable()
   }
 
+  // expect/actual classes (AuthorizationLauncher) are stable enough for our use.
+  compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+
   sourceSets {
     androidMain.dependencies {
       implementation(libs.compose.uiToolingPreview)
       implementation(libs.androidx.activity.compose)
+      implementation(libs.ktor.client.okhttp)
+      implementation(libs.androidx.browser)
+      implementation(libs.androidx.work.runtime)
     }
     commonMain.dependencies {
       implementation(project(":ohs-player-library"))
@@ -63,6 +91,10 @@ kotlin {
       implementation(libs.compose.foundation)
       implementation(libs.compose.material)
       implementation(libs.compose.material3)
+      implementation(libs.compose.adaptive)
+      implementation(libs.compose.adaptive.layout)
+      implementation(libs.compose.adaptive.navigation)
+      implementation(libs.compose.material3.adaptive.navigation.suite)
       implementation(libs.compose.materialIconsCore)
       implementation(libs.compose.ui)
       implementation(libs.compose.components.resources)
@@ -81,17 +113,48 @@ kotlin {
       implementation(libs.ohs.fhir.model)
       implementation(libs.ohs.fhir.path)
       implementation(libs.fhir.data.capture)
+      // Auth: shared OAuth2/PKCE client, secure session storage, SHA-256 for PKCE.
+      implementation(libs.ktor.client.core)
+      implementation(libs.ktor.client.auth)
+      implementation(libs.ktor.client.content.negotiation)
+      implementation(libs.ktor.serialization.kotlinx.json)
+      implementation(libs.ksafe)
+      implementation(project.dependencies.platform(libs.kotlincrypto.hash.bom))
+      implementation(libs.kotlincrypto.hash.sha2)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
       implementation(libs.compose.uiTest)
       implementation(libs.kotlinx.coroutines.test)
+      implementation(libs.ktor.client.mock)
+    }
+    iosMain.dependencies { implementation(libs.ktor.client.darwin) }
+    getByName("foregroundSyncWebMain").dependencies { implementation(libs.kotlinx.browser) }
+    webMain.dependencies {
+      // :engine's WebWorkerSQLiteDriver worker (androidx.sqlite:sqlite-web) is loaded via
+      // `new Worker(new URL("sqlite-wasm-worker/worker.js", import.meta.url), { type: "module" })`
+      // — a bare npm specifier that :engine's own local file: npm dependency can't propagate to
+      // consumers. Vendoring a matching "sqlite-wasm-worker" npm module here (copied from
+      // kotlin-fhir-engine's engine/src/webMain/npm/sqlite-wasm-worker/) makes that specifier
+      // resolve in this app's own build too.
+      implementation(
+        npm(
+          "sqlite-wasm-worker",
+          layout.projectDirectory.dir("src/webMain/npm/sqlite-wasm-worker").asFile,
+        )
+      )
+      implementation(libs.ktor.client.js)
+      implementation(libs.kotlinx.browser)
     }
     jvmMain.dependencies {
       implementation(compose.desktop.currentOs)
       implementation(libs.kotlinx.coroutinesSwing)
+      implementation(libs.ktor.client.cio)
     }
-    jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+    jvmTest.dependencies {
+      implementation(compose.desktop.currentOs)
+      implementation(libs.koin.test)
+    }
   }
 }
 
@@ -142,6 +205,98 @@ val hasReleaseSigning: Boolean =
     !keystoreKeyPassword.isNullOrBlank() &&
     !keystoreStorePassword.isNullOrBlank()
 
+// --- OAuth / OIDC config ------------------------------------------------------
+// Provider-agnostic: the app resolves endpoints via OIDC discovery
+// ({issuer}/.well-known/openid-configuration).
+fun authProp(key: String, default: String): String =
+  nonBlankEnv(key).orNull ?: localProperties[key]?.takeIf { it.isNotBlank() } ?: default
+
+// Auth/deployment settings live in local.properties (git-ignored), with env-var overrides for CI.
+val localProperties: Map<String, String> =
+  providers
+    .fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+    .asText
+    .map { text ->
+      val props = Properties().apply { load(text.reader()) }
+      props.stringPropertyNames().associateWith(props::getProperty)
+    }
+    .getOrElse(emptyMap())
+
+val authConfigOutputDir = layout.buildDirectory.dir("generated/authconfig/commonMain/kotlin")
+
+val generateAuthConfig =
+  tasks.register("generateAuthConfig") {
+    val issuer = authProp("OAUTH_ISSUER", "https://keycloak.example.org/realms/ohs-player")
+    val clientId = authProp("OAUTH_CLIENT_ID", "ohs-player-reference-app")
+    val redirectScheme = authProp("OAUTH_REDIRECT_SCHEME", "dev.ohs.player.reference.app")
+    val redirectHost = authProp("OAUTH_REDIRECT_HOST", "auth")
+    val webRedirectUrl = authProp("OAUTH_WEB_REDIRECT_URL", "http://localhost:8080/callback")
+    val desktopPort = authProp("OAUTH_DESKTOP_REDIRECT_PORT", "8765")
+    val scopes = authProp("OAUTH_SCOPES", "openid profile email offline_access")
+    val fhirBaseUrl = authProp("FHIR_BASE_URL", "https://hapi.fhir.org/baseR4")
+    val versionName = releaseVersionName
+    val versionCode = releaseVersionCode
+    val outDir = authConfigOutputDir
+    inputs.property("issuer", issuer)
+    inputs.property("clientId", clientId)
+    inputs.property("redirectScheme", redirectScheme)
+    inputs.property("redirectHost", redirectHost)
+    inputs.property("webRedirectUrl", webRedirectUrl)
+    inputs.property("desktopPort", desktopPort)
+    inputs.property("scopes", scopes)
+    inputs.property("fhirBaseUrl", fhirBaseUrl)
+    inputs.property("versionName", versionName)
+    inputs.property("versionCode", versionCode)
+    outputs.dir(outDir)
+    doLast {
+      val pkgDir =
+        outDir.get().asFile.resolve("dev/ohs/player/reference/app/auth").apply { mkdirs() }
+      pkgDir
+        .resolve("GeneratedAuthConfig.kt")
+        .writeText(
+          """
+        |// Generated by the :ohs-player-reference-app generateAuthConfig task. Do not edit.
+        |// Values come from local.properties / env vars; see local.properties.sample.
+        |package dev.ohs.player.reference.app.auth
+        |
+        |internal object GeneratedAuthConfig {
+        |  const val ISSUER: String = "$issuer"
+        |  const val CLIENT_ID: String = "$clientId"
+        |  const val REDIRECT_SCHEME: String = "$redirectScheme"
+        |  const val REDIRECT_HOST: String = "$redirectHost"
+        |  const val WEB_REDIRECT_URL: String = "$webRedirectUrl"
+        |  const val DESKTOP_REDIRECT_PORT: Int = $desktopPort
+        |  const val SCOPES: String = "$scopes"
+        |  const val FHIR_BASE_URL: String = "$fhirBaseUrl"
+        |}
+        |
+        """
+            .trimMargin()
+        )
+      pkgDir
+        .resolve("GeneratedAppInfo.kt")
+        .writeText(
+          """
+        |// Generated by the :ohs-player-reference-app generateAuthConfig task. Do not edit.
+        |package dev.ohs.player.reference.app.auth
+        |
+        |internal object GeneratedAppInfo {
+        |  const val VERSION_NAME: String = "$versionName"
+        |  const val VERSION_CODE: Int = $versionCode
+        |}
+        |
+        """
+            .trimMargin()
+        )
+    }
+  }
+
+kotlin.sourceSets.named("commonMain") { kotlin.srcDir(authConfigOutputDir) }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+  dependsOn(generateAuthConfig)
+}
+
 android {
   namespace = "dev.ohs.player.reference.app"
   compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -178,8 +333,8 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
   }
 }
 
@@ -251,8 +406,13 @@ compose.desktop {
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
-      packageName = "dev.ohs.player.reference.app"
+      packageName = "PlayerReference"
       packageVersion = composePackageVersion
+
+      val iconsDir = project.layout.projectDirectory.dir("desktop-icons")
+      macOS { iconFile.set(iconsDir.file("app-icon.icns")) }
+      windows { iconFile.set(iconsDir.file("app-icon.ico")) }
+      linux { iconFile.set(iconsDir.file("app-icon.png")) }
     }
   }
 }

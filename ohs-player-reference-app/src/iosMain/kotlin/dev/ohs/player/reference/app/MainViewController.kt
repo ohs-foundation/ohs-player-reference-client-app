@@ -16,14 +16,45 @@
 package dev.ohs.player.reference.app
 
 import androidx.compose.ui.window.ComposeUIViewController
-import dev.ohs.fhir.FhirEngine
-import dev.ohs.fhir.FhirEngineConfiguration
-import dev.ohs.fhir.FhirEngineProvider
+import dev.ohs.fhir.engine.FhirEngine
+import dev.ohs.fhir.engine.FhirEngineConfiguration
+import dev.ohs.fhir.engine.FhirEngineProvider
+import dev.ohs.fhir.engine.NetworkConfiguration
+import dev.ohs.fhir.engine.ServerConfiguration
+import dev.ohs.fhir.engine.sync.remote.HttpLogger
+import dev.ohs.player.reference.app.auth.FhirBearerAuthenticator
+import dev.ohs.player.reference.app.auth.GeneratedAuthConfig
 import dev.ohs.player.reference.app.data.di.initKoin
+import dev.ohs.player.reference.app.data.sync.IosSyncManager
+import dev.ohs.player.reference.app.data.sync.SYNC_TIMEOUT_DURATION
+import dev.ohs.player.reference.app.data.sync.SyncManager
 import org.koin.dsl.module
 
 fun MainViewController() = run {
-  FhirEngineProvider.init(FhirEngineConfiguration())
-  initKoin(module { single<FhirEngine> { FhirEngineProvider.getInstance() } })
+  FhirEngineProvider.init(
+    FhirEngineConfiguration(
+      serverConfiguration =
+        ServerConfiguration(
+          baseUrl = GeneratedAuthConfig.FHIR_BASE_URL,
+          networkConfiguration =
+            NetworkConfiguration(
+              connectionTimeOut = SYNC_TIMEOUT_DURATION,
+              readTimeOut = SYNC_TIMEOUT_DURATION,
+              writeTimeOut = SYNC_TIMEOUT_DURATION,
+            ),
+          httpLogger = HttpLogger(level = HttpLogger.Level.HEADERS),
+          authenticator = FhirBearerAuthenticator,
+        )
+    )
+  )
+  // Constructed eagerly (not inside the Koin lambda, which is lazy) so BGTaskScheduler
+  // registration happens now, during app launch — see IosBgSyncScheduler's docs.
+  val syncManager = IosSyncManager()
+  initKoin(
+    module {
+      single<FhirEngine> { FhirEngineProvider.getInstance() }
+      single<SyncManager> { syncManager }
+    }
+  )
   ComposeUIViewController { App() }
 }

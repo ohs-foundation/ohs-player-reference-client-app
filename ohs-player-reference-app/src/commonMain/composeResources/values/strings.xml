@@ -6,4 +6,81 @@
     <string name="relationship_guardian">Guardian</string>
     <string name="relationship_other_relative">Other relative</string>
     <string name="relationship_non_relative">Non-relative</string>
+
+    <!-- Login screen -->
+    <string name="login_brand">Player Reference</string>
+    <string name="login_card_title">Sign in</string>
+    <string name="login_redirect_hint">We'll hand you over to your organization's sign-in page, then bring you straight back.</string>
+    <string name="login_sign_in">Continue to sign in</string>
+    <string name="login_error_title">Sign-in failed</string>
+    <string name="login_error_dismiss">Dismiss</string>
+
+    <!-- Home screen -->
+    <string name="home_destination_households">Households</string>
+    <string name="home_registers">Registers</string>
+    <string name="home_signed_in">Signed in</string>
+    <string name="home_last_synced">Last synced: %1$s</string>
+    <string name="home_sync_now">Sync now</string>
+    <string name="home_cancel_sync">Cancel sync</string>
+    <string name="home_sync_in_progress">Sync in progress</string>
+    <string name="home_sign_out">Sign out</string>
+    <string name="home_open_navigation_menu">Open navigation menu</string>
+    <string name="home_sync_failed">Sync failed. Please try again.</string>
+    <string name="home_sync_cancelled">Sync cancelled.</string>
+    <string name="home_select_household">Select a household to view details</string>
+
+    <!-- Initial sync screen -->
+    <string name="initial_sync_title">Setting up your data…</string>
+    <string name="initial_sync_subtitle">This may take a moment the first time.</string>
+    <string name="initial_sync_failed_title">Couldn't sync your data</string>
+    <string name="initial_sync_failed_body">Sync failed. Please check your connection and try again.</string>
+    <string name="initial_sync_retry">Retry</string>
+    <string name="initial_sync_continue">Continue without syncing</string>
+
+    <!-- Group list screen -->
+    <string name="group_list_register_household">Add household</string>
+    <string name="group_list_empty">No households</string>
+
+    <!-- Group profile screen -->
+    <string name="group_profile_default_name">Household</string>
+    <string name="group_profile_back">Back</string>
+    <string name="group_profile_add_members">Add members</string>
+    <string name="group_profile_add_members_description">Add household members</string>
+
+    <!-- Patient list screen -->
+    <string name="patient_list_title">Patients</string>
+    <string name="patient_list_empty">No patients</string>
+
+    <!-- Patient profile screen -->
+    <string name="patient_profile_default_name">Patient</string>
+    <string name="patient_profile_back">Back</string>
+    <string name="patient_profile_add_clinical_data">Add clinical data</string>
+    <string name="patient_profile_not_found">Patient not found</string>
+
+    <!-- Questionnaire screen -->
+    <string name="questionnaire_title">Questionnaire</string>
+    <string name="questionnaire_close">Close</string>
+    <string name="questionnaire_back">Back</string>
+    <string name="questionnaire_retry">Retry</string>
+
+    <!-- Shared item labels -->
+    <string name="label_age">Age %1$s</string>
+    <string name="label_mrn">MRN %1$s</string>
+    <string name="name_unknown">Unknown</string>
+    <!-- Section header -->
+    <string name="section_collapse">Collapse</string>
+    <string name="section_expand">Expand</string>
+    <!-- Household profile -->
+    <string name="group_default_name">Household</string>
+    <string name="group_unknown_name">Unknown Household</string>
+    <string name="group_head">Head: %1$s</string>
+    <string name="group_member_count_one">%1$s member</string>
+    <string name="group_member_count_other">%1$s members</string>
+    <!-- Patient clinical items -->
+    <string name="condition_unknown">Unknown condition</string>
+    <string name="condition_since">Since %1$s</string>
+    <string name="medication_unknown">Unknown medication</string>
+    <string name="allergy_unknown">Unknown substance</string>
+    <string name="immunization_unknown">Unknown vaccine</string>
+    <string name="immunization_given">Given %1$s</string>
 </resources>

@@ -39,6 +39,7 @@ class AppFhirSyncWorker(appContext: Context, workerParams: WorkerParameters) :
    * bootstrap never ran and [dev.ohs.player.reference.app.auth.SessionRepository] is empty. Hydrate
    * and refresh the session first so the sync's requests carry a valid Bearer token.
    */
+  @Suppress("RestrictedApi")
   override suspend fun doWork(): Result {
     ensureFreshSessionForSync()
     return super.doWork().also { if (it is Result.Success) DataChangeSignal.notifyChanged() }

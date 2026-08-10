@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-rootProject.name = "OhsPlayerReferenceClientApp"
+rootProject.name = "player-reference"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
@@ -52,6 +52,4 @@ dependencyResolutionManagement {
 
 plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0" }
 
-include(":ohs-player-reference-app")
-
-include(":ohs-player-library")
+include(":reference-app")

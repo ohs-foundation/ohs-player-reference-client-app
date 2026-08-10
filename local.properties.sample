@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 # local.properties.sample — copy to `local.properties` and fill in your values.
 # `local.properties` is git-ignored. These are read at build time by the
-# :ohs-player-reference-app `generateAuthConfig` task. CI may override any of
+# :reference-app `generateAuthConfig` task. CI may override any of
 # these with environment variables of the same name.
 #
 # PKCE uses a PUBLIC client, so there is NO client secret here.

@@ -58,21 +58,12 @@ jobs:
         include:
           - id: jvm
             label: JVM/Desktop
-            tasks: >-
-              :ohs-player-library:jvmTest
-              :ohs-player-reference-app:jvmTest
+            tasks: ':reference-app:jvmTest'
             kotlinDaemonHeap: '-Xmx6g -XX:+UseG1GC'
             extraArgs: ''
           - id: android
             label: Android
-            # ohs-player-library uses the androidKotlinMultiplatformLibrary
-            # plugin, which doesn't register `lintDebug` - assembleAndroidMain
-            # is the closest "compile + verify the Android variant" task it
-            # exposes. ohs-player-reference-app uses classic androidTarget
-            # and keeps lintDebug.
-            tasks: >-
-              :ohs-player-library:assembleAndroidMain
-              :ohs-player-reference-app:lintDebug
+            tasks: ':reference-app:lintDebug'
             kotlinDaemonHeap: '-Xmx6g -XX:+UseG1GC'
             extraArgs: ''
     steps:
@@ -143,5 +134,4 @@ jobs:
       - name: Compile + link ${{ matrix.label }}
         run: |
           ./gradlew --stacktrace \
-            :ohs-player-library:compileKotlin${{ matrix.target }} \
-            :ohs-player-reference-app:linkDebugFramework${{ matrix.target }}
+            :reference-app:linkDebugFramework${{ matrix.target }}

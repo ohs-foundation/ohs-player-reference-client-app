@@ -21,8 +21,8 @@ import kotlinx.serialization.Serializable
  * Codegen view of a ViewDefinition — only the fields code generation needs to derive the typed
  * state class: the resource and its column tree. Runtime concerns the generator never reads
  * (`constant`, `where`, `status`, …) are intentionally omitted; the full SQL-on-FHIR model lives in
- * the library (`dev.ohs.player.library.config.ViewDefinition`), where extraction uses them. Unknown
- * JSON keys are ignored on decode.
+ * the client library (`dev.ohs.player.client.config.ViewDefinition`), where extraction uses them.
+ * Unknown JSON keys are ignored on decode.
  */
 @Serializable
 data class ViewDefinition(

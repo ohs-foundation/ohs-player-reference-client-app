@@ -84,9 +84,10 @@ The app combines the OHS Player library with the OHS Foundational Libraries. Ver
 | Library | Purpose |
 | --- | --- |
 | [`dev.ohs.player:client`](https://github.com/ohs-foundation/player-client) | Config-driven views using flattened data from FHIR resources (the player) |
-| `dev.ohs.fhir:fhir-model` | Typed Kotlin models for FHIR resources |
-| `dev.ohs.fhir:fhir-path` | FHIRPath expression evaluation |
+| `dev.ohs.fhir:fhir-model-r4` | Typed Kotlin models for FHIR R4 resources |
+| `dev.ohs.fhir:fhir-engine` | Local FHIR store, search, and server sync |
 | `dev.ohs.fhir:fhir-data-capture` | FHIR Structured Data Capture (questionnaires) |
+| `dev.ohs.fhir:fhir-path` | FHIRPath evaluation; arrives transitively via the engine and data capture |
 
 ### Have an existing app?
 

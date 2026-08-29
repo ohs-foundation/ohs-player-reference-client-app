@@ -19,7 +19,7 @@
         },
         {
           "name": "occurrenceDate",
-          "path": "occurrenceDateTime",
+          "path": "occurrence",
           "type": "http://hl7.org/fhir/StructureDefinition/dateTime"
         },
         {

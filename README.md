@@ -1,118 +1,123 @@
-# OHS Player Reference Client App
+# Player Reference
 
-A Kotlin Multiplatform and Compose Multiplatform reference client for [Open Health Stack (OHS)](https://developers.google.com/open-health-stack/overview).
+A Kotlin Multiplatform / Compose Multiplatform reference client for [Open Health Stack (OHS)](https://developers.google.com/open-health-stack/overview), targeting Android, iOS, Desktop and Web from one source tree.
 
-The app renders healthcare UI from configuration rather than hand-written mapping code. Declarative configuration projects FHIR resources into typed view-state, and renderers resolved from a registry then draw that state on screen. This README explains the two halves — extraction and rendering — and then joins them in a single end-to-end example.
+Screens are not hand-mapped from FHIR. Configuration authored as FHIR resources is compiled into typed Kotlin at build time, projected into flat view-state at runtime, and drawn by renderers resolved from a registry.
 
-This repository is a GitHub template: start your own OHS app from it, or just run it to see OHS in action.
+```mermaid
+flowchart LR
+  cfg["Config Binaries<br/>ViewDefinition · ViewJoinMap · ViewConfig"] -->|ig-codegen<br/>build time| gen["Typed Kotlin<br/>*State · *Config · ViewTypeCS"]
+  srv["FHIR server"] -->|OIDC-authenticated sync| eng["On-device FHIR engine"]
+  eng --> sr["SearchResult"]
+  sr -->|GenericStateExtractor| vs["Typed view-state"]
+  gen -.-> vs
+  vs -->|ViewRegistry| ui["Renderers → screens"]
+```
 
-## Supported platforms
+This repository is a GitHub template: start your own OHS app from it, or run it to see OHS end to end.
 
-A single Kotlin source tree targets Android, iOS, Desktop (Windows, macOS, Linux), and Web (JS and Wasm). Every platform is built, tested, and released by GitHub Actions; see [Deployment](#deployment).
+## Quick start
 
-## Getting started
+The app opens on a login screen and blocks on a first sync before any data is shown. **An OIDC provider and a FHIR server are both required** — there is no bundled-data demo mode.
 
-### Just want to see OHS in action?
+### 1. Prerequisites
 
-The desktop app is the fastest path. It needs only JDK 21 — no Android SDK, no Xcode:
+| Need | For |
+| --- | --- |
+| JDK 21 | every target |
+| An OIDC provider with a **public** client, PKCE enabled | login |
+| A FHIR R4 server reachable with that provider's tokens | data |
+| [Android Studio](https://developer.android.com/studio) + Android SDK | Android only |
+| Xcode | iOS only |
+
+### 2. Configure
 
 ```shell
-git clone <repository-url>
+git clone git@github.com:ohs-foundation/player-reference.git
 cd player-reference
+cp local.properties.sample local.properties
+```
+
+At minimum set `OAUTH_ISSUER`, `OAUTH_CLIENT_ID` and `FHIR_BASE_URL`. Every key is documented in [`local.properties.sample`](./local.properties.sample) and summarised under [Configuration](#configuration). Values are baked in at build time, so **edits need a rebuild, not just a restart**.
+
+### 3. Register the redirect URIs
+
+Add all of these to the client at your provider, or only the ones for the platforms you run:
+
+| Platform | Redirect URI | Built from |
+| --- | --- | --- |
+| Android, iOS | `dev.ohs.player.reference.app://auth` | `OAUTH_REDIRECT_SCHEME` + `OAUTH_REDIRECT_HOST` |
+| Desktop (JVM) | `http://127.0.0.1:8765/callback` | `OAUTH_DESKTOP_REDIRECT_PORT` |
+| Web (JS/Wasm) | `http://localhost:8080/callback` | `OAUTH_WEB_REDIRECT_URL`, verbatim |
+
+### 4. Run
+
+Desktop is the fastest path — JDK 21 only, no Android SDK, no Xcode:
+
+```shell
 ./gradlew :reference-app:run
 ```
 
-Sample FHIR data is bundled, so the app works out of the box.
-
-Other platforms:
-
 | Target | Command |
 | --- | --- |
+| Desktop | `./gradlew :reference-app:run` |
 | Android | `./gradlew :reference-app:assembleDebug` |
 | Web (Wasm) | `./gradlew :reference-app:wasmJsBrowserDevelopmentRun` |
 | Web (JS) | `./gradlew :reference-app:jsBrowserDevelopmentRun` |
 
-For iOS, open [`iosApp/`](./iosApp) in Xcode and run, or use the run-configuration widget in a Kotlin Multiplatform IDE.
+For iOS, open [`iosApp/`](./iosApp) in Xcode and run.
 
-### Start from this template
+Use `gradlew.bat` on Windows, and run every command from the repository root. Code generation is part of the build — `generateIgCode` and `generateAuthConfig` run before Kotlin compilation, so there is no separate generation step.
 
-1. On GitHub, click **Use this template → Create a new repository** (or clone and re-init).
-2. Set up your machine ([Developer setup](#developer-setup-kotlin-multiplatform) below) and check that `./gradlew build` passes.
-3. Make the app yours ([Customizing the template](#customizing-the-template) below).
+## Configuration
 
-### Developer setup (Kotlin Multiplatform)
+`local.properties` is git-ignored and read by the `generateAuthConfig` task into `GeneratedAuthConfig`. Precedence is **env var > `local.properties` > default**, so CI overrides any key by exporting it under the same name.
 
-- JDK 21
-- [Android Studio](https://developer.android.com/studio) with the Kotlin Multiplatform plugin (Android builds also need the Android SDK)
-- Xcode (for iOS builds, macOS only)
-- Optional: [`kdoctor`](https://github.com/Kotlin/kdoctor) checks your multiplatform environment
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `OAUTH_ISSUER` | `https://keycloak.example.org/realms/ohs-player` | OIDC issuer. Endpoints are discovered from `{issuer}/.well-known/openid-configuration`; nothing else is configured. |
+| `OAUTH_CLIENT_ID` | `ohs-player-reference-app` | Public client id. PKCE only — there is no client secret. |
+| `OAUTH_SCOPES` | `openid profile email offline_access` | Space separated. `offline_access` is what yields a refresh token. |
+| `OAUTH_REDIRECT_SCHEME` | `dev.ohs.player.reference.app` | Android/iOS deep-link scheme. |
+| `OAUTH_REDIRECT_HOST` | `auth` | Android/iOS deep-link host. |
+| `OAUTH_DESKTOP_REDIRECT_PORT` | `8765` | Port for the desktop loopback listener. |
+| `OAUTH_WEB_REDIRECT_URL` | `http://localhost:8080/callback` | Full URL the browser returns to on web. |
+| `FHIR_BASE_URL` | `https://hapi.fhir.org/baseR4` | FHIR R4 base URL for sync. Requests carry the session's bearer token. |
 
-Use `./gradlew` on macOS and Linux, and `gradlew.bat` on Windows. Run all commands from the repository root.
+Each platform uses its idiomatic flow: Chrome Custom Tabs on Android, `ASWebAuthenticationSession` on iOS (no `Info.plist` entry needed), a loopback HTTP server on desktop, and a full-page redirect on web.
 
-### Build
+Two things to know:
+
+- **Changing the scheme or host means editing [`AndroidManifest.xml`](./reference-app/src/androidMain/AndroidManifest.xml) too** — the `LoginRedirectActivity` intent-filter hardcodes the pair.
+- Android Studio writes `sdk.dir` into the same `local.properties`. Keep it; Android and `allTests` builds need it.
+
+### Keycloak example
 
 ```shell
-./gradlew build
+docker run -p 8081:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+  -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.0 start-dev
 ```
 
-Code generation is part of the build: the `ig-codegen` Gradle plugin runs its `generateIgCode` task before Kotlin compilation, so there is no separate generation step.
+Create a realm, add an OpenID Connect client with **Client authentication off** (public) and **Standard flow** on, paste the redirect URIs from step 3, then set:
 
-## Customizing the template
-
-Work through these in rough order:
-
-- **Application id / namespace**
-  - `applicationId` and `namespace` in [`reference-app/build.gradle.kts`](./reference-app/build.gradle.kts)
-  - iOS bundle id in [`iosApp/Configuration/Config.xcconfig`](./iosApp/Configuration/Config.xcconfig)
-  - Kotlin package `dev.ohs.player.reference.app` under `reference-app/src/*/kotlin/`
-- **Application name**
-  - Android: `app_name` in [`strings.xml`](./reference-app/src/androidMain/res/values/strings.xml)
-  - iOS: `PRODUCT_NAME` in `Config.xcconfig`
-  - Desktop: `packageName` in the `compose.desktop` block of `reference-app/build.gradle.kts`
-  - Web: `<title>` in [`index.html`](./reference-app/src/webMain/resources/index.html)
-- **Icons**
-  - Android: launcher icons in `reference-app/src/androidMain/res/mipmap-*/`
-  - iOS: `iosApp/iosApp/Assets.xcassets`
-- **Generated code package** — `packageName` in the `igCodegen` block of `reference-app/build.gradle.kts` (defaults to `dev.ohs.player.generated`).
-- **Project names** — `rootProject.name` and the module name in [`settings.gradle.kts`](./settings.gradle.kts). Renaming either changes the package of the generated Compose resources class (`Res`).
-- **Screens and configuration** — the sample `Binary-*.json` files under `reference-app/src/commonMain/composeResources/files/` and the renderers under `reference-app/src/commonMain/kotlin/.../feature/`. The rest of this README explains how the two fit together.
-
-## Bundled OHS libraries
-
-The app combines the OHS Player library with the OHS Foundational Libraries. Versions are pinned in [`gradle/libs.versions.toml`](./gradle/libs.versions.toml):
-
-| Library | Purpose |
-| --- | --- |
-| [`dev.ohs.player:client`](https://github.com/ohs-foundation/player-client) | Config-driven views using flattened data from FHIR resources (the player) |
-| `dev.ohs.fhir:fhir-model-r4` | Typed Kotlin models for FHIR R4 resources |
-| `dev.ohs.fhir:fhir-engine` | Local FHIR store, search, and server sync |
-| `dev.ohs.fhir:fhir-data-capture` | FHIR Structured Data Capture (questionnaires) |
-| `dev.ohs.fhir:fhir-path` | FHIRPath evaluation; arrives transitively via the engine and data capture |
-
-### Have an existing app?
-
-You do not need this template to use OHS Player. The player is a library, not a framework: add it to any Kotlin Multiplatform or Android project and adopt it one screen at a time.
-
-```kotlin
-commonMain.dependencies {
-  implementation("dev.ohs.player:client:1.0.0-alpha01")
-}
+```properties
+OAUTH_ISSUER=http://localhost:8081/realms/<realm>
+OAUTH_CLIENT_ID=<client-id>
 ```
 
-The [library README](https://github.com/ohs-foundation/player-client#readme) is a standalone user guide. This repository then serves as the worked example.
+A plaintext `http://localhost` issuer works for desktop and web. Android blocks cleartext traffic by default and the emulator cannot reach the host's `localhost`, so use an HTTPS issuer there.
 
-## From FHIR data to view state
+## What the app does
 
-A screen never consumes a raw FHIR resource. It consumes a typed *view-state*: a flat, serializable data class with exactly the fields the screen needs. Four steps produce it:
+Sign in (OAuth 2.0 + PKCE) → a blocking first sync → a household register in a navigation drawer → household profile → patient profile. `Patient` and `Group` are synced; local edits are uploaded as a bundle. Periodic sync then runs on a 15-minute interval via WorkManager on Android and a coroutine scheduler on desktop and web, and as an OS-scheduled `BGProcessingTask` on iOS.
 
-1. **Author** configuration as FHIR `Binary` resources (a `ViewDefinition`, a `ViewJoinMap`, and a `ViewConfig`).
-2. **Generate** typed Kotlin from those Binaries at build time via the `ig-codegen` plugin.
-3. **Load** the Binaries at runtime through a `ConfigStore`.
-4. **Extract** view-state from a `SearchResult` with `GenericStateExtractor.extract<T>()`.
+Household registration, member capture and clinical data entry run through FHIR Structured Data Capture questionnaires, with template extraction writing the resulting resources back into the engine.
+
+## How it works
 
 ### 1. Author configuration
 
-A `ViewDefinition` declares the columns of a view as FHIRPath expressions over a FHIR resource. Each column carries a name, a path, and a FHIR type. Excerpt from [`Binary-PatientSummary.json`](./reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummary.json):
+A `ViewDefinition` declares the columns of a view as FHIRPath expressions over a resource — excerpt from [`Binary-PatientSummary.json`](./reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummary.json):
 
 ```json
 {
@@ -125,15 +130,15 @@ A `ViewDefinition` declares the columns of a view as FHIRPath expressions over a
       "column": [
         { "name": "patientId", "path": "id", "type": "http://hl7.org/fhir/StructureDefinition/string" },
         { "name": "familyName", "path": "name.family.first()", "type": "http://hl7.org/fhir/StructureDefinition/string" },
-        { "name": "gender", "path": "gender", "type": "http://hl7.org/fhir/StructureDefinition/code" },
-        { "name": "active", "path": "active", "type": "http://hl7.org/fhir/StructureDefinition/boolean" }
+        { "name": "birthDate", "path": "birthDate", "type": "http://hl7.org/fhir/StructureDefinition/date" },
+        { "name": "mrn", "path": "identifier.where(type.coding.code = 'MR').value.first()", "type": "http://hl7.org/fhir/StructureDefinition/string" }
       ]
     }
   ]
 }
 ```
 
-A `ViewJoinMap` names the view-state and binds it to a pivot `ViewDefinition` (and, where needed, joined views). [`Binary-PatientSummaryState.json`](./reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummaryState.json):
+A `ViewJoinMap` names the view-state and binds it to a pivot `ViewDefinition` (plus any joined views) — [`Binary-PatientSummaryState.json`](./reference-app/src/commonMain/composeResources/files/states/Binary-PatientSummaryState.json):
 
 ```json
 {
@@ -145,7 +150,7 @@ A `ViewJoinMap` names the view-state and binds it to a pivot `ViewDefinition` (a
 }
 ```
 
-A `ViewConfig` declares the configuration a renderer accepts, with defaults. [`Binary-PatientCardConfig.json`](./reference-app/src/commonMain/composeResources/files/configs/Binary-PatientCardConfig.json):
+A `ViewConfig` declares the configuration a renderer accepts, with defaults — excerpt from [`Binary-PatientCardConfig.json`](./reference-app/src/commonMain/composeResources/files/configs/Binary-PatientCardConfig.json):
 
 ```json
 {
@@ -153,30 +158,23 @@ A `ViewConfig` declares the configuration a renderer accepts, with defaults. [`B
   "viewType": "PatientCard",
   "property": [
     { "name": "showStatusChip", "type": "boolean", "valueBoolean": true },
-    { "name": "showAge", "type": "boolean", "valueBoolean": true },
     { "name": "elevation", "type": "decimal", "valueDecimal": 2.0 }
   ]
 }
 ```
 
-A single `CodeSystem` Binary enumerates the view-types the app renders; see [`CodeSystem-ViewTypes.json`](./reference-app/src/commonMain/composeResources/files/viewtypes/CodeSystem-ViewTypes.json).
+One `CodeSystem` enumerates every view-type the app renders — [`CodeSystem-ViewTypes.json`](./reference-app/src/commonMain/composeResources/files/viewtypes/CodeSystem-ViewTypes.json).
 
 ### 2. Generate typed Kotlin
 
-The `ig-codegen` plugin reads these Binaries and emits typed sources. It is applied and configured in [`reference-app/build.gradle.kts`](./reference-app/build.gradle.kts):
+The `ig-codegen` plugin reads those files from `src/commonMain/composeResources/files/` — `states/`, `configs/`, `viewtypes/` — and emits sources onto the `commonMain` source set:
 
 ```kotlin
-plugins {
-    id("dev.ohs.ig-codegen")
-}
-
 igCodegen {
     // sourcesDir defaults to src/commonMain/composeResources/files
     packageName = "dev.ohs.player.generated"
 }
 ```
-
-Inputs live under `src/commonMain/composeResources/files/`, organised as `states/` (ViewDefinition and ViewJoinMap), `configs/` (ViewConfig), and `viewtypes/` (the CodeSystem). The generated symbols are:
 
 | Generated symbol | Source | Package |
 | --- | --- | --- |
@@ -185,7 +183,7 @@ Inputs live under `src/commonMain/composeResources/files/`, organised as `states
 | `ViewTypeCS` | CodeSystem | `dev.ohs.player.generated.viewtype` |
 | `GeneratedConfigManifest` | file listing | `dev.ohs.player.generated` |
 
-`PatientSummaryState`, for example, is generated as:
+Scalar columns become nullable fields, collection columns become `List<T>`:
 
 ```kotlin
 @Serializable
@@ -201,22 +199,9 @@ data class PatientSummaryState(
 )
 ```
 
-### 3. Load configuration at runtime
+### 3. Extract view-state
 
-A `ConfigStore` holds the parsed configuration and is fed by a `ConfigSource`. The reference app reads the bundled Binaries. To load configuration from a backend instead, the `ConfigSource` is the only thing to replace. See [`LocalConfigSource.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/datasource/LocalConfigSource.kt):
-
-```kotlin
-object LocalConfigSource : ConfigSource {
-    private const val DIR_NAME = "states"
-
-    override suspend fun readAll(): List<String> =
-        GeneratedConfigManifest.byDirectory[DIR_NAME].orEmpty().map { fileName ->
-            Res.readBytes("files/$DIR_NAME/$fileName").decodeToString()
-        }
-}
-```
-
-The store and a single extractor are wired once in [`Extraction.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/Extraction.kt):
+A `ConfigStore` holds the parsed configuration and is fed by a `ConfigSource`. [`LocalConfigSource`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/datasource/LocalConfigSource.kt) reads the bundled Binaries; swapping it for an HTTP fetch is the only change needed to serve configuration from a backend.
 
 ```kotlin
 object Extraction {
@@ -225,37 +210,24 @@ object Extraction {
 }
 ```
 
-### 4. Extract view-state
-
-`GenericStateExtractor.extract<T>()` selects the configuration for `T` by name, evaluates its FHIRPath columns against a `SearchResult`, and returns a list of typed `T`. A `SearchResult` mirrors a FHIR search response: the pivot resource plus any forward-included and reverse-included resources.
-
-From [`PatientRepository.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/data/repository/PatientRepository.kt):
+`extract<T>()` selects the configuration for `T` by name, evaluates its FHIRPath columns against a `SearchResult` — the pivot resource plus forward- and reverse-included resources, mirroring a FHIR search response — and returns typed results:
 
 ```kotlin
 suspend fun getPatients(): List<PatientSummaryState> =
     withContext(extractorDispatcher) {
-        allPatientIds().mapNotNull { id ->
-            patientSummarySearchResult(id)?.let {
+        allPatientIds(fhirRepository).mapNotNull { id ->
+            patientSummarySearchResult(id, fhirRepository)?.let {
                 extractor.extract<PatientSummaryState>(it).firstOrNull()
             }
         }
     }
 ```
 
-The FHIRPath engine holds mutable evaluation state and is not safe for concurrent use, so run all extraction on a single thread. The repository does this with `Dispatchers.Default.limitedParallelism(1)`.
+The FHIRPath engine holds mutable evaluation state and is not concurrency-safe, so extraction is serialised on `Dispatchers.Default.limitedParallelism(1)`.
 
-## Rendering view state
+### 4. Render
 
-View-state is rendered by renderers resolved through a registry, so screens depend on view-types rather than concrete UI classes:
-
-1. **Author** a `ComponentRenderer` for a view-state type.
-2. **Register** it under a generated `ViewTypeCS` view-type in a `ViewRegistry`.
-3. **Install** the registry into the composition via `LocalViewRegistry`.
-4. **Render** with `ListScaffold` or `DetailScaffold`, which resolve renderers by view-type.
-
-### 1. Author a renderer
-
-A `ComponentRenderer<T, C>` renders one item of state `T` with configuration `C`. One renderer class can be registered under several view-types with different configurations.
+A `ComponentRenderer<T, C>` draws one item of state `T` with configuration `C`. The same renderer class can be registered under several view-types with different configuration.
 
 ```kotlin
 class PatientCardRenderer : ComponentRenderer<PatientSummaryState, PatientCardConfig> {
@@ -265,16 +237,12 @@ class PatientCardRenderer : ComponentRenderer<PatientSummaryState, PatientCardCo
         config: PatientCardConfig,
         options: RenderOptions,
     ) {
-        PatientCard(patient = item, config = config, onClick = options.onClick, modifier = options.modifier)
+        PatientCard(patient = item, config = config, onClick = options.onClick)
     }
 }
 ```
 
-`RenderOptions` carries the optional tap handler and root modifier. `LayoutRenderer<T>` is the corresponding arrangement abstraction; the library ships `VerticalListRenderer`, `HorizontalListRenderer`, and `GridListRenderer`.
-
-### 2. Register renderers
-
-Group a feature's registrations into an extension on `ViewRegistry`. See [`PatientListRegistrations.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListRegistrations.kt):
+Registrations are grouped per feature and assembled once. `LayoutRenderer<T>` is the arrangement counterpart; the library ships `VerticalListRenderer`, `HorizontalListRenderer` and `GridListRenderer`.
 
 ```kotlin
 fun ViewRegistry.registerPatientList() {
@@ -285,41 +253,31 @@ fun ViewRegistry.registerPatientList() {
     )
     registerLayout<PatientSummaryState>(
         VerticalListRenderer.VIEW_TYPE,
-        VerticalListRenderer(contentPadding = PaddingValues(16.dp), itemSpacing = 12.dp),
+        VerticalListRenderer(
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+            itemSpacing = 2.dp,
+        ),
     )
 }
-```
 
-Assemble all feature registrations in one builder, as in [`AppViewRegistry.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/AppViewRegistry.kt):
-
-```kotlin
 fun buildAppViewRegistry(): ViewRegistry = ViewRegistry().apply {
+    registerGroupList()
+    registerGroupProfile()
     registerPatientList()
     registerPatientProfile()
 }
 ```
 
-A registry lookup is keyed by both view-type and state type. If no renderer was registered for that pair, the lookup throws `NoSuchElementException` naming the missing key.
-
-### 3. Install the registry
-
-Provide the registry at the composition root so every screen can resolve renderers. See [`App.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/App.kt):
+The registry is installed at the composition root, so screens depend on view-types rather than concrete UI classes:
 
 ```kotlin
-@Composable
-fun App() {
-    val registry = remember { buildAppViewRegistry() }
-    CompositionLocalProvider(LocalViewRegistry provides registry) {
-        MaterialTheme {
-            // NavHost, screens, etc.
-        }
-    }
+val registry = remember { buildAppViewRegistry() }
+CompositionLocalProvider(LocalViewRegistry provides registry) {
+    OhsPlayerTheme { /* auth gate, sync gate, NavHost */ }
 }
 ```
 
-### 4. Render
-
-`ListScaffold` renders a list. In its builder, `component(...)` and `layout(...)` name the view-types to resolve; omitting `layout(...)` falls back to `VerticalListRenderer`, and an empty list renders `emptyState` without invoking the layout renderer. See [`PatientListScreen.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/list/PatientListScreen.kt):
+List screens use `ListScaffold`, whose builder names view-types instead of composables. Omitting `layout(...)` falls back to `VerticalListRenderer`; an empty list renders `emptyState` without invoking the layout renderer.
 
 ```kotlin
 ListScaffold<PatientSummaryState>(
@@ -329,50 +287,59 @@ ListScaffold<PatientSummaryState>(
 ) {
     component(ViewTypeCS.PatientCard)
     layout(VerticalListRenderer.VIEW_TYPE)
-    topBar { TopAppBar(title = { Text("Patients") }) }
-    emptyState { Text("No patients") }
+    topBar { TopAppBar(title = { Text(stringResource(Res.string.patient_list_title)) }) }
+    emptyState { Text(stringResource(Res.string.patient_list_empty)) }
 }
 ```
 
-`DetailScaffold` is the single-item counterpart: it renders a stack of sections for one nullable item, falling back to a `notFound` slot when the item is absent.
+Detail screens compose sections by resolving renderers directly, which lets one screen mix several state types — see [`PatientProfileScreen.kt`](./reference-app/src/commonMain/kotlin/dev/ohs/player/reference/app/feature/patient/profile/PatientProfileScreen.kt):
 
-## End-to-end example
+```kotlin
+val registry = LocalViewRegistry.current
+val headerRenderer = remember(registry) {
+    registry.componentRenderer<PatientSummaryState>(ViewTypeCS.PatientHeader)
+}
+```
 
-A patient list screen exercises both halves of the pipeline:
+A lookup is keyed by both view-type and state type; a miss throws `NoSuchElementException` naming the missing key.
 
-1. **Configuration.** `Binary-PatientSummary.json` declares the columns; `Binary-PatientSummaryState.json` names the `patientSummary` view-state. `ig-codegen` generates `PatientSummaryState`.
-2. **Extraction.** `PatientRepository.getPatients()` builds a `SearchResult` per patient and calls `extractor.extract<PatientSummaryState>(result)`, yielding `List<PatientSummaryState>`.
-3. **Registration.** `registerPatientList()` binds `PatientCardRenderer` to `ViewTypeCS.PatientCard` for `PatientSummaryState`, and `buildAppViewRegistry()` installs it at the composition root.
-4. **Rendering.** `PatientListScreen` passes the extracted states to `ListScaffold`, which resolves `PatientCard` by view-type and renders each row.
+**Adding a field is a configuration change**: add a column to the `ViewDefinition`, then use the regenerated state field in the renderer. No extraction or wiring code changes.
 
-Adding a field is a configuration change: add a column to the `ViewDefinition`, then reference the regenerated state field in the renderer. No extraction or wiring code changes.
+You do not need this template to use the player — it is a library, not a framework, and can be adopted one screen at a time in any Kotlin Multiplatform or Android project:
+
+```kotlin
+commonMain.dependencies {
+  implementation("dev.ohs.player:client:1.0.0-alpha01")
+}
+```
+
+The [library README](https://github.com/ohs-foundation/player-client#readme) is the standalone user guide; this repository is the worked example.
+
+## Customizing the template
+
+Click **Use this template → Create a new repository** on GitHub, then work through these:
+
+- **Application id / namespace** — `applicationId` and `namespace` in [`reference-app/build.gradle.kts`](./reference-app/build.gradle.kts), the iOS bundle id in [`iosApp/Configuration/Config.xcconfig`](./iosApp/Configuration/Config.xcconfig), and the Kotlin package `dev.ohs.player.reference.app`.
+- **Application name** — Android [`strings.xml`](./reference-app/src/androidMain/res/values/strings.xml), iOS `PRODUCT_NAME`, desktop `packageName` in the `compose.desktop` block, web `<title>` in [`index.html`](./reference-app/src/webMain/resources/index.html).
+- **Icons** — `reference-app/src/androidMain/res/mipmap-*/`, `iosApp/iosApp/Assets.xcassets`, and `reference-app/desktop-icons/`.
+- **Generated code package** — `packageName` in the `igCodegen` block.
+- **Project names** — `rootProject.name` and the module name in [`settings.gradle.kts`](./settings.gradle.kts). Renaming either changes the package of the generated Compose `Res` class.
+- **Screens and configuration** — the `Binary-*.json` files under `reference-app/src/commonMain/composeResources/files/` and the renderers under `reference-app/src/commonMain/kotlin/.../feature/`.
 
 ## Testing
 
 ```shell
-./gradlew :reference-app:allTests   # all platforms
-./gradlew :reference-app:jvmTest    # JVM only
+./gradlew :reference-app:jvmTest    # JVM — what CI runs
+./gradlew :reference-app:allTests   # all platforms; needs the Android SDK
 ```
 
-## Deployment
+## CI and release
 
-### Continuous integration
+[`ci.yml`](./.github/workflows/ci.yml) validates every pull request and push to `main`: spotless formatting, `jvmTest`, Android `lintDebug`, and an iOS compile-and-link on macOS runners for `iosArm64` and `iosSimulatorArm64`.
 
-The [`ci.yml`](./.github/workflows/ci.yml) workflow validates every pull request and push to `main`. It runs formatting (spotless), JVM tests, Android lint, JS/Wasm compilation, and iOS compile-and-link, each as a separate job.
+Pushing a semantic version tag (`vX.Y.Z` or `vX.Y.Z-suffix`) triggers [`release.yml`](./.github/workflows/release.yml), which builds and signs every platform and publishes a GitHub Release with checksummed artifacts: an Android APK, desktop installers (`.deb`, `.rpm`, `.msi`, `.dmg`) and a portable Linux tarball. A `workflow_dispatch` run is a dry run — it builds and uploads artifacts but publishes no Release. The web and GitHub Pages jobs are gated off (`if: false`) pending a larger runner; the web preview is deployed manually meanwhile.
 
-### Release pipeline
-
-Pushing a semantic version tag (`vX.Y.Z` or `vX.Y.Z-suffix`) triggers the [`release.yml`](./.github/workflows/release.yml) workflow. It builds and signs every platform, then publishes a GitHub Release with checksummed artifacts:
-
-- Android APK (`assembleRelease`)
-- Desktop installers: Linux `.deb` and `.rpm`, Windows `.msi`, macOS `.dmg`
-- A portable Linux tarball (`createDistributable`)
-
-A `workflow_dispatch` run is a dry run: it builds, signs, and uploads artifacts but does not publish a Release. The web (Wasm) and GitHub Pages jobs are currently gated off (`if: false`) pending a larger build runner; the web preview is deployed manually in the interim.
-
-### Local installers
-
-Build a native installer or distributable locally:
+Local installers:
 
 ```shell
 ./gradlew :reference-app:packageDmg                 # macOS .dmg
@@ -384,16 +351,16 @@ Build a native installer or distributable locally:
 
 ### Android release signing
 
-Release builds read signing inputs from environment variables first, then fall back to a `keystore.properties` file for development. To sign a release locally:
+Release builds read signing inputs from environment variables first, then fall back to a `keystore.properties` file:
 
 ```shell
 cp keystore.properties.template keystore.properties
-# Edit keystore.properties with your keystore path, alias, and passwords, then:
+# fill in keystore path, alias and passwords, then:
 ./gradlew :reference-app:bundleRelease
 ```
 
-`keystore.properties` is gitignored and must never be committed. When both are set, the environment variables `ANDROID_KEYSTORE_PATH`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, and `ANDROID_STORE_PASSWORD` take precedence over the file. If neither is configured, release builds are emitted unsigned.
+`keystore.properties` is git-ignored and must never be committed. `ANDROID_KEYSTORE_PATH`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` and `ANDROID_STORE_PASSWORD` take precedence over the file. With neither configured, release builds are emitted unsigned.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html), [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform), and [Kotlin/Wasm](https://kotl.in/wasm/).
+Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html), [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform).

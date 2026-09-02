@@ -1,33 +1,65 @@
-# ---------------------------------------------------------------------------
-# local.properties.sample — copy to `local.properties` and fill in your values.
-# `local.properties` is git-ignored. These are read at build time by the
-# :reference-app `generateAuthConfig` task. CI may override any of
-# these with environment variables of the same name.
+# ----------------------------------------------------------------------------
+# local.properties.sample
 #
-# PKCE uses a PUBLIC client, so there is NO client secret here.
-# ---------------------------------------------------------------------------
+# Copy to `local.properties` and fill in your values:
+#
+#   cp local.properties.sample local.properties
+#
+# `local.properties` is git-ignored. The :reference-app `generateAuthConfig`
+# task bakes these into `GeneratedAuthConfig` before Kotlin compilation, so
+# edits here need a rebuild — not just an app restart.
+#
+# Precedence: env var > local.properties > the default shown below. Every key
+# has a working default, so an absent file still builds; it just points the app
+# at a provider that does not exist.
+#
+# Login is OAuth 2.0 Authorization Code + PKCE against a PUBLIC client. There
+# is deliberately no client secret here — never add one.
+#
+# Android Studio writes its own `sdk.dir` entry into local.properties. Keep it:
+# Android builds and `allTests` need it.
+# ----------------------------------------------------------------------------
 
-# --- OAuth / OIDC provider ---------------------------------------------------
-# Provider-agnostic: the app resolves all endpoints via OIDC discovery at
+
+# --- Identity provider -------------------------------------------------------
+# Provider-agnostic. Only the issuer is configured; the app resolves the
+# authorization, token, userinfo and end-session endpoints at runtime from
 # {OAUTH_ISSUER}/.well-known/openid-configuration.
-#   Keycloak: https://host/realms/<realm>   (the realm IS part of the issuer)
+# Keycloak note: the realm is part of the issuer.
 OAUTH_ISSUER=https://keycloak.example.org/realms/ohs-player
-# Public client id (PKCE / public client — no secret).
+
+# Public client id registered at the provider, with PKCE required.
 OAUTH_CLIENT_ID=ohs-player-reference-app
-# OAuth scopes (space separated). offline_access yields a refresh token.
+
+# Space-separated scopes. offline_access is what yields a refresh token; drop
+# it and every session ends when the access token expires.
 OAUTH_SCOPES=openid profile email offline_access
 
-# --- Redirect URIs (must be registered as Valid Redirect URIs at the provider) ---
-# Android + iOS use a custom URI scheme deep link: {SCHEME}://{HOST}
+
+# --- Redirect URIs -----------------------------------------------------------
+# Each platform uses its own redirect and all of them must be registered as
+# valid redirect URIs on the client above.
+
+# Android and iOS: a custom-scheme deep link, {SCHEME}://{HOST}.
+# Register: dev.ohs.player.reference.app://auth
+# Changing these also means editing the LoginRedirectActivity intent-filter in
+# reference-app/src/androidMain/AndroidManifest.xml, which hardcodes the pair.
 OAUTH_REDIRECT_SCHEME=dev.ohs.player.reference.app
 OAUTH_REDIRECT_HOST=auth
-# Desktop (JVM) uses a localhost loopback redirect on this port.
-# Register as: http://127.0.0.1:8765/callback (and http://localhost:8765/callback)
+
+# Desktop (JVM): a loopback HTTP server started for the duration of the flow.
+# Register: http://127.0.0.1:8765/callback
 OAUTH_DESKTOP_REDIRECT_PORT=8765
-# Web (JS/Wasm) uses a full-page redirect back to the app origin.
+
+# Web (JS/Wasm): a full-page redirect back to the app, read on the next load.
+# Register this URL verbatim. It must be a path the server actually serves —
+# the webpack dev server serves the app at the origin root, so prefer
+# http://localhost:8080/ there unless you have configured a fallback.
 OAUTH_WEB_REDIRECT_URL=http://localhost:8080/callback
 
-# --- FHIR server --------------------------------------------------------------
-# Base URL of the remote FHIR server. Requests are authenticated with the
-# signed-in session's Bearer token (see FhirBearerAuthenticator).
+
+# --- FHIR server -------------------------------------------------------------
+# Base URL synced into the on-device FHIR engine. Requests carry the signed-in
+# session's bearer token (FhirBearerAuthenticator), so this server must accept
+# tokens from OAUTH_ISSUER — or, like the public HAPI sandbox, accept anything.
 FHIR_BASE_URL=https://hapi.fhir.org/baseR4

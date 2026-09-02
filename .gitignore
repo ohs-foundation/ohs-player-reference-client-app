@@ -56,3 +56,6 @@ CLAUDE.MD
 # Git worktrees used for isolated agent workspaces
 .worktrees/
 
+#bin directories
+ig-codegen/bin/
+build-logic/bin/

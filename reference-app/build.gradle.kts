@@ -110,10 +110,6 @@ kotlin {
       implementation(libs.koin.compose)
       implementation(libs.koin.composeViewmodel)
       implementation(libs.ohs.fhir.engine)
-      // R4-only artifact, not the `fhir-model` umbrella that also pulls in R4B and R5. No
-      // `fhir-path-r4` counterpart: nothing here uses dev.ohs.fhir.fhirpath, and the pre-split
-      // fhir-path :fhir-engine and :fhir-data-capture pull in has to stay — beta04+ moved
-      // `FhirPathEngine.Companion.forR4()`, which both of them call.
       implementation(libs.ohs.fhir.model.r4)
       implementation(libs.fhir.data.capture)
       // Auth: shared OAuth2/PKCE client, secure session storage, SHA-256 for PKCE.

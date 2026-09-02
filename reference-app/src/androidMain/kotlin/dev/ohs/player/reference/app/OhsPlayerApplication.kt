@@ -16,7 +16,6 @@
 package dev.ohs.player.reference.app
 
 import android.app.Application
-import dev.ohs.fhir.datacapture.DataCapture
 import dev.ohs.fhir.engine.FhirEngine
 import dev.ohs.fhir.engine.FhirEngineConfiguration
 import dev.ohs.fhir.engine.FhirEngineProvider
@@ -61,6 +60,5 @@ class OhsPlayerApplication : Application() {
         single<SyncManager> { WorkManagerSyncManager(applicationContext) }
       }
     )
-    DataCapture.initialize(applicationContext)
   }
 }

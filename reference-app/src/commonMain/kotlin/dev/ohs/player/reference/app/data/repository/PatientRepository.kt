@@ -65,7 +65,11 @@ class PatientRepository(private val fhirRepository: FhirRepository) {
         allergyReactions = extractor.extract<AllergyReactionState>(result),
         medications = extractor.extract<PatientMedicationState>(result),
         conditions = extractor.extract<PatientConditionState>(result),
-        immunizations = extractor.extract<PatientImmunizationState>(result),
+        immunizations =
+          extractor.extract<PatientImmunizationState>(result).sortedByDescending {
+            // ISO-8601 string form sorts chronologically; undated entries sink to the bottom.
+            it.occurrenceDate?.toString() ?: ""
+          },
         contacts =
           extractor.extract<PatientContactState>(result).filter {
             it.contactGivenName != null || it.contactFamilyName != null

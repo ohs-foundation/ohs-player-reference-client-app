@@ -193,9 +193,11 @@ jobs:
             task: ':reference-app:packageMsi'
             glob: 'reference-app/build/compose/binaries/main/msi/*.msi'
             artifact: windows-msi
-          # macos-latest is Apple Silicon — the .dmg is arm64-only. Intel Macs
-          # need the portable Linux tarball or a future universal build.
-          - os: macos-latest
+          # Pin to the latest stable Apple Silicon image: macos-latest currently
+          # resolves to macOS 26, where jpackage fails during createDistributable.
+          # The .dmg is arm64-only. Intel Macs need the portable Linux tarball or
+          # a future universal build.
+          - os: macos-15
             label: macOS dmg
             task: ':reference-app:packageDmg'
             glob: 'reference-app/build/compose/binaries/main/dmg/*.dmg'

@@ -71,7 +71,7 @@ Use `gradlew.bat` on Windows, and run every command from the repository root. Co
 
 ## Configuration
 
-`local.properties` is git-ignored and read by the `generateAuthConfig` task into `GeneratedAuthConfig`. Precedence is **env var > `local.properties` > default**, so CI overrides any key by exporting it under the same name.
+`local.properties` is git-ignored and read by the `generateAuthConfig` task into `GeneratedAuthConfig`. Precedence is **env var > `local.properties` > default**, so CI overrides any key by exporting it under the same name. Both workflows under [`.github/workflows`](./.github/workflows) already export all eight keys from GitHub repository variables of the same name, so setting them under Settings > Secrets and variables > Actions > Variables is all CI needs. None of them is a secret, because the OAuth client is public and uses PKCE. A variable you leave unset counts as absent, and the build falls back to the default below.
 
 | Key | Default | Purpose |
 | --- | --- | --- |

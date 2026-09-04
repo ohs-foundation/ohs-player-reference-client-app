@@ -197,11 +197,11 @@ jobs:
           # resolves to macOS 26, where jpackage fails during createDistributable.
           # The .dmg is arm64-only. Intel Macs need the portable Linux tarball or
           # a future universal build.
-          - os: macos-15
-            label: macOS dmg
-            task: ':reference-app:packageDmg'
-            glob: 'reference-app/build/compose/binaries/main/dmg/*.dmg'
-            artifact: macos-dmg
+          #- os: macos-15
+          #  label: macOS dmg
+          #  task: ':reference-app:packageDmg'
+          #  glob: 'reference-app/build/compose/binaries/main/dmg/*.dmg'
+          #  artifact: macos-dmg
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read

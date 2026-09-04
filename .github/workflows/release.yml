@@ -26,6 +26,16 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  OAUTH_ISSUER: ${{ vars.OAUTH_ISSUER }}
+  OAUTH_CLIENT_ID: ${{ vars.OAUTH_CLIENT_ID }}
+  OAUTH_SCOPES: ${{ vars.OAUTH_SCOPES }}
+  OAUTH_REDIRECT_SCHEME: ${{ vars.OAUTH_REDIRECT_SCHEME }}
+  OAUTH_REDIRECT_HOST: ${{ vars.OAUTH_REDIRECT_HOST }}
+  OAUTH_DESKTOP_REDIRECT_PORT: ${{ vars.OAUTH_DESKTOP_REDIRECT_PORT }}
+  OAUTH_WEB_REDIRECT_URL: ${{ vars.OAUTH_WEB_REDIRECT_URL }}
+  FHIR_BASE_URL: ${{ vars.FHIR_BASE_URL }}
+
 jobs:
   preflight:
     name: Preflight

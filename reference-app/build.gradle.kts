@@ -230,7 +230,10 @@ val generateAuthConfig =
     val redirectScheme = authProp("OAUTH_REDIRECT_SCHEME", "dev.ohs.player.reference.app")
     val redirectHost = authProp("OAUTH_REDIRECT_HOST", "auth")
     val webRedirectUrl = authProp("OAUTH_WEB_REDIRECT_URL", "http://localhost:8080/callback")
-    val desktopPort = authProp("OAUTH_DESKTOP_REDIRECT_PORT", "8765")
+    val desktopPort =
+      authProp("OAUTH_DESKTOP_REDIRECT_PORT", "8765").let { raw ->
+        raw.toIntOrNull() ?: error("OAUTH_DESKTOP_REDIRECT_PORT='$raw' must be an integer")
+      }
     val scopes = authProp("OAUTH_SCOPES", "openid profile email offline_access")
     val fhirBaseUrl = authProp("FHIR_BASE_URL", "https://hapi.fhir.org/baseR4")
     val versionName = releaseVersionName
